@@ -1,0 +1,16 @@
+warning: You appear to have cloned an empty repository.
+curl -i -H Content-Type: application/json -X POST -d '{
+password : super,
+value:0.24,
+latitude  : 23,
+longitude : 12,
+mechanism_id:3
+}' http://localhost:5000/add_post
+warning: You appear to have cloned an empty repository.
+curl -i -H Content-Type: application/json -X POST -d '{
+password : super1,
+value:0.24,
+latitude  : 23,
+longitude : 12,
+mechanism_id:3
+}' http://localhost:5000/add_post

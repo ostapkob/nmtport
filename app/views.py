@@ -33,19 +33,12 @@ def get_post(p_id):
     return f'{mech.value}'
 
 
-    if not request.json or not 'title' in request.json:
-        abort(404)
-
-
-
 @app.route("/test", methods=['GET'])
 def get_test():
     all_mech_id = Mechanism.query.all()
     a = [mech.id for mech in Mechanism.query.all()]
     return jsonify({'tasks':data})
     abort(404)
-
-
 
 
 @app.route('/add_post', methods=['POST'])
@@ -71,25 +64,13 @@ def add_post():
 
 
 
-
-
-
-
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
 
-# @app.route('/sent', methods=['POST'])
-# def add_post():
-#     value=request.json['value']
-#     latitude = request.json['latitude']
-#     longitude = request.json['longitude']
-#     mechanism_id =  request.json['mechanism_id']
-#     new_post = Post(value, latitude, longitude, mechanism_id)
-#     data = request.data
-#     db.session.add(new_post)
-#     db.session.commit()
-#     return data
+@app.errorhandler(403)
+def not_found(error):
+    return make_response(jsonify({'error': 'Wrong password'}), 403)
 
 @app.route('/add_mech', methods=['POST'])
 def add_mechanism():
@@ -104,15 +85,4 @@ def add_mechanism():
     db.session.add(new_mech)
     db.session.commit()
     return data
-    # return 'Data is update'
-    # return jsonify(new_user)
 
-
-@app.route('/form', methods=['GET', 'POST'])
-def form_example():
-    username = request.form['username']
-    email = request.form['email']
-    new_user = User(username, email)
-    db.session.add(new_user)
-    db.session.commit()
-    return request.data
