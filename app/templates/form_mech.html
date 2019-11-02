@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block main %}
+fffffffffffffffffffffff
+<h1> {{val}} </h1>
+
+
+<form action="" metchod="post" name="add_mehc">
+
+    {{ form.hidden_tag() }}
+
+    <p>  id {{ form.id }} <br> </p>
+    <p>  company {{ form.company }} <br> </p>
+    <p>  type {{ form.type }} <br> </p>
+    <p>  model {{ form.model }} <br> </p>
+    <p>  number {{ form.number }} <br> </p>
+    <p>  name {{ form.name }} <br> </p>
+    <p>  {{ form.btn }} <br> </p>
+
+</form>
+
+
+{% endblock %}
