@@ -19,6 +19,7 @@ class Mechanism(db.Model):
     number = db.Column(db.SmallInteger, index=True)
     name = db.Column(db.String(64), index=True, unique=True)
     posts = db.relationship('Post', backref='mech', lazy=True)
+
     def __init__(self, id, company, type, model, number, name):
         self.id = id
         self.company = company
