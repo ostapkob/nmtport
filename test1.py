@@ -18,9 +18,10 @@ db.create_all()
 # p = Post(title='lin', body='yes')
 # c1.posts.append(p)
 # db.session.add(c2)
-m = Mechanism(12, company='nmtp', type='usm', model='PowerTrack', number=12, name='PowerTrack13')
-db.session.add(m)
-db.session.commit()
+# m = Mechanism(12, company='nmtp', type='usm', model='PowerTrack', number=12, name='PowerTrack13')
+# p = Post(value=0.5, latitude=23, longitude=12, mechanism_id=1)
+# db.session.add(p)
+# db.session.commit()
 
 # print(User.query.all())
 # print(User.query.filter_by(username='potap').first())
@@ -35,12 +36,12 @@ db.session.commit()
 # print(c1.posts)
 
 # print(c1.posts)
-a = [mech.id for mech in Mechanism.query.all()]
-print(a)
+# a = [mech.id for mech in Mechanism.query.all()]
+# print(a)
 # posts = Post.query.all()
-# posts = Category.query.all()
-# for p in posts[3:]:
-#     db.session.delete(p)
+# posts = Mechanism.query.all()
+# for p in posts:
+    # db.session.delete(p)
 
 # db.session.commit()
 # query = Category.query.options(joinedload('posts'))
@@ -50,3 +51,7 @@ print(a)
 # print(Post.query.filter_by(category_id=2).first())
 
 
+all_mech_id = [m.id for m in Mechanism.query.all()]
+print(all_mech_id)
+# db.session.add(p)
+# db.session.commit()

@@ -13,12 +13,12 @@ from datetime import datetime
 
 class Mechanism(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    company = db.Column(db.String(64), index=True)
-    type = db.Column(db.String(64), index=True)
-    model = db.Column(db.String(64), index=True)
-    number = db.Column(db.SmallInteger, index=True)
-    name = db.Column(db.String(64), index=True, unique=True)
-    posts = db.relationship('Post', backref='mech', lazy=True)
+    company = db.Column(db.String(64), nullable=False, index=True)
+    type = db.Column(db.String(64), nullable=False, index=True)
+    model = db.Column(db.String(64), nullable=False, index=True)
+    number = db.Column(db.SmallInteger, nullable=False, index=True)
+    name = db.Column(db.String(64), nullable=False, index=True, unique=True)
+    posts = db.relationship('Post', backref='mech', lazy='dynamic')
 
     def __init__(self, id, company, type, model, number, name):
         self.id = id

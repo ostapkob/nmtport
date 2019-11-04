@@ -33,7 +33,6 @@ def show_all_mechanisms():
 
 
 
-
 #================API=========================
 @app.route("/get_mech/<int:m_id>", methods=["GET"])
 def get_mech(m_id):
@@ -49,7 +48,7 @@ def get_post(p_id):
 
 @app.route('/add_post', methods=['POST'])
 def add_post():
-    all_mech_id = [mech.id for mech in Mechanism.query.all()]
+    all_mech_id = [m.id for m in Mechanism.query.all()]
     need_keys= 'password', 'value', 'latitude', 'longitude', 'mechanism_id'
     request_j =request.json
     if not request_j: abort(400)
