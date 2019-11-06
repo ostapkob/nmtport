@@ -1,7 +1,5 @@
-from sqlalchemy.orm import joinedload
 # from run import db
 from app import db
-
 from app.model import Mechanism, Post
 db.create_all()
 
@@ -49,9 +47,13 @@ db.create_all()
 #     print(cat, cat.posts)
 
 # print(Post.query.filter_by(category_id=2).first())
+# obj = session.query(Post).order_by(Post.id.desc()).offset(1).first()
+# p = Post.query.filter_by(id=1).id.desc().first()
+p =   Post.query.filter_by(mechanism_id=1).order_by(Post.id.desc()).limit(1)
+for i in p:
+    print(i)
 
-
-all_mech_id = [m.id for m in Mechanism.query.all()]
-print(all_mech_id)
+# all_mech_id = [m.id for m in Mechanism.query.all()]
+# print(all_mech_id)
 # db.session.add(p)
 # db.session.commit()

@@ -10,3 +10,6 @@ class AddMechanism(FlaskForm):
     number = StringField('number', validators=[Required()])
     name = StringField('name', validators=[Required()])
     btn = SubmitField('sent')
+
+
+

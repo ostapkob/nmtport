@@ -4,6 +4,7 @@ from flask import render_template, flash, redirect
 from app import db, app
 from app.model import Mechanism, Post
 from app.form import AddMechanism
+
 db.create_all()
 
 @app.route("/")
@@ -33,18 +34,40 @@ def show_all_mechanisms():
 
 
 
+
+
+
+@app.route("/last")
+def last():
+    all_mech_id = [m.id for m in Mechanism.query.all()]
+    # posts = [Post.query.filter_by(mechanism_id=p).first() for p in all_mech_id]
+    # posts = [Post.query.filter_by(mechanism_id=p).first() for p in all_mech_id]
+    posts =   Post.query.filter_by(mechanism_id=1).order_by(Post.id.desc()).limit(3)
+
+
+
+    return render_template("last.html",
+                           title = 'Последние данные',
+                           posts = posts)
+
+
+
+
+
+
 #================API=========================
 @app.route("/get_mech/<int:m_id>", methods=["GET"])
 def get_mech(m_id):
     mech= Mechanism.query.get(m_id)
     return f'{mech.name}'
 
-@app.route("/get_post/<int:p_id>", methods=["GET"])
-def get_post(p_id):
-    mech= Post.query.get(p_id)
+@app.route("/get_post/<int:m_id>", methods=["GET"])
+def get_post(m_id):
+    mech= Post.query.get(m_id)
     if mech == None:
         return abort(404)
-    return f'{mech.value}'
+    post=Post.query.filter_by(mechanism_id=m_id).first()
+    return f'{post.value}'
 
 @app.route('/add_post', methods=['POST'])
 def add_post():
@@ -69,7 +92,8 @@ def add_post():
 
 @app.errorhandler(404)
 def not_found(error):
-    return make_response(jsonify({'error': 'Not found'}), 404)
+    return render_template('404.html'), 404
+    # return make_response(jsonify({'error': 'Not found'}), 404)
 
 @app.errorhandler(403)
 def not_found(error):

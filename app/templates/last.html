@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block main %}
+<br>
+{% for post in posts %}
+    <p> {{post.value}} | {{post.timestamp}} | {{post.latitude}} | {{post.longitude}} | {{post.mechanism_id}} </p>
+{% endfor %}
+
+
+
+
+{% endblock %}
