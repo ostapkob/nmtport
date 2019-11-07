@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block main %}
+<br>
+{% for p in posts %}
+{% for post in p %}
+    <p> {{post.value}} | {{post.timestamp}} | {{post.mech.name}} </p>
+{% endfor %}
+{% endfor %}
+
+
+
+
+{% endblock %}

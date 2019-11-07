@@ -33,29 +33,28 @@ def show_all_mechanisms():
                            mechs = all_mech)
 
 
-
-
-
-
 @app.route("/last")
 def last():
     all_mech_id = [m.id for m in Mechanism.query.all()]
-    # posts = [Post.query.filter_by(mechanism_id=p).first() for p in all_mech_id]
-    # posts = [Post.query.filter_by(mechanism_id=p).first() for p in all_mech_id]
-    posts =   Post.query.filter_by(mechanism_id=1).order_by(Post.id.desc()).limit(3)
-
-
-
+    posts =   [Post.query.filter_by(mechanism_id=p).order_by(Post.id.desc()).limit(1) for p in all_mech_id]
     return render_template("last.html",
                            title = 'Последние данные',
                            posts = posts)
 
 
 
-
-
-
 #================API=========================
+@app.route("/per_shift")
+def per_shift():
+    all_mech_id = [m.id for m in Mechanism.query.all()]
+    posts =   [Post.query.filter_by(mechanism_id=p).order_by(Post.id.desc()).limit(1) for p in all_mech_id]
+    return render_template("per_shift.html",
+                           title = 'За смену',
+                           posts = posts)
+
+
+
+
 @app.route("/get_mech/<int:m_id>", methods=["GET"])
 def get_mech(m_id):
     mech= Mechanism.query.get(m_id)

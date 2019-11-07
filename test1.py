@@ -51,9 +51,20 @@ db.create_all()
 # p = Post.query.filter_by(id=1).id.desc().first()
 p =   Post.query.filter_by(mechanism_id=1).order_by(Post.id.desc()).limit(1)
 for i in p:
-    print(i)
+    print(i.value, i.mechanism_id, sep=' | ')
 
 # all_mech_id = [m.id for m in Mechanism.query.all()]
 # print(all_mech_id)
 # db.session.add(p)
 # db.session.commit()
+
+
+m1=Mechanism.query.get(1)
+pp = m1.posts
+# for p in pp:
+#     print(p)
+
+p1= Post.query.get(1)
+
+print(p1.mech.name)
+print(Post.query.all())
