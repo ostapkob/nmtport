@@ -1,4 +1,5 @@
 # from run import db
+from datetime import datetime
 from app import db
 from app.model import Mechanism, Post
 db.create_all()
@@ -37,11 +38,11 @@ db.create_all()
 # a = [mech.id for mech in Mechanism.query.all()]
 # print(a)
 # posts = Post.query.all()
-# posts = Mechanism.query.all()
-# for p in posts:
-    # db.session.delete(p)
+posts = Mechanism.query.all()
+for p in posts:
+    db.session.delete(p)
 
-# db.session.commit()
+db.session.commit()
 # query = Category.query.options(joinedload('posts'))
 # for cat in query:
 #     print(cat, cat.posts)
@@ -65,6 +66,10 @@ pp = m1.posts
 #     print(p)
 
 p1= Post.query.get(1)
-
 print(p1.mech.name)
 print(Post.query.all())
+print(datetime.date(datetime.now()))
+print(datetime.time(datetime.now()))
+
+
+

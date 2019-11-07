@@ -3,11 +3,8 @@
 <br>
 {% for p in posts %}
 {% for post in p %}
-    <p> {{post.value}} | {{post.timestamp}} | {{post.mech.name}} </p>
+    <p> {{post.value}} | {{post.date_shift}} | {{post.shift}} | {{post.mech.name}} </p>
 {% endfor %}
 {% endfor %}
-
-
-
 
 {% endblock %}

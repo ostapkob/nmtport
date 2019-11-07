@@ -2,12 +2,32 @@
 {% block main %}
 <br>
 <form action="{{'add_mechanism'}}" method="post">
-    <p>  id {{ form.id }} <br> </p>
-    <p>  company {{ form.company }} <br> </p>
-    <p>  type {{ form.type }} <br> </p>
-    <p>  model {{ form.model }} <br> </p>
-    <p>  number {{ form.number }} <br> </p>
-    <p>  name {{ form.name }} <br> </p>
+    <table>
+        <tr>
+        <th> id </th>
+        <th> {{ form.id }}  </th>
+        </tr>
+        <tr>
+        <th> company </th>
+        <th> {{ form.company }} </th>
+        </tr>
+        <tr>
+        <th> type </th>
+        <th> {{ form.type }}  </th>
+        </tr>
+        <tr>
+        <th> model </th>
+        <th> {{ form.model }} </th>
+        </tr>
+        <tr>
+        <th> number </th>
+        <th> {{ form.number }} </th>
+        </tr>
+        <tr>
+        <th> name </th>
+        <th> {{ form.name }} </th>
+        </tr>
+    </table>
 <button type="form.btm" class="btn btn-outline-secondary">Sent</button>
 </form>
 

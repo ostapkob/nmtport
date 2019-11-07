@@ -1,15 +1,6 @@
 from app import db
-from datetime import datetime
+from datetime import datetime, timedelta
 
-# class User(db.Model):
-#     id = db.Column(db.Integer, primary_key = True)
-#     username = db.Column(db.String(80), unique=True, nullable=False)
-#     email = db.Column(db.String(40),    unique=True, nullable=False)
-#     def __init__(self, username, email):
-#         self.username = username
-#         self.email = email
-#     def __repr__(self):
-#         return f'={self.username}  {self.email}='
 
 class Mechanism(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -19,7 +10,6 @@ class Mechanism(db.Model):
     number = db.Column(db.SmallInteger, index=True)
     name = db.Column(db.String(64), index=True, unique=True)
     posts = db.relationship('Post', backref='mech', lazy='dynamic')
-    # posts = db.relationship('Post', backref='mech', lazy=True)
 
     def __init__(self, id, company, type, model, number, name):
         self.id = id
@@ -28,46 +18,43 @@ class Mechanism(db.Model):
         self.model = model
         self.number = number
         self.name = name
+
     def __repr__(self):
         return f'<{self.name}>'
+
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     value = db.Column(db.Float)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    date = db.Column(db.Date,  default=datetime.utcnow)
+    # time = db.Column(db.Time,  default=datetime.utcnow)
+    date_shift = db.Column(db.Date)
     latitude = db.Column(db.Float)
+    shift = db.Column(db.Integer)
     longitude = db.Column(db.Float)
     mechanism_id = db.Column(db.Integer, db.ForeignKey('mechanism.id'))
 
     def __init__(self, value, latitude, longitude, mechanism_id):
+        hour = datetime.now().hour
+        if hour > 8 and hour < 20:
+            date_shift = datetime.now()
+            shift = 1
+        elif hour < 8:
+            date_shift = datetime.now() - timedelta(days=1)
+            shift = 2
+        else:
+            date_shift = datetime.now()
+            shift = 2
+
         self.value = value
         self.latitude = latitude
         self.longitude = longitude
         self.mechanism_id = mechanism_id
+        self.shift = shift
+        self.date_shift = date_shift
 
     def __repr__(self):
         return f'<{self.timestamp}>'
-
-
-
-
-# class Post(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     title = db.Column(db.String, nullable=False)
-#     body=db.Column(db.Text, nullable=False)
-    # pub_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    # category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
-    # category = db.relationship('Category', backref=db.backref('posts', lazy=True))
-
-#     def __repr__(self):
-#         return f'post:{self.title}'
-
-
-# class Category(db.Model):
-#     id = db.Column(db.Integer, primary_key = True)
-#     name = db.Column(db.String(50), nullable=False)
-
-#     def __repr__(self) :
-#         return f'#Category {self.name}#'
 
 

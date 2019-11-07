@@ -42,8 +42,6 @@ def last():
                            posts = posts)
 
 
-
-#================API=========================
 @app.route("/per_shift")
 def per_shift():
     all_mech_id = [m.id for m in Mechanism.query.all()]
@@ -52,6 +50,7 @@ def per_shift():
                            title = 'За смену',
                            posts = posts)
 
+#================API=========================
 
 
 
@@ -102,10 +101,6 @@ def not_found(error):
 def add_mechanism():
     all_mech_id = [mech.id for mech in Mechanism.query.all()]
     request_f = request.form
-    # need_keys = 'id', 'company', 'type', 'model', 'number', 'name'
-    # keys = [p for p in request_f.keys()]
-    # return render_template(keys)
-    # if not set(keys).issubset(need_keys): abort(402)
     id = request_f['id']
     company = request_f['company']
     type = request_f['type']
