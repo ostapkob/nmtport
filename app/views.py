@@ -72,6 +72,7 @@ def add_post():
     all_mech_id = [m.id for m in Mechanism.query.all()]
     need_keys= 'password', 'value', 'latitude', 'longitude', 'mechanism_id'
     request_j =request.json
+    print(request_j)
     if not request_j: abort(400)
     keys = [p for p in request_j.keys()]
     if not set(keys).issubset(need_keys): abort(400)

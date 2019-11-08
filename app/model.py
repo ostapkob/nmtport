@@ -25,15 +25,15 @@ class Mechanism(db.Model):
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    mechanism_id = db.Column(db.Integer, db.ForeignKey('mechanism.id'))
     value = db.Column(db.Float)
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    date = db.Column(db.Date,  default=datetime.utcnow)
+    # date = db.Column(db.Date,  default=datetime.utcnow)
     # time = db.Column(db.Time,  default=datetime.utcnow)
     date_shift = db.Column(db.Date)
-    latitude = db.Column(db.Float)
     shift = db.Column(db.Integer)
-    longitude = db.Column(db.Float)
-    mechanism_id = db.Column(db.Integer, db.ForeignKey('mechanism.id'))
 
     def __init__(self, value, latitude, longitude, mechanism_id):
         hour = datetime.now().hour
@@ -53,7 +53,7 @@ class Post(db.Model):
         self.mechanism_id = mechanism_id
         self.shift = shift
         self.date_shift = date_shift
-
+        print(date_shift)
     def __repr__(self):
         return f'<{self.timestamp}>'
 
