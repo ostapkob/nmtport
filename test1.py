@@ -1,5 +1,5 @@
 # from run import db
-from datetime import datetime
+from datetime import datetime, timedelta
 from app import db
 from app.model import Mechanism, Post
 db.create_all()
@@ -18,7 +18,9 @@ db.create_all()
 # c1.posts.append(p)
 # db.session.add(c2)
 # m = Mechanism(12, company='nmtp', type='usm', model='PowerTrack', number=12, name='PowerTrack13')
-# p = Post(value=0.5, latitude=23, longitude=12, mechanism_id=1)
+dt=timestamp=datetime.utcnow()+timedelta(days=1)
+print('==', dt)
+p = Post(value=0.5, latitude=23, longitude=12, mechanism_id=1, timestamp=dt)
 # db.session.add(p)
 # db.session.commit()
 
@@ -38,11 +40,11 @@ db.create_all()
 # a = [mech.id for mech in Mechanism.query.all()]
 # print(a)
 # posts = Post.query.all()
-posts = Mechanism.query.all()
-for p in posts:
-    db.session.delete(p)
+# posts = Mechanism.query.all()
+# for p in posts:
+    # db.session.delete(p)
 
-db.session.commit()
+# db.session.commit()
 # query = Category.query.options(joinedload('posts'))
 # for cat in query:
 #     print(cat, cat.posts)
@@ -50,9 +52,9 @@ db.session.commit()
 # print(Post.query.filter_by(category_id=2).first())
 # obj = session.query(Post).order_by(Post.id.desc()).offset(1).first()
 # p = Post.query.filter_by(id=1).id.desc().first()
-p =   Post.query.filter_by(mechanism_id=1).order_by(Post.id.desc()).limit(1)
-for i in p:
-    print(i.value, i.mechanism_id, sep=' | ')
+# p =   Post.query.filter_by(mechanism_id=1).order_by(Post.id.desc()).limit(1)
+# for i in p:
+    # print(i.value, i.mechanism_id, sep=' | ')
 
 # all_mech_id = [m.id for m in Mechanism.query.all()]
 # print(all_mech_id)
@@ -60,16 +62,16 @@ for i in p:
 # db.session.commit()
 
 
-m1=Mechanism.query.get(1)
-pp = m1.posts
+# m1=Mechanism.query.get(1)
+# pp = m1.posts
 # for p in pp:
 #     print(p)
 
-p1= Post.query.get(1)
-print(p1.mech.name)
-print(Post.query.all())
-print(datetime.date(datetime.now()))
-print(datetime.time(datetime.now()))
+# p1= Post.query.get(1)
+# print(p1.mech.name)
+# print(Post.query.all())
+# print(datetime.date(datetime.now()))
+# print(datetime.time(datetime.now()))
 
 
 

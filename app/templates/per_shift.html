@@ -1,10 +1,15 @@
 {% extends "base.html" %}
 {% block main %}
 <br>
-{% for p in posts %}
-{% for post in p %}
-    <p> {{post.value}} | {{post.date_shift}} | {{post.shift}} | {{post.mech.name}} </p>
-{% endfor %}
+{{ date_shift }}
+{{ shift }}
+{{ hours }}
+<br>
+-----------------------
+{% for p in hours%}
+    {% for post in p %}
+        <p> {{post.value}} 
+    {% endfor %}
 {% endfor %}
 
 {% endblock %}

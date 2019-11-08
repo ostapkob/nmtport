@@ -5,8 +5,9 @@ from app import db, app
 from app.model import Mechanism, Post
 from app.form import AddMechanism
 from datetime import datetime, timedelta
+from functions import shift_date
+from sqlalchemy import func
 db.create_all()
-
 @app.route("/")
 @app.route("/index")
 def index():
@@ -45,15 +46,30 @@ def last():
 
 @app.route("/per_shift")
 def per_shift():
-    all_mech_id = [m.id for m in Mechanism.query.all()]
-    posts =   [Post.query.filter_by(mechanism_id=p).order_by(Post.id.desc()).limit(1) for p in all_mech_id]
+    date_shift, shift = shift_date()
+    print(date_shift, shift)
+    hours=[db.session.query(Post).filter(Post.shift==shift, Post.date_shift==date_shift)]
     return render_template("per_shift.html",
                            title = 'За смену',
-                           posts = posts)
+                           date_shift = date_shift,
+                           shift = shift,
+                           hours =hours,
+                           )
 
 #================API=========================
 
 
+@app.route("/get_per_shift", methods=["GET"])
+def get_per_shift():
+
+    date_shift, shift = shift_date()
+    hours=[db.session.query(Post.value).filter(Post.shift==shift, Post.date_shift==date_shift)]
+    s=0
+    for p in hours:
+        for h in p:
+            s+=h[0]
+    hours=111
+    return f'{s}'
 
 @app.route("/get_mech/<int:m_id>", methods=["GET"])
 def get_mech(m_id):

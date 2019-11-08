@@ -14,7 +14,6 @@ data = {"password" : "super",
         "latitude"  : 42.814723,
         "longitude" : 132.891339,
         "mechanism_id" : 1,
-        # 'timestap' : date
         }
 head = {"Content-type": "application/json",
           "Accept": "text/plain"}
