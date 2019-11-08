@@ -4,7 +4,7 @@ from flask import render_template, flash, redirect
 from app import db, app
 from app.model import Mechanism, Post
 from app.form import AddMechanism
-
+from datetime import datetime, timedelta
 db.create_all()
 
 @app.route("/")
@@ -36,9 +36,10 @@ def show_all_mechanisms():
 @app.route("/last")
 def last():
     all_mech_id = [m.id for m in Mechanism.query.all()]
-    posts =   [Post.query.filter_by(mechanism_id=p).order_by(Post.id.desc()).limit(1) for p in all_mech_id]
+    posts =   [Post.query.filter_by(mechanism_id=p).order_by(Post.id.desc()).limit(10) for p in all_mech_id]
     return render_template("last.html",
                            title = 'Последние данные',
+                           tim = datetime.now() + timedelta(days=2),
                            posts = posts)
 
 

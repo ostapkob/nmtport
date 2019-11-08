@@ -3,12 +3,10 @@
 <br>
 {% for p in posts %}
 {% for post in p %}
-<p> {{post.mechanism_id}} | {{post.value}} | {{post.timestamp}} | {{post.latitude}} | {{post.longitude}} |  {{post.date_shift}} | {{post.shift}} </p>
+<p> {{post.mechanism_id}} | {{post.value}} | {{moment(post.timestamp).format('lll')}} |
+{{post.latitude}} | {{post.longitude}} |  {{post.date_shift}} | {{post.shift}} </p>
 {% endfor %}
 <p> ------------------------------------------------------------- </p>
 {% endfor %}
-
-
-
 
 {% endblock %}

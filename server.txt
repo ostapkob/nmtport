@@ -2,7 +2,7 @@
 curl -i -H "Content-Type: application/json" -X POST -d '{
 "password" : "super",
 "value" : 0.55,
-"latitude"  : 13,
-"longitude" : 44,
+"latitude"  : 42.814723 ,
+"longitude" : 132.891339,
 "mechanism_id" : 1
-}' http://35.241.126.215:80/add_post
+}' http://35.241.126.215:80/add_post'
