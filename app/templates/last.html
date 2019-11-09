@@ -4,16 +4,9 @@
 {% for p in posts %}
 <p>{{ p|sum(attribute='value')|round(3) if p[0] }}</p>
 {% for post in p %}
-<p> {{post.mechanism_id}} | {{post.value}} | {{moment(post.timestamp).format('lll')}} |
+<p>{{post.mech.number}} | {{post.value}} | {{moment(post.timestamp).format('lll')}} |
 {{post.latitude}} | {{post.longitude}} |  {{post.date_shift}} | {{post.shift}} </p>
 {% endfor %}
 {{ '-------------------------------------------------------------' if p[0] }}
 {% endfor %}
-{% set ls = [1,2,3,4,5,6,7] %}
-<br>
-{{ ls|select("lessthan", 4) }}
-<br>
-{{ ls|map('lower')|join(', ') }}
-<br>
-{{ ls|sum}}
 {% endblock %}

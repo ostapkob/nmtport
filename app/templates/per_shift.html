@@ -5,11 +5,13 @@
 {{ shift }}
 {{ hours }}
 <br>
------------------------
-{% for p in hours%}
-    {% for post in p %}
-        <p> {{post.value}} 
-    {% endfor %}
+<table>
+{% for el in data_per_shift %}
+    <tr>
+
+    <th>{{el.mech.name}}  &nbsp;&nbsp;</th>  <th>  {{el.value}} &nbsp;&nbsp;</th> <th>{{moment(el.timestamp).format('lll')}}</th> 
+    <tr>
 {% endfor %}
 
+</table>
 {% endblock %}
