@@ -13,7 +13,7 @@ data = {"password" : "super",
         "value" : round(random(), 3),
         "latitude"  : 42.814723,
         "longitude" : 132.891339,
-        "mechanism_id" : 1,
+        "mechanism_id" : 3,
         }
 head = {"Content-type": "application/json",
           "Accept": "text/plain"}

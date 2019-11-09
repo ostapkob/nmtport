@@ -129,7 +129,8 @@ def add_mechanism():
     data = request.data
     db.session.add(new_mech)
     db.session.commit()
-    return data
+    return redirect("http://localhost:5000/show_all_mechanism", code=301)
+    # return data
 
 #maybe not use
 @app.route('/add_mech_json', methods=['POST'])
