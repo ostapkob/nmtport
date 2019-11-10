@@ -1,17 +1,14 @@
 {% extends "base.html" %}
 {% block main %}
 <br>
-{{ date_shift }}
-{{ shift }}
-{{ hours }}
-<br>
-<table>
-{% for el in data_per_shift %}
-    <tr>
-
-    <th>{{el.mech.name}}  &nbsp;&nbsp;</th>  <th>  {{el.value}} &nbsp;&nbsp;</th> <th>{{moment(el.timestamp).format('lll')}}</th> 
-    <tr>
+<p> Дата смены: {{ date_shift }} номер смены: {{ shift }} </p>
+<dl>
+{% for key, value in data_per_shift.items() %}
+<dt> {{ value[0].mech.name}} - {{ value|sum(attribute='value')|round(3) }}</dt>
+    {% for el in value %}
+    <tt> | {{el.value}} {{moment(el.timestamp).format('LTS')}} </tt>
+    {% endfor %}
 {% endfor %}
 
-</table>
+</dl>
 {% endblock %}

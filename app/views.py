@@ -5,7 +5,7 @@ from app import db, app
 from app.model import Mechanism, Post
 from app.form import AddMechanism
 from datetime import datetime, timedelta
-from functions import shift_date
+from functions import shift_date, all_mechanisms_id
 from sqlalchemy import func
 db.create_all()
 @app.route("/")
@@ -33,23 +33,28 @@ def show_all_mechanisms():
                            title='Механизмы',
                            mechs=all_mech)
 
-
 @app.route("/last")
 def last():
-    all_mech_id = [m.id for m in Mechanism.query.all()]
+    # all_mech_id = [m.id for m in Mechanism.query.all()]
     posts = [Post.query.filter_by(mechanism_id=p).order_by(
-        Post.id.desc()).limit(10) for p in all_mech_id]
+        Post.id.desc()).limit(10) for p in all_mechanisms_id()]
     return render_template("last.html",
                            title='Последние данные',
                            tim=datetime.now() + timedelta(days=2),
                            posts=posts)
 
-
 @app.route("/per_shift")
 def per_shift():
     date_shift, shift = shift_date()
-    data_per_shift = db.session.query(Post).filter(
-        Post.date_shift == date_shift, Post.shift == shift).order_by(Post.mechanism_id).all()
+
+    cursor = db.session.query(Post).filter(Post.date_shift==date_shift, Post.shift==shift).order_by(Post.mechanism_id).all()
+    data_per_shift={}
+    for el in cursor:
+        if data_per_shift.get(el.mech.id):
+            data_per_shift[el.mech.id].append(el)
+        else:
+            data_per_shift[el.mech.id]=[el]
+
     return render_template("per_shift.html",
                            title='За смену',
                            date_shift=date_shift,
@@ -59,13 +64,15 @@ def per_shift():
 
 # ================API=========================
 
-
 @app.route("/get_per_shift/<int:m_id>", methods=["GET"])
 def get_per_shift(m_id):
     date_shift, shift = shift_date()
-    data_per_shift = db.session.query(Post).filter(Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).all()
-    start = db.session.query(Post.timestamp).filter(Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).first()[0]
-    stop = db.session.query(Post.timestamp).filter(Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).order_by(Post.timestamp.desc()).first()[0]
+    data_per_shift = db.session.query(Post).filter( Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).all()
+    try:
+        start = db.session.query(Post.timestamp).filter( Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).first()[0]
+        stop = db.session.query(Post.timestamp).filter(Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).order_by(Post.timestamp.desc()).first()[0]
+    except TypeError:
+        abort(405)
     start += timedelta(hours=10)
     stop += timedelta(hours=10)
     total = round(sum([el.value for el in data_per_shift]), 3)
@@ -90,7 +97,6 @@ def get_post(m_id):
 
 @app.route('/add_post', methods=['POST'])
 def add_post():
-    all_mech_id = [m.id for m in Mechanism.query.all()]
     need_keys = 'password', 'value', 'latitude', 'longitude', 'mechanism_id'
     request_j = request.json
     print(request_j)
@@ -101,9 +107,8 @@ def add_post():
         abort(400)
     if request_j['password'] != 'super':
         abort(403)  # need use this password in Arduino
-    if request_j['mechanism_id'] not in all_mech_id:
+    if request_j['mechanism_id'] not in all_mechanisms_id():
         abort(405)
-
     value = request_j['value']
     latitude = request_j['latitude']
     longitude = request_j['longitude']

@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from app.model import Post, Mechanism
 def shift_date():
     hour = datetime.now().hour
     if hour > 8 and hour < 20:
@@ -11,4 +12,13 @@ def shift_date():
         date_shift = datetime.now()
         shift = 2
     return date_shift.date(), shift
-print(shift_date())
+
+def all_mechanisms_id():
+    'Find all mechanisms id'''
+    return [m.id for m in Mechanism.query.all()]
+
+
+def all_number(type, number):
+    '''Need to do then'''
+    return [m.id for m in Mechanism.query.all()]
+

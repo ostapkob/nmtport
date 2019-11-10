@@ -5,7 +5,7 @@ from random import random
 
 date = datetime.now()
 dt = datetime.strftime(date,  "%d.%m.%Y  %H:%M")
-print(dt)
+# print(dt)
 
 host='http://127.0.0.1:5000/add_post'
 data = {"password" : "super",

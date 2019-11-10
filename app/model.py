@@ -54,7 +54,8 @@ class Post(db.Model):
         self.shift = shift
         self.date_shift = date_shift
         print(date_shift)
+
     def __repr__(self):
-        return f'<{self.timestamp}>'
+        return f'{self.value}'
 
 
