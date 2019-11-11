@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>TEST</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <table>
+        <tr>
+            <th>
+<!--     <div id='app'>
+        <span @click="name='text'">   Click </span> | 
+        <span @mouseover="name='Any'">over  </span> |
+        <span @mouseover="ChangeText">method</span>
+        <p> {{ name }} </p>
+        <p> {{ lable }} </p>
+        <p :class="styleCSS"> color {{ styleCSS }} </p>
+        <input type="text" v-on:input="styleCSS = $event.target.value">
+    </div> -->
+
+        </th>
+        <th>
+
+<div id="app">
+	<input type="text" v-on:input="increment ($event.target.value)">
+	<p>{{ value }}</p>
+	<p>{{ doublevalue }}</p>
+	<button v-on:click="show = !show"> Show </button>
+	<p v-if="show">This text can be transperensy</p>
+	<p v-else>Its work good</p>
+</div>
+
+
+        </th>
+    </tr>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src='js/main.js'> </script>
+</body>
+</html>

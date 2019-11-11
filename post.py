@@ -8,6 +8,7 @@ dt = datetime.strftime(date,  "%d.%m.%Y  %H:%M")
 # print(dt)
 
 host='http://127.0.0.1:5000/add_post'
+# host='http://35.241.126.216/add_post'
 data = {"password" : "super",
         "value" : round(random(), 3),
         "latitude"  : 42.814723,
@@ -22,4 +23,5 @@ for i in range(1, 12):
     data['value']= round(random(),3)
     jdata = json.dumps(data)
     r = requests.post(host,data=jdata, headers=head)
-    print(r.status_code, r.reason, sep=' | ')
+    print(i, r.status_code, r.reason, sep=' | ')
+

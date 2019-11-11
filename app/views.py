@@ -54,7 +54,7 @@ def per_shift():
             data_per_shift[el.mech.id].append(el)
         else:
             data_per_shift[el.mech.id]=[el]
-
+    # data_per_shift= {data_per_shift[el.mech.id].append(el) if data_per_shift.get(el.mech.id) else data_per_shift[el.mech.id].append(el) for el in cursor}
     return render_template("per_shift.html",
                            title='За смену',
                            date_shift=date_shift,
