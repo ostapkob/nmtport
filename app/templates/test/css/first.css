@@ -1,0 +1,21 @@
+body  {
+	background-color: #66ffaa;
+
+}   
+	h1 {font-size: 30px;
+		color: #33aa99;}	
+	#first {color: #994433;}	
+
+	h2 {color: #228844;}
+	p.my {color: #3344cc;
+			background-color: #fafafa;}	
+	h3.my {color: #a3a4ac;}	
+
+p u {color: #ff22ff;}
+p.example,b {background-color: #acacac;
+			font-weight: bold;}
+
+.myhref {
+	color: #940000;
+	background-color: #eeebcc;
+}
