@@ -6,8 +6,9 @@
 {% for key, value in data_per_shift.items() %}
 <dt> {{ value[0].mech.name}} - {{ value|sum(attribute='value')|round(3) }}</dt>
     {% for el in value %}
-    <tt> | {{el.value}} {{moment(el.timestamp).format('LTS')}} </tt>
+    <tt> | {{el.value}} {{moment(el.timestamp).format('LT')}} </tt>
     {% endfor %}
+    <hr />
 {% endfor %}
 
 </dl>
