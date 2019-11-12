@@ -5,7 +5,7 @@ from app import db, app
 from app.model import Mechanism, Post
 from app.form import AddMechanism
 from datetime import datetime, timedelta
-from functions import shift_date, all_mechanisms_id
+from functions import shift_date, all_mechanisms_id, in_hours
 from sqlalchemy import func
 db.create_all()
 @app.route("/")
@@ -76,7 +76,7 @@ def get_per_shift(m_id):
     start += timedelta(hours=10)
     stop += timedelta(hours=10)
     total = round(sum([el.value for el in data_per_shift]), 3)
-    data = {'total': total, 'start': start, 'stop': stop}
+    data = {'total': in_hours(total), 'start': start, 'stop': stop}
     return jsonify(data)
 
 

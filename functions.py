@@ -22,3 +22,7 @@ def all_number(type, number):
     '''Need to do then'''
     return [m.id for m in Mechanism.query.all()]
 
+def in_hours(n):
+    return round(n*600/7200, 3)
+
+

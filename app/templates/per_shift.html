@@ -1,15 +1,21 @@
 {% extends "base.html" %}
 {% block main %}
 <br>
-<p> Дата смены: {{ date_shift }} номер смены: {{ shift }} </p>
+<div class="alert alert-warning" role="alert">
+    Дата смены: <strong> {{ date_shift }} </strong> номер смены:<strong> {{ shift }} </strong>	
+</div>
 <dl>
 {% for key, value in data_per_shift.items() %}
-<dt> {{ value[0].mech.name}} - {{ value|sum(attribute='value')|round(3) }}</dt>
+<h2> {{ value[0].mech.name}} <span class="badge badge-secondary"> {{ (value|sum(attribute='value')*600/7200)|round(3) }}</span></h2>
+
+<div class="alert alert-dark" role="alert">
     {% for el in value %}
-    <tt> | {{el.value}} {{moment(el.timestamp).format('LT')}} </tt>
+    | {{el.value}} {{moment(el.timestamp).format('LT')}} 
     {% endfor %}
+</div>
     <hr />
 {% endfor %}
+
 
 </dl>
 {% endblock %}
