@@ -1,40 +1,25 @@
 {% extends "base.html" %}
 {% block main %}
-PowerTrack1
-<div class="progress">
-  <div class="progress-bar progress-bar-striped bg-danger" role="progressbar" style="width: 4%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
-  <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 15%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
-  <div class="progress-bar progress-bar-striped bg-warning" role="progressbar" style="width: 3%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
-  <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 15%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
-  <div class="progress-bar progress-bar-striped bg-warning" role="progressbar" style="width: 3%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
-  <div class="progress-bar progress-bar-striped bg-danger" role="progressbar" style="width: 8%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
-</div>
-PowerTrack2
-<div class="progress">
-  <div class="progress-bar progress-bar-striped bg-danger" role="progressbar" style="width: 5%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
-  <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 15%" aria-valuenow="13" aria-valuemin="0" aria-valuemax="100"></div>
-  <div class="progress-bar progress-bar-striped bg-warning" role="progressbar" style="width: 6%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
-  <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 16%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
-  <div class="progress-bar progress-bar-striped bg-warning" role="progressbar" style="width: 3%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
-  <div class="progress-bar progress-bar-striped bg-danger" role="progressbar" style="width: 8%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
-</div>
-<br>
 
-<div id="app">
-    <h1> Hi - {{name}} </h1>
-</div>
-
-
-<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script>
-
-        new Vue({
-            el: '#app',
-            data: {
-                name: 'Vue!'
-            }
-
-        })
-
-    </script>
+<script>
+  function progress_bar(list){
+    document.write('<div class="progress">') ;
+    for (var i in list) {
+      n=list[i]
+      if (n==-1){
+        document.write('<div class="progress-bar bg-danger"  style="width: 0.139%" ></div>'); }
+      else if (n==0){
+        document.write('<div class="progress-bar bg-warning"  style="width: 0.139%"></div>'); }
+      else {
+        document.write('<div class="progress-bar"  style="width: 0.139%"></div>') ; }
+      }
+      document.write('</div>')
+    }
+    
+    var values = JSON.parse('{{  data | tojson | safe}}');
+    for (var key in values) {
+      document.write(key + '<br />');
+      progress_bar (values[key]) ;
+    }
+</script>
 {% endblock %}

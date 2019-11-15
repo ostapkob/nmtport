@@ -73,12 +73,61 @@ def time_for_shift(date_shift, shift):
         start_m=start
         time_by_minuts[key_m] = {}
         for i in range(60*12-1):
-            start_m+=timedelta(minutes=1)
             time_by_minuts[key_m][start_m]= existing_values[key_m].setdefault(start_m, -1)
-            if start_m>datetime.now():
+            start_m+=timedelta(minutes=1)
+            if start_m>=datetime.now():
                 break
 
     return time_by_minuts
+
+
+def time_for_shift_list(date_shift, shift):
+    '''get dict with all minute's values for the period'''
+    #get data from db
+    cursor = db.session.query(Post).filter( Post.date_shift == date_shift, Post.shift == shift).order_by(Post.mechanism_id).all()
+
+    #create dict all works mechanism in shift
+    data_per_shift = {}
+    for el in cursor:
+        if data_per_shift.get(el.mech.name):
+            data_per_shift[el.mech.name].append(el)
+        else:
+            data_per_shift[el.mech.name] = [el]
+
+
+    # get start time for this shift
+    start = datetime.combine(date_shift, datetime.min.time())
+    if shift == 1:
+        start=start.replace(hour=8, minute=0, second=0, microsecond=0)
+    else:
+        start=start.replace(hour=20, minute=0, second=0, microsecond=0)
+
+    #create dict existing values by time
+    existing_values = {}
+    for key, values in data_per_shift.items():
+        existing_values[key]={}
+        for val in values:
+            date_t = val.timestamp.replace(second=0, microsecond=0)
+            date_t+=timedelta(hours=10)
+            existing_values[key][date_t]=val.value
+
+    #create dict with all minutes to now if value is not return (-1) because 0 may exist
+    time_by_minuts ={}
+    for key_m, values_m in existing_values.items():
+        start_m=start
+        time_by_minuts[key_m] = []
+        for i in range(60*12-1):
+            val_minutes = existing_values[key_m].setdefault(start_m, -1)
+            if (val_minutes  < 0.1 and val_minutes > 0): val_minutes = 0    
+            time_by_minuts[key_m].append(val_minutes    )
+            start_m+=timedelta(minutes=1)
+            if start_m>=datetime.now():
+                break
+
+    return time_by_minuts
+
+
+
 
 
 
