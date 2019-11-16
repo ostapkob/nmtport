@@ -18,7 +18,7 @@ data = {"password" : "super",
 head = {"Content-type": "application/json",
           "Accept": "text/plain"}
 
-for i in range(1, 12):
+for i in range(1, 12, 2):
     data['mechanism_id'] =i
     data['value']= round(random(),3)
     jdata = json.dumps(data)
