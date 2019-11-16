@@ -5,14 +5,19 @@ from app import db, app
 from app.model import Mechanism, Post
 from app.form import AddMechanism
 from datetime import datetime, timedelta
-from functions import shift_date, all_mechanisms_id, in_hours
+from functions import today_shift_date, all_mechanisms_id, time_for_shift, time_for_shift_list
 from sqlalchemy import func
 db.create_all()
 @app.route("/")
 @app.route("/index")
 def index():
+    date_shift, shift = today_shift_date()
+    data = time_for_shift_list(date_shift, shift)
+    # data ={'firstname': "Mr.", 'lastname': "My Father's Son"}
     return render_template("index.html",
-                           val='fox')
+                           data=data,
+                           val=type(data),
+                           )
 
 # Dont work
 @app.route("/form_mech", methods=['GET', 'POST'])
@@ -45,7 +50,7 @@ def last():
 
 @app.route("/per_shift")
 def per_shift():
-    date_shift, shift = shift_date()
+    date_shift, shift = today_shift_date()
 
     cursor = db.session.query(Post).filter(Post.date_shift==date_shift, Post.shift==shift).order_by(Post.mechanism_id).all()
     data_per_shift={}
@@ -54,7 +59,6 @@ def per_shift():
             data_per_shift[el.mech.id].append(el)
         else:
             data_per_shift[el.mech.id]=[el]
-    # data_per_shift= {data_per_shift[el.mech.id].append(el) if data_per_shift.get(el.mech.id) else data_per_shift[el.mech.id].append(el) for el in cursor}
     return render_template("per_shift.html",
                            title='За смену',
                            date_shift=date_shift,
@@ -66,7 +70,7 @@ def per_shift():
 
 @app.route("/get_per_shift/<int:m_id>", methods=["GET"])
 def get_per_shift(m_id):
-    date_shift, shift = shift_date()
+    date_shift, shift = today_shift_date()
     data_per_shift = db.session.query(Post).filter( Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).all()
     try:
         start = db.session.query(Post.timestamp).filter( Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).first()[0]
@@ -75,8 +79,8 @@ def get_per_shift(m_id):
         abort(405)
     start += timedelta(hours=10)
     stop += timedelta(hours=10)
-    total = round(sum([el.value for el in data_per_shift]), 3)
-    data = {'total': in_hours(total), 'start': start, 'stop': stop}
+    total = round(sum(el.value for el in data_per_shift)/60, 3)
+    data = {'total': total, 'start': start, 'stop': stop}
     return jsonify(data)
 
 
@@ -97,6 +101,7 @@ def get_post(m_id):
 
 @app.route('/add_post', methods=['POST'])
 def add_post():
+    # import sys
     need_keys = 'password', 'value', 'latitude', 'longitude', 'mechanism_id'
     request_j = request.json
     print(request_j)
@@ -117,6 +122,7 @@ def add_post():
     data = request.data
     db.session.add(new_post)
     db.session.commit()
+    # print('******', sys.getsizeof(request_j))
     return data, 201
 
 

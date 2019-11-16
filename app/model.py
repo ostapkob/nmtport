@@ -1,6 +1,6 @@
 from app import db
 from datetime import datetime, timedelta
-
+# from functions import multiple_5
 
 class Mechanism(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -30,8 +30,7 @@ class Post(db.Model):
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    # date = db.Column(db.Date,  default=datetime.utcnow)
-    # time = db.Column(db.Time,  default=datetime.utcnow)
+    # multiple5= db.Column(db.DateTime)
     date_shift = db.Column(db.Date)
     shift = db.Column(db.Integer)
 
@@ -52,6 +51,7 @@ class Post(db.Model):
         self.longitude = longitude
         self.mechanism_id = mechanism_id
         self.shift = shift
+        # self.multiple5 = multiple_5(datetime.now())
         self.date_shift = date_shift
         print(date_shift)
 

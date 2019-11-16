@@ -6,7 +6,7 @@
 </div>
 <dl>
 {% for key, value in data_per_shift.items() %}
-<h2> {{ value[0].mech.name}} <span class="badge badge-secondary"> {{ (value|sum(attribute='value')*600/7200)|round(3) }}</span></h2>
+<h2> {{ value[0].mech.name}} <span class="badge badge-secondary"> {{ (value|sum(attribute='value')/60)|round(3) }}</span></h2>
 
 <div class="alert alert-dark" role="alert">
     {% for el in value %}
