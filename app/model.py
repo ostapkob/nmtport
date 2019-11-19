@@ -36,7 +36,7 @@ class Post(db.Model):
 
     def __init__(self, value, latitude, longitude, mechanism_id):
         hour = datetime.now().hour
-        if hour > 8 and hour < 20:
+        if hour >= 8 and hour < 20:
             date_shift = datetime.now()
             shift = 1
         elif hour < 8:
