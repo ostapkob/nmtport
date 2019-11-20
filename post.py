@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import requests
 import json
 from random import random
+import time
 
 date = datetime.now()
 dt = datetime.strftime(date,  "%d.%m.%Y  %H:%M")
@@ -18,10 +19,11 @@ data = {"password" : "super",
 head = {"Content-type": "application/json",
           "Accept": "text/plain"}
 
-for i in range(1, 12):
-    data['mechanism_id'] =i
-    data['value']= round(random(),3)
-    jdata = json.dumps(data)
-    r = requests.post(host,data=jdata, headers=head)
-    print(i, r.status_code, r.reason, sep=' | ')
-
+while True:
+    for i in range(1, 12):
+        data['mechanism_id'] =i
+        data['value']= round(random(),3)
+        jdata = json.dumps(data)
+        r = requests.post(host,data=jdata, headers=head)
+        print(i, r.status_code, r.reason, sep=' | ')
+    time.sleep(60)
