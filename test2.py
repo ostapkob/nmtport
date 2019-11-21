@@ -26,4 +26,3 @@ for el in cursor:
     else:
         data_per_shift[el.mech.id]=[el]
 
-

@@ -5,7 +5,7 @@ from app import db
 HOURS = 10
 def today_shift_date():
     hour = datetime.now().hour
-    if hour > 8 and hour < 20:
+    if hour >= 8 and hour < 20:
         date_shift = datetime.now()
         shift = 1
     elif hour < 8:
@@ -41,15 +41,22 @@ def time_for_shift(date_shift, shift):
     '''get dict with all minute's values for the period'''
     #get data from db
     cursor = db.session.query(Post).filter( Post.date_shift == date_shift, Post.shift == shift).order_by(Post.mechanism_id).all()
-
     #create dict all works mechanism in shift
     data_per_shift = {}
-    for el in cursor:
-        if data_per_shift.get(el.mech.name):
-            data_per_shift[el.mech.name].append(el)
-        else:
-            data_per_shift[el.mech.name] = [el]
 
+    for el in cursor:
+        date_t = el.timestamp.replace(second=0, microsecond=0)
+        date_t+=timedelta(hours=10)
+        # date_t = date_t.strftime("%H:%M")
+        val_minute = 0 if el.value < 0.1 else el.value
+
+        if data_per_shift.get(el.mech.number):
+            data_per_shift[el.mech.number]['data'][date_t]=val_minute
+        else:
+            data_per_shift[el.mech.number]={}
+            data_per_shift[el.mech.number]['mechanism'] = el.mech
+            data_per_shift[el.mech.number]['data'] = {}
+            data_per_shift[el.mech.number]['data'] [date_t] = val_minute
 
     # get start time for this shift
     start = datetime.combine(date_shift, datetime.min.time())
@@ -58,27 +65,37 @@ def time_for_shift(date_shift, shift):
     else:
         start=start.replace(hour=20, minute=0, second=0, microsecond=0)
 
-    #create dict existing values by time
-    existing_values = {}
-    for key, values in data_per_shift.items():
-        existing_values[key]={}
-        for val in values:
-            date_t = val.timestamp.replace(second=0, microsecond=0)
-            date_t+=timedelta(hours=10)
-            existing_values[key][date_t]=val.value
 
+    if data_per_shift=={}: return None
     #create dict with all minutes to now if value is not return (-1) because 0 may exist
-    time_by_minuts ={}
-    for key_m, values_m in existing_values.items():
-        start_m=start
-        time_by_minuts[key_m] = {}
-        for i in range(60*12-1):
-            time_by_minuts[key_m][start_m]= existing_values[key_m].setdefault(start_m, -1)
-            start_m+=timedelta(minutes=1)
-            if start_m>=datetime.now():
+    time_by_minuts = {}
+    for key, value in data_per_shift.items():
+        time_by_minuts[key]={}
+        time_by_minuts[key]['name'] = data_per_shift[key]['mechanism'].name
+        time_by_minuts[key]['data'] = {}
+        delta_minutes = start
+        for i in range(1, 60*12):
+            date_t =delta_minutes.strftime("%H:%M")
+            val_minute = data_per_shift[key]['data'].setdefault(delta_minutes, -1)
+            time_by_minuts[key]['data'][i]={'time':date_t, 'value':val_minute}
+            delta_minutes+=timedelta(minutes=1)
+            if delta_minutes>=datetime.now():
                 break
 
+    # for key, value in data_per_shift.items():
+    #     delta_minutes = start
+    #     for i in range(60*12-1):
+    #         date_t =delta_minutes.strftime("%H:%M")
+    #         try:
+    #             test = data_per_shift[key]['data'][date_t] # try get variable 'test'
+    #         except KeyError:
+    #             data_per_shift[key]['data'][date_t] = -1 # if it no exist
+    #         delta_minutes+=timedelta(minutes=1)
+    #         if delta_minutes>=datetime.now():
+    #             break
+
     return time_by_minuts
+
 
 
 def time_for_shift_list(date_shift, shift):
@@ -108,7 +125,7 @@ def time_for_shift_list(date_shift, shift):
         existing_values[key]={}
         for val in values:
             date_t = val.timestamp.replace(second=0, microsecond=0)
-            date_t+=timedelta(hours=10)
+            date_t+=timedelta(hours=HOURS)
             existing_values[key][date_t]=val.value
 
     #create dict with all minutes to now if value is not return (-1) because 0 may exist
@@ -127,7 +144,13 @@ def time_for_shift_list(date_shift, shift):
     return time_by_minuts
 
 
-
+# from pprint import pprint
+# date_shift, shift = today_shift_date()
+# print(date_shift, shift)
+# dd = time_for_shift(date_shift, shift)
+# ll = time_for_shift_list(date_shift, shift)
+# print(ll)
+# pprint(dd)
 
 
 

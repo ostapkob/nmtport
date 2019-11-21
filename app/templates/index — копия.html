@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block main %}
+
+<script>
+  function progress_bar(list){
+    document.write('<div class="progress">') ;
+    for (var i in list) {
+      n=list[i]
+      if (n==-1){
+        document.write('<div class="progress-bar bg-danger"  style="width: 0.139%" ></div>'); }
+      else if (n==0){
+        document.write('<div class="progress-bar bg-warning"  style="width: 0.139%"></div>'); }
+      else {
+        document.write('<div class="progress-bar"  style="width: 0.139%"></div>') ; }
+      }
+      document.write('</div>')
+    }
+    
+    var values = JSON.parse('{{  data | tojson | safe}}');
+    for (var key in values) {
+      document.write(key + '<br />');
+      progress_bar (values[key]) ;
+    }
+</script>
+{% endblock %}

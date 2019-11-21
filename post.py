@@ -21,22 +21,21 @@ data = {"password" : "super",
 head = {"Content-type": "application/json",
           "Accept": "text/plain"}
 last_sent = time.time() - 61
-# while True:
-print(time.time()- last_sent)
-if time.time() - last_sent > 60.0:
-    last_sent = time.time()
-    print(datetime.now())
-    for i in range(0, 11, 2):
-        data['mechanism_id'] =ids[i]
-        data['value']= 1 #round(random(),3)
-        jdata = json.dumps(data)
-        r = requests.post(host,data=jdata, headers=head)
-        print(i, r.status_code, r.reason, sep=' : ', end = " | ")
-    for i in range(1, 11, 2):
-        data['mechanism_id'] =ids[i]
-        data['value']= 0.099 # round(random(),3)
-        jdata = json.dumps(data)
-        r = requests.post(host,data=jdata, headers=head)
-        print(i, r.status_code, r.reason, sep=' : ', end = " | ")
-    print()
-
+while True:
+    # print(time.time()- last_sent)
+    if time.time() - last_sent > 60.0:
+        last_sent = time.time()
+        print(datetime.now())
+        for i in range(0, 11, 2):
+            data['mechanism_id'] =ids[i]
+            data['value']= round(random(),3)
+            jdata = json.dumps(data)
+            r = requests.post(host,data=jdata, headers=head)
+            print(i, r.status_code, r.reason, sep=' : ', end = " | ")
+        # for i in range(1, 11, 2):]
+        #     data['mechanism_id'] =ids[i]
+        #     data['value']= 0.099 # round(random(),3)
+        #     jdata = json.dumps(data)
+        #     r = requests.post(host,data=jdata, headers=head)
+        #     print(i, r.status_code, r.reason, sep=' : ', end = " | ")
+        print()

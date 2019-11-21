@@ -7,19 +7,20 @@ from app.form import AddMechanism
 from datetime import datetime, timedelta
 from functions import today_shift_date, all_mechanisms_id, time_for_shift, time_for_shift_list
 from sqlalchemy import func
+from pprint import pprint
 db.create_all()
+
 @app.route("/")
 @app.route("/index")
 def index():
     date_shift, shift = today_shift_date()
-    data = time_for_shift_list(date_shift, shift)
-    # data ={'firstname': "Mr.", 'lastname': "My Father's Son"}
+    data = time_for_shift(date_shift, shift)
     return render_template("index.html",
                            data=data,
-                           val=type(data),
+                           shift=shift,
+                           date_shift = date_shift
                            )
 
-# Dont work
 @app.route("/form_mech", methods=['GET', 'POST'])
 def form_mech():
     form_m = AddMechanism()
