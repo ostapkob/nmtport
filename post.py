@@ -1,15 +1,17 @@
 from datetime import datetime, timedelta
+import time
 import requests
 import json
 from random import random
 import time
 
+
 date = datetime.now()
 dt = datetime.strftime(date,  "%d.%m.%Y  %H:%M")
 # print(dt)
 
-host='http://127.0.0.1:5000/add_post'
-# host='http://35.241.126.216/add_post'
+# host='http://127.0.0.1:5000/add_post'
+host='http://35.241.126.216/add_post'
 data = {"password" : "super",
         "value" : round(random(), 3),
         "latitude"  : 42.814723,
@@ -18,12 +20,23 @@ data = {"password" : "super",
         }
 head = {"Content-type": "application/json",
           "Accept": "text/plain"}
-
+last_sent = time.time() - 59
 while True:
-    for i in range(1, 12):
-        data['mechanism_id'] =i
-        data['value']= round(random(),3)
-        jdata = json.dumps(data)
-        r = requests.post(host,data=jdata, headers=head)
-        print(i, r.status_code, r.reason, sep=' | ')
-    time.sleep(60)
+
+    if time.time() - last_sent > 60.0:
+        last_sent = time.time()
+        print(datetime.now())
+        for i in range(2, 12, 2):
+            data['mechanism_id'] =i
+            data['value']= 1 #round(random(),3)
+            jdata = json.dumps(data)
+            r = requests.post(host,data=jdata, headers=head)
+            print(i, r.status_code, r.reason, sep=' : ', end = " | ")
+        for i in range(1, 12, 2):
+            data['mechanism_id'] =i
+            data['value']= 0.099 # round(random(),3)
+            jdata = json.dumps(data)
+            r = requests.post(host,data=jdata, headers=head)
+            print(i, r.status_code, r.reason, sep=' : ', end = " | ")
+        print()
+
