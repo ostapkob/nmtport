@@ -118,7 +118,7 @@ def time_for_shift_list(date_shift, shift):
         time_by_minuts[key_m] = []
         for i in range(60*12-1):
             val_minutes = existing_values[key_m].setdefault(start_m, -1)
-            if (val_minutes  < 0.1 and val_minutes > 0): val_minutes = 0    
+            if (val_minutes  < 0.1 and val_minutes > 0): val_minutes = 0
             time_by_minuts[key_m].append(val_minutes    )
             start_m+=timedelta(minutes=1)
             if start_m>=datetime.now():

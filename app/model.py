@@ -2,12 +2,13 @@ from app import db
 from datetime import datetime, timedelta
 # from functions import multiple_5
 
+
 class Mechanism(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     company = db.Column(db.String(64), index=True)
     type = db.Column(db.String(64), index=True)
     model = db.Column(db.String(64), index=True)
-    number = db.Column(db.SmallInteger, index=True)
+    number = db.Column(db.SmallInteger, index=True)  # 32768 should be enough
     name = db.Column(db.String(64), index=True, unique=True)
     posts = db.relationship('Post', backref='mech', lazy='dynamic')
 
@@ -30,11 +31,12 @@ class Post(db.Model):
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    # multiple5= db.Column(db.DateTime)
     date_shift = db.Column(db.Date)
     shift = db.Column(db.Integer)
+    terminal = db.Column(db.SmallInteger, index=True) # this column must form by GPS
 
     def __init__(self, value, latitude, longitude, mechanism_id):
+
         hour = datetime.now().hour
         if hour >= 8 and hour < 20:
             date_shift = datetime.now()
@@ -45,17 +47,15 @@ class Post(db.Model):
         else:
             date_shift = datetime.now()
             shift = 2
+        terminal = 1 #this column must form by GPS
 
         self.value = value
         self.latitude = latitude
         self.longitude = longitude
         self.mechanism_id = mechanism_id
         self.shift = shift
-        # self.multiple5 = multiple_5(datetime.now())
         self.date_shift = date_shift
-        print(date_shift)
+        self.terminal = terminal
 
     def __repr__(self):
         return f'{self.value}'
-
-
