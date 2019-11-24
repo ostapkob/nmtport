@@ -88,6 +88,7 @@ def get_per_shift(m_id):
 @app.route("/get_mech/<int:m_id>", methods=["GET"])
 def get_mech(m_id):
     mech = Mechanism.query.get(m_id)
+    print(mech)
     return f'{mech.name}'
 
 

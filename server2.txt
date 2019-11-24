@@ -2,8 +2,7 @@
 curl -i -H "Content-Type: application/json" -X POST -d '{
 "password" : "super",
 "value" : 0.55,
-
 "latitude"  : 13,
 "longitude" : 44,
 "mechanism_id" : 32047
-}' http://localhost:5000/add_post
+}' http://35.241.126.216/add_post
