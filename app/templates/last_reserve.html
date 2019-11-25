@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block main %}
+<br>
+{% for p in posts %}
+<p>{{ p|sum(attribute='value')|round(3) if p[0] }}</p>
+{% for post in p %}
+<p>{{post.mech.id}} {{post.mech.number}} | {{post.value}} | {{moment(post.timestamp).format('lll')}} |
+{{post.latitude}} | {{post.longitude}} |  {{post.date_shift}} | {{post.shift}} </p>
+{% endfor %}
+{{ '-------------------------------------------------------------' if p[0] }}
+{% endfor %}
+{% endblock %}

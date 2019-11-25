@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block main %}
+<ul> 
+    <li> /api/v1.0/get_per_shift/<strong>mechanism's id </strong> ", methods=["GET"] </li>
+    <li> /api/v1.0/get_data/<strong>type</strong> / <strong>date shift</strong> /  <strong>number shift</strong>, methods=["GET"] </li>
+    <li> /api/v1.0/get_mech/<strong>mechanism's id</strong>, methods=["GET"] </li>
+    <li> /api/v1.0/get_post/<strong>mechanism's id</strong>, methods=["GET"] </li>
+    <li> /api/v1.0/add_post', methods=['POST'] </li>
+</ul>
+
+{% for p in ls_api %}
+{{p}} </p>
+{% endfor %}
+
+{% endblock %}

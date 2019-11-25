@@ -1,12 +1,14 @@
 {% extends "base.html" %}
 {% block main %}
-<br>
-{% for p in posts %}
-<p>{{ p|sum(attribute='value')|round(3) if p[0] }}</p>
-{% for post in p %}
-<p>{{post.mech.number}} | {{post.value}} | {{moment(post.timestamp).format('lll')}} |
-{{post.latitude}} | {{post.longitude}} |  {{post.date_shift}} | {{post.shift}} </p>
-{% endfor %}
-{{ '-------------------------------------------------------------' if p[0] }}
-{% endfor %}
+
+{% import 'bootstrap/wtf.html' as wtf %}
+
+    <h1>Register</h1>
+    <div class="row" method="post" >
+        <div class="col-md-4">
+            {{ wtf.quick_form(form) }}
+        </div>
+    </div>
+
+
 {% endblock %}

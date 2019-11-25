@@ -1,6 +1,5 @@
 from app import db
 from datetime import datetime, timedelta
-# from functions import multiple_5
 
 
 class Mechanism(db.Model):
@@ -47,8 +46,8 @@ class Post(db.Model):
         else:
             date_shift = datetime.now()
             shift = 2
-        terminal = 1 #this column must form by GPS
 
+        terminal = 1 #this column must form by GPS, may be
         self.value = value
         self.latitude = latitude
         self.longitude = longitude

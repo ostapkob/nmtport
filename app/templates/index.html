@@ -30,24 +30,17 @@ function hours(shift){
    
   function progress_bar_time(list, shift){
     document.write('<div class="progress">') ;
-    var tmp = -1;
-    var long_;
-    var start;
     for (var id in list) {
         n=list[id].value;
-        if (n!=tmp) {
-           start=list[id].time;
-        }
       if (n==-1){
-        document.write('<div class="progress-bar bg-danger" role="progressbar"  style="width: 0.139%" ></div>'); }
+        document.write('<div class="progress-bar bg-danger" role="progressbar"  style="width: 0.14%" ></div>'); }
       else if (n==0){
-        document.write('<div class="progress-bar bg-warning"  role="progressbar" style="width: 0.139%"></div>'); }
+        document.write('<div class="progress-bar bg-warning"  role="progressbar" style="width: 0.14%"></div>'); }
       else {
-        document.write('<div class="progress-bar"  role="progressbar" style="width: 0.139%"></div>') ; }
+        document.write('<div class="progress-bar"  role="progressbar" style="width: 0.14%"></div>') ; }
       }
       document.write('</div>');
     hours(shift);
-      <!-- document.write(start+'<br />'); -->
     }
 
 
@@ -93,7 +86,7 @@ function hours(shift){
 
         for (var key in valByMins) {
             document.write('<div class="h5">'+ valByMins[key].name+ ' ' );
-            document.write('<span class="badge badge-secondary"> 4.5</span></div>');
+            document.write('<span class="badge badge-secondary">' + valByMins[key].total + '</span></div>');
             progress_bar_time(valByMins[key].data, shift);
         }
 

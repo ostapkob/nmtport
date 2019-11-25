@@ -9,8 +9,8 @@ import time
 date = datetime.now()
 dt = datetime.strftime(date,  "%d.%m.%Y  %H:%M")
 # print(dt)
-ids = 32046, 32047, 32711, 32740, 32770, 32771, 32772, 32773, 32941, 32942, 33287
-host='http://127.0.0.1:5000/add_post'
+ids = 32046, 32047, 32711, 32740, 32770, 32771, 32772, 32773, 32941, 32942, 33287, 32777
+host='http://127.0.0.1:5000/api/v1.0/add_post'
 # host='http://35.241.126.216/add_post'
 data = {"password" : "super",
         "value" : round(random(), 3),
@@ -26,12 +26,12 @@ while True:
     if time.time() - last_sent > 60.0:
         last_sent = time.time()
         print(datetime.now())
-        for i in range(0, 11, 2):
+        for i in range(1, 12, 2):
             data['mechanism_id'] =ids[i]
-            data['value']= round(random(),3)
+            data['value']= 0
             jdata = json.dumps(data)
             r = requests.post(host,data=jdata, headers=head)
-            print(i, r.status_code, r.reason, sep=' : ', end = " | ")
+            print(ids[i], r.status_code, r.reason, sep=' : ', end = " | ")
         # for i in range(1, 11, 2):]
         #     data['mechanism_id'] =ids[i]
         #     data['value']= 0.099 # round(random(),3)
