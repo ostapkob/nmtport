@@ -18,7 +18,7 @@ class SelectDataShift(FlaskForm):
     type = StringField('type', validators=[Required()])
     date_shift = StringField('Date', validators=[Required()])
     # date_shift = DateField('Start Date', format='%Y-%m-%d')#, validators=(validators.Optional(),))
-    shift = StringField('Shift', validators=[DataRequired()])
-    # shift = RadioField('shift',choices= [(1, 'День'), (2, 'Ночь')] )
+    # shift = StringField('Shift', validators=[DataRequired()])
+    shift = RadioField('shift',choices= [('1', 'День'), ('2', 'Ночь')] )
 
-    submit = SubmitField('sent')
+    submit = SubmitField('Submit')

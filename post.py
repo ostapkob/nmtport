@@ -28,7 +28,7 @@ while True:
         print(datetime.now())
         for i in range(1, 12, 2):
             data['mechanism_id'] =ids[i]
-            data['value']= 0
+            data['value']= 1
             jdata = json.dumps(data)
             r = requests.post(host,data=jdata, headers=head)
             print(ids[i], r.status_code, r.reason, sep=' : ', end = " | ")

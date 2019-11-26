@@ -44,7 +44,6 @@ def show_all_mechanisms():
 @app.route("/last", methods=['GET', 'POST'])
 def last():
     form = SelectDataShift()
-    print(form.type.data, form.date_shift.data, form.shift.data,  sep=' | ')
     if form.validate_on_submit():
         date_shift= form.date_shift.data
         shift=form.shift.data
@@ -55,7 +54,6 @@ def last():
             flash('Enter correct shift')
             return redirect(url_for('index'))
         data = time_for_shift(type_mechanism, date, shift)
-        pprint(data)
         return render_template("index.html",
                             data=data,
                             shift=shift,

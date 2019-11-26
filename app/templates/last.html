@@ -3,11 +3,12 @@
 
 {% import 'bootstrap/wtf.html' as wtf %}
 
-    <h1>Register</h1>
-    <div class="row" method="post" >
-        <div class="col-md-4">
-            {{ wtf.quick_form(form) }}
+    <div class="row">
+        <form method="POST" avtion="">
+        <div class="col-md-10" >
+            {{ wtf.quick_form(form ) }}
         </div>
+    </form>
     </div>
 
 
