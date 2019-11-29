@@ -41,8 +41,8 @@ def show_all_mechanisms():
                            title='Механизмы',
                            mechs=all_mech)
 
-@app.route("/last", methods=['GET', 'POST'])
-def last():
+@app.route("/history", methods=['GET', 'POST'])
+def history():
     form = SelectDataShift()
     if form.validate_on_submit():
         date_shift= form.date_shift.data
@@ -54,14 +54,21 @@ def last():
             flash('Enter correct shift')
             return redirect(url_for('index'))
         data = time_for_shift(type_mechanism, date, shift)
-        return render_template("index.html",
+        return render_template("history.html",
                             data=data,
                             shift=shift,
-                            date_shift = date
+                            date_shift = date,
+                            form=form,
                             )
-    return render_template("last.html",
-                           form=form
-                           )
+
+    date, shift = today_shift_date()
+    data={}
+    return render_template("history.html",
+                            data=data,
+                            shift=shift,
+                            date_shift = date,
+                            form=form,
+                            )
 
 @app.route("/list_api")
 def list_api():

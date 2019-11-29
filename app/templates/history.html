@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block main %}
+
+
+{% import 'bootstrap/wtf.html' as wtf %}
+
+<div class="span4">
+    <form method="POST" avtion="">
+        {{ wtf.quick_form(form ) }}
+
+    </form>
+</div>
+<p class="date-shift"> дата: <strong>{{date_shift}} </strong>смена: <strong>{{shift}} </strong> </p>
+<script>
+    var valByMins = JSON.parse('{{  data | tojson | safe}}');
+    var shift = '{{shift}}';
+    progress_per_shift(valByMins);
+</script>
+{% endblock %}

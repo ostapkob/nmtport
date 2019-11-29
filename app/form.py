@@ -15,7 +15,7 @@ class AddMechanism(FlaskForm):
 
 class SelectDataShift(FlaskForm):
     # company = StringField('company', validators=[Required()])
-    type = StringField('type', validators=[Required()])
+    type = StringField('type', validators=[Required()], default="usm")
     date_shift = StringField('Date', validators=[Required()])
     # date_shift = DateField('Start Date', format='%Y-%m-%d')#, validators=(validators.Optional(),))
     # shift = StringField('Shift', validators=[DataRequired()])

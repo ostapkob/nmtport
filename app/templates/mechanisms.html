@@ -2,15 +2,15 @@
 {% block main %}
 <br />
 <div class="row">
-    {% for mech in mechs %}
-    <div class="col mechanism">      {{mech.id}}       </div>
-    <div class="col mechanism">      {{mech.company}}  </div>
-    <div class="col mechanism">      {{mech.type}}     </div>
-    <div class="col mechanism">      {{mech.model}}    </div>
-    <div class="col mechanism">      {{mech.number}}   </div>
-    <div class="col mechanism">      {{mech.name}}     </div>
-  <div class="w-100"></div>
-    {% endfor %}
+	{% for mech in mechs %}
+	<div class="col mechanism">      {{mech.id}}       </div>
+	<div class="col mechanism">      {{mech.company}}  </div>
+	<div class="col mechanism">      {{mech.type}}     </div>
+	<div class="col mechanism">      {{mech.model}}    </div>
+	<div class="col mechanism">      {{mech.number}}   </div>
+	<div class="col mechanism">      {{mech.name}}     </div>
+	<div class="w-100"></div>
+	{% endfor %}
 </div>
 
 {% endblock %}

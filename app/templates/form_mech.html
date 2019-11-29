@@ -1,35 +1,14 @@
 {% extends "base.html" %}
 {% block main %}
 <br>
-<form action="{{'add_mechanism'}}" method="post">
-    <table>
-        <tr>
-        <th> id </th>
-        <th> {{ form.id }}  </th>
-        </tr>
-        <tr>
-        <th> company </th>
-        <th> {{ form.company }} </th>
-        </tr>
-        <tr>
-        <th> type </th>
-        <th> {{ form.type }}  </th>
-        </tr>
-        <tr>
-        <th> model </th>
-        <th> {{ form.model }} </th>
-        </tr>
-        <tr>
-        <th> number </th>
-        <th> {{ form.number }} </th>
-        </tr>
-        <tr>
-        <th> name </th>
-        <th> {{ form.name }} </th>
-        </tr>
-    </table>
-<button type="form.btm" class="btn btn-outline-secondary">Sent</button>
-</form>
+{% import 'bootstrap/wtf.html' as wtf %}
+<div class="row">
+	<form method="POST" avtion="">
+		<div class="" >
+			{{ wtf.quick_form(form ) }}
+		</div>
+	</form>
+</div>
 
 
 {% endblock %}
