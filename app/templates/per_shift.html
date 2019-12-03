@@ -10,12 +10,10 @@
 
 	<div class="alert alert-dark" role="alert">
 		{% for el in value %}
-		| {{el.value}} {{moment(el.timestamp).format('LT')}} 
+        | {{el.value}} : {{el.latitude}} : {{el.longitude}} : {{moment(el.timestamp).format('LT')}} 
 		{% endfor %}
 	</div>
 	<hr />
 	{% endfor %}
-
-
 </dl>
 {% endblock %}

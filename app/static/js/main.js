@@ -11,11 +11,11 @@
         hs = ['08', '╵','09', '╵','10', '╵','11', '╵','12', '╵','13', '╵','14', '╵','15', '╵','16', '╵','17', '╵','18', '╵','19', '╵', '20'] }
         else {
           hs = ['20', '╵','21', '╵','22', '╵','23', '╵','00', '╵','01', '╵','02', '╵','03', '╵','04', '╵','05', '╵','06', '╵','07', '╵', '08'] }
-          document.write(' <small> <div class="d-flex justify-content-between time-mech">');
+          document.write(' <div class="d-flex justify-content-between line-mech">');
           for (var h in hs) {
-            document.write('<div class="text-center">'+hs[h]+'</div>');
+            document.write('<div class="text-center time-mech">'+hs[h]+'</div>');
           }
-          document.write(' </div> </small>');
+          document.write(' </div> ');
         }
 
         

@@ -18,7 +18,7 @@
 </head>
 <body>
 
-	<nav class="navbar navbar-expand navbar-dark bg-dark">
+<!-- 	<nav class="navbar navbar-expand navbar-dark bg-dark">
 		<a class="navbar-brand" href="/">Home</a>
 		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
 			<span class="navbar-toggler-icon"></span>
@@ -42,13 +42,36 @@
 				</li>
 			</ul>
 		</div>
-	</nav>
+	</nav> -->
 
+	<div class= "container-fluid">
+		<div class= "row">
+			<div class ="col-1 bg-light">
+			</div>
+			<div class ="col-10">
+				<header>
+					<nav>
+						<input type="checkbox" id="checkbox-menu">
+						<label for="checkbox-menu">
+							<ul class="menu touch">
+								<li><a class="today" href="/"> Today </a> </li>
+								<li><a  href="{{'history'}}"> History </a> </li>
+								<li><a href="{{'per_shift'}}"> Per-Shift </a> </li>
+								<li><a href="{{'show_all_mechanisms'}}"> Mechanisms </a> </li>
+								<li><a href="{{'form_mech'}}"> Form </a> </li>
+								<li><a href="{{'list_api'}}"> API</a> </li>
+							</ul>
+							<span class="toggle"> ☰ </span>
+						</label>
+					</nav>
+				</header>
+				{% block main %} {% endblock %}
+			</div>
+			<div class ="col-1 bg-light">
+			</div>
+		</div>
+	</div>
 
-
-  <div class="container">
-			{% block main %} {% endblock %}
-</div>  
 
 
 

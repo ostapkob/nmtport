@@ -4,16 +4,25 @@
 
 {% import 'bootstrap/wtf.html' as wtf %}
 
-<div class="span4">
-    <form method="POST" avtion="">
-        {{ wtf.quick_form(form ) }}
 
-    </form>
-</div>
+
+
+	<div class= "row">
+		<div class ="col-6">
+			<form method="POST" action="">
+				{{ wtf.quick_form(form, button_map={'submit':'outline-dark'} ) }}
+			</form>
+		</div>
+		<div class ="col-6">
+		</div>
+	</div>
+
+
 <p class="date-shift"> дата: <strong>{{date_shift}} </strong>смена: <strong>{{shift}} </strong> </p>
+
 <script>
-    var valByMins = JSON.parse('{{  data | tojson | safe}}');
-    var shift = '{{shift}}';
-    progress_per_shift(valByMins);
+	var valByMins = JSON.parse('{{  data | tojson | safe}}');
+	var shift = '{{shift}}';
+	progress_per_shift(valByMins);
 </script>
 {% endblock %}

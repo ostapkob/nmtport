@@ -65,6 +65,12 @@ def add_post():
     latitude = request_j['latitude']
     longitude = request_j['longitude']
     mechanism_id = request_j['mechanism_id']
+    if float(latitude)==0 or float(longitude)==0:
+        mech = Mechanism.query.get(mechanism_id)
+        data_mech = db.session.query(Post).filter(Post.mechanism_id == mechanism_id).first()
+        latitude =data_mech.latitude
+        longitude = data_mech.longitude
+        print(latitude, longitude)
     new_post = Post(value, latitude, longitude, mechanism_id)
     data = request.data
     db.session.add(new_post)

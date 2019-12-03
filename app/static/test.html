@@ -7,28 +7,37 @@
 
 
   <link rel="stylesheet" href='style.css'>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="assets/css/bootstrap-responsive.css" rel="stylesheet">  
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}"/>
+  <script src="{{url_for('static', filename='js/main.js')}}"></script>
 </head>
 <body>
   <br />
-  <header>
-    <nav>
-      <input type="checkbox" id="checkbox-my-menu">
-      <label for="checkbox-my-menu">
-        <ul class="my-menu touch">
-          <li><a class="logo" href="#"> Test</a> </li>
-          <li><a href="#"> Logo 1</a> </li>
-          <li><a href="#"> Test 2</a> </li>
-          <li><a href="#"> Test 3</a> </li>
-          <li><a href="#"> Test 3</a> </li>
-          <li><a href="#"> Test 3</a> </li>
-        </ul>
-        <span class="toggle"> ☰ </span>
-      </label>
-    </nav>
-  </header>
 
 
+
+     <input type="checkbox" id="checkbox-menu">
+     <label for="checkbox-menu">
+      <ul class="menu touch">
+        <li><a class="logo" href="#"> Test</a> </li>
+        <li><a href="#"> Logo 1</a> </li>
+        <li><a href="#"> Test 2</a> </li>
+        <li><a href="#"> Test 3</a> </li>
+        <li><a href="#"> Test 3</a> </li>
+        <li><a href="#"> Test 3</a> </li>
+      </ul>
+      <span class="toggle"> ☰ </span>
+    </label>
+
+
+
+
+<div class="container">
+
+  {% block main %} {% endblock %}
+</div>  
 
 
 </body>
