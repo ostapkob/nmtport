@@ -4,12 +4,9 @@
 
 {% import 'bootstrap/wtf.html' as wtf %}
 
-
-
-
 	<div class= "row">
 		<div class ="col-6">
-			<form method="POST" action="">
+			<form class="form form-horizontal" method="POST" action="">
 				{{ wtf.quick_form(form, button_map={'submit':'outline-dark'} ) }}
 			</form>
 		</div>

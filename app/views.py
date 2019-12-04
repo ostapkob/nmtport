@@ -33,6 +33,11 @@ def form_mech():
                            title='Добавить механизм',
                            form=form_m)
 
+@app.route("/vue")
+def vue():
+
+    return render_template("vue.html",
+                           title='Vue')
 
 @app.route("/show_all_mechanisms")
 def show_all_mechanisms():

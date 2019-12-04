@@ -20,7 +20,7 @@ def get_per_shift(m_id):
         stop = db.session.query(Post.timestamp).filter(Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).order_by(Post.timestamp.desc()).first()[0]
     except TypeError:
         abort(405)
-    start += timedelta(hours=10)
+    start += timedelta(hours=10) #it should be better
     stop += timedelta(hours=10)
     total = round(sum(el.value for el in data_per_shift)/60, 3)
     data = {'total': total, 'start': start, 'stop': stop}
@@ -38,6 +38,12 @@ def get_data(type_mechanism, date_shift, shift):
     data = time_for_shift(type_mechanism, date, shift)
     return jsonify(data)
 
+@app.route("/api/v1.0/all_last_data", methods=["GET"])
+def all_last_data():
+    '''get all data mechanism'''
+    last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).first() for x in all_mechanisms_id()]
+    data = {str(el.mech.number)+el.mech.type:{'id':el.mech.id, 'name':el.mech.name, 'value':el.value, 'latitude':el.latitude, 'longitude':el.longitude} for el in last_data_mech}
+    return jsonify(data)
 
 @app.route("/api/v1.0/get_mech/<int:m_id>", methods=["GET"])
 def get_mech(m_id):
