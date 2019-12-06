@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import time
 import requests
 import json
-from random import random
+from random import random, randint
 import time
 
 
@@ -14,9 +14,9 @@ host='http://127.0.0.1:5000/api/v1.0/add_post'
 # host='http://35.241.126.216/api/v1.0/add_post'
 data = {"password" : "super",
         "value" : round(random(), 3),
-        "latitude"  : 0,
-        "longitude" : 0,
-        "mechanism_id" : 2,
+        "latitude"  : 42.814722,
+        "longitude" : 132.891338,
+        "mechanism_id" : 1,
         }
 head = {"Content-type": "application/json",
           "Accept": "text/plain"}
@@ -26,9 +26,11 @@ while True:
     if time.time() - last_sent > 60.0:
         last_sent = time.time()
         print(datetime.now())
-        for i in range(1, 12, 4):
+        for i in range(0, 12, 2):
             data['mechanism_id'] =ids[i]
-            data['value']= 0.8
+            data['value']= round(random(), 2)
+            data['latitude'] = 42.814722 + randint(0, 10)
+            data['longitude'] = 42.814722 + randint(0, 10)
             jdata = json.dumps(data)
             r = requests.post(host,data=jdata, headers=head)
             print(ids[i], r.status_code, r.reason, sep=' : ', end = " | ")

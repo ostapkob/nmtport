@@ -41,7 +41,8 @@ def get_data(type_mechanism, date_shift, shift):
 @app.route("/api/v1.0/all_last_data", methods=["GET"])
 def all_last_data():
     '''get all data mechanism'''
-    last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).first() for x in all_mechanisms_id()]
+    last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(Post.timestamp.desc()).first() for x in all_mechanisms_id()]
+    # last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).first() for x in all_mechanisms_id()]
     data = {str(el.mech.number)+el.mech.type:{'id':el.mech.id, 'name':el.mech.name, 'value':el.value, 'latitude':el.latitude, 'longitude':el.longitude} for el in last_data_mech}
     return jsonify(data)
 
@@ -57,7 +58,7 @@ def add_post():
     '''add post from arduino'''
     need_keys = 'password', 'value', 'latitude', 'longitude', 'mechanism_id'
     request_j = request.json
-    # print(request_j)
+    print(request_j)
     if not request_j:
         abort(400)
     keys = [p for p in request_j.keys()]
@@ -76,7 +77,6 @@ def add_post():
         data_mech = db.session.query(Post).filter(Post.mechanism_id == mechanism_id).first()
         latitude =data_mech.latitude
         longitude = data_mech.longitude
-        print(latitude, longitude)
     new_post = Post(value, latitude, longitude, mechanism_id)
     data = request.data
     db.session.add(new_post)

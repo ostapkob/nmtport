@@ -4,7 +4,25 @@
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
 <div id="app">
+    <template v-if="status==1"> 
+        <p> 111 </p>
+    </template>
+    <template v-else-if="status==2"> 
+        <p> 222 </p>
+    </template>
+    <template v-else> 
+        <p> False </p>
+    </template>
+    <div class="border border-primary" :class="{ 'bg-warning':bg, 'text-white':tx }">texty</div>
+    <ul @click="func">
+        <li v-for="l in ls">{{ ' {{ l }} ' }}</li>
+      
+    </ul >
+    <ul class='bg-warning' @click="users[0].id=444">
+        <li v-for="l in users">{{ ' {{ l.id }} {{l.name}}' }}</li>
+    </ul>
     <div @click="get_data"> {{' {{ counter }} '}} </div>
+
     <ul class='bg-success'>
         <li v-for="el in all_data">{{ ' {{ el }}' }}</li>
     </ul>
@@ -15,10 +33,21 @@
 var app = new Vue({
   el: '#app',
   data: {
+    status: 2,
+    bg: false,
+    tx: false,
     counter: 1,
     all_data: [],
+    ls : ['one', 'two', 'three'],
+    users:[
+        {id: 11, name: 'Ostap'},
+        {id: 22, name: 'Yulia'}
+        ]
   },
     methods: {
+        func() {
+        this.ls.push('four')
+        },
         hight() {
         this.counter++;
         console.log(this.status);
@@ -29,16 +58,7 @@ var app = new Vue({
             this.all_data=response.data;
             });
         }
-    },
-mounted: function () {
-        this.$nextTick(function () {
-            window.setInterval(() => {
-                this.get_data();
-            },20000);
-        })
     }
-
-
 })
 
 </script>
