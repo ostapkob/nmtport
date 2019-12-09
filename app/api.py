@@ -43,7 +43,7 @@ def all_last_data():
     '''get all data mechanism'''
     last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(Post.timestamp.desc()).first() for x in all_mechanisms_id()]
     # last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).first() for x in all_mechanisms_id()]
-    data = {str(el.mech.number)+el.mech.type:{ 'id': el.mech.id, 'name':el.mech.name, 'value':el.value, 'latitude':el.latitude, 'longitude':el.longitude, 'time':el.timestamp} for el in last_data_mech}
+    data = {el.mech.type+str(el.mech.number):{ 'id': el.mech.id, 'name':el.mech.name, 'value':el.value, 'latitude':el.latitude, 'longitude':el.longitude, 'time':el.timestamp+timedelta(hours=10)} for el in last_data_mech}
     return jsonify(data)
 
 @app.route("/api/v1.0/get_mech/<int:m_id>", methods=["GET"])
@@ -56,9 +56,10 @@ def get_mech(m_id):
 @app.route('/api/v1.0/add_post', methods=['POST'])
 def add_post():
     '''add post from arduino'''
+    print('------')
     need_keys = 'password', 'value', 'latitude', 'longitude', 'mechanism_id'
     request_j = request.json
-    print(request_j)
+    print(request_j, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     if not request_j:
         abort(400)
     keys = [p for p in request_j.keys()]
