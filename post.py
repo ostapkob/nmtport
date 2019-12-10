@@ -10,8 +10,8 @@ date = datetime.now()
 dt = datetime.strftime(date,  "%d.%m.%Y  %H:%M")
 # print(dt)
 ids = 32046, 32047, 32711, 32740, 32770, 32771, 32772, 32773, 32941, 32942, 33287, 32777
-host='http://127.0.0.1:5000/api/v1.0/add_post'
-# host='http://35.241.126.216/api/v1.0/add_post'
+# host='http://127.0.0.1:5000/api/v1.0/add_post'
+host='http://35.241.126.216/api/v1.0/add_post'
 data = {"password" : "super",
         "value" : round(random(), 3),
         "latitude"  : 42.814722,
