@@ -5,6 +5,11 @@ h1 {
     color: #222222;
 }   
 
+.block {
+   padding-left: 3%;
+   padding-right: 3%;
+}   
+
 .mechanism {
     display: grid;  
     color: #6644cc;
@@ -88,8 +93,10 @@ body, html{
 } 
 
 .menu{
-    padding-top: 5px;
     /*padding: 0;*/
+/* padding: 5%; */
+padding-left: 3%;
+padding-right: 3%;
     margin: 0;
     height: 50px;
     display: flex;

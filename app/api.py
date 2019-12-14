@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from functions import today_shift_date, all_mechanisms_id, time_for_shift, time_for_shift_list
 from sqlalchemy import func
 from pprint import pprint
-
+from psw import post_pass
 
 @app.route("/api/v1.0/get_per_shift/<int:m_id>", methods=["GET"])
 def get_per_shift(m_id):
@@ -31,7 +31,7 @@ def get_per_shift(m_id):
 def get_data(type_mechanism, date_shift, shift):
     '''get data shift for by type of mechanism'''
     try:
-        date = datetime.strptime(date_shift, '%Y-%m-%d').date()
+        date = datetime.strptime(date_shift, '%d.%m.%Y').date()
     except ValueError:
         return make_response(jsonify({'error': 'Bad format date'}), 400)
 
@@ -59,13 +59,14 @@ def add_post():
     print('------')
     need_keys = 'password', 'value', 'latitude', 'longitude', 'mechanism_id'
     request_j = request.json
-    print(request_j, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    print(request_j, datetime.now().strftime("%d.%m.%Y %H:%M:%S"))
+
     if not request_j:
         abort(400)
     keys = [p for p in request_j.keys()]
     if not set(keys).issubset(need_keys):
         abort(400)
-    if request_j['password'] != 'super':
+    if request_j['password'] != post_pass:
         abort(403)  # need use this password in Arduino
     if request_j['mechanism_id'] not in all_mechanisms_id():
         abort(405)

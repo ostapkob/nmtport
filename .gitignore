@@ -1,3 +1,4 @@
 /venv
+/pass.py
 /__pycache__
 /nmtp-mechanisms.db
