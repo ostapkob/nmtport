@@ -17,6 +17,7 @@ def index():
     date_shift, shift = today_shift_date()
     data = time_for_shift('usm', date_shift, shift)
     # data = time_for_shift('sennebogen', date_shift, shift)
+    # date_shift = datetime.strptime(date_shift, '%d.%m.%Y').date()
     return render_template("index.html",
                            data=data,
                            shift=shift,
@@ -33,11 +34,36 @@ def form_mech():
                            title='Добавить механизм',
                            form=form_m)
 
+@app.route("/last")
+def last():
+
+    return render_template("last.html",
+                           title='Last')
+
+
+
 @app.route("/vue")
 def vue():
-
+    date_shift, shift = today_shift_date()
+    date_shift = date_shift.strftime('%d.%m.%Y')
+    type_mech = 'usm'
+    http='http://127.0.0.1:5000/api/v1.0/get_data/'
+    http+= type_mech +'/' + date_shift + '/'+ str(shift)
+    print(http)
     return render_template("vue.html",
+                           http = http,
+                           date_shift = date_shift,
+                           shift=shift,
                            title='Vue')
+
+
+
+
+
+
+
+
+
 
 @app.route("/show_all_mechanisms")
 def show_all_mechanisms():
@@ -54,7 +80,7 @@ def history():
         shift=form.shift.data
         type_mechanism=form.type.data
         try:
-            date = datetime.strptime(date_shift, '%Y-%m-%d').date()
+            date = datetime.strptime(date_shift, '%d.%m.%Y').date()
         except ValueError:
             flash('Enter correct shift')
             return redirect(url_for('index'))

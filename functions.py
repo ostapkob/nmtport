@@ -136,13 +136,10 @@ def time_for_shift_list(date_shift, shift):
     print(shift)
     return time_by_minuts
 
-
-# from pprint import pprint
 # date_shift, shift = today_shift_date()
 # print(date_shift, shift)
-# dd = time_for_shift(date_shift, shift)
+# dd = time_for_shift('usm', date_shift, shift)
 # pprint(dd)
-
 
 
 

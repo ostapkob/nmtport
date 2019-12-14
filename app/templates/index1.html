@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block main %}
+
+<p class="date-shift"> дата: <strong>{{date_shift}} </strong>смена: <strong>{{shift}} </strong> </p>
+
+<script>
+	var valByMins = JSON.parse('{{  data | tojson | safe}}');
+	var shift = '{{shift}}';
+	progress_per_shift(valByMins);
+</script>
+{% endblock %}
