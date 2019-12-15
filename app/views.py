@@ -11,6 +11,7 @@ from sqlalchemy import func
 from pprint import pprint
 db.create_all()
 
+
 @app.route("/")
 @app.route("/index")
 def index():
@@ -21,8 +22,9 @@ def index():
     return render_template("index.html",
                            data=data,
                            shift=shift,
-                           date_shift = date_shift
+                           date_shift=date_shift
                            )
+
 
 @app.route("/form_mech", methods=['GET', 'POST'])
 def form_mech():
@@ -34,6 +36,7 @@ def form_mech():
                            title='Добавить механизм',
                            form=form_m)
 
+
 @app.route("/last")
 def last():
 
@@ -41,28 +44,25 @@ def last():
                            title='Last')
 
 
+@app.route("/maps")
+def maps():
+    return render_template("maps.html",
+                           title='Maps')
+
 
 @app.route("/vue")
 def vue():
     date_shift, shift = today_shift_date()
     date_shift = date_shift.strftime('%d.%m.%Y')
     type_mech = 'usm'
-    http='http://127.0.0.1:5000/api/v1.0/get_data/'
-    http+= type_mech +'/' + date_shift + '/'+ str(shift)
+    http = 'http://127.0.0.1:5000/api/v1.0/get_data/'
+    http += type_mech + '/' + date_shift + '/' + str(shift)
     print(http)
     return render_template("vue.html",
-                           http = http,
-                           date_shift = date_shift,
+                           http=http,
+                           date_shift=date_shift,
                            shift=shift,
                            title='Vue')
-
-
-
-
-
-
-
-
 
 
 @app.route("/show_all_mechanisms")
@@ -72,13 +72,14 @@ def show_all_mechanisms():
                            title='Механизмы',
                            mechs=all_mech)
 
+
 @app.route("/history", methods=['GET', 'POST'])
 def history():
     form = SelectDataShift()
     if form.validate_on_submit():
-        date_shift= form.date_shift.data
-        shift=form.shift.data
-        type_mechanism=form.type.data
+        date_shift = form.date_shift.data
+        shift = form.shift.data
+        type_mechanism = form.type.data
         try:
             date = datetime.strptime(date_shift, '%d.%m.%Y').date()
         except ValueError:
@@ -86,42 +87,45 @@ def history():
             return redirect(url_for('index'))
         data = time_for_shift(type_mechanism, date, shift)
         return render_template("history.html",
-                            data=data,
-                            shift=shift,
-                            date_shift = date,
-                            form=form,
-                            )
+                               data=data,
+                               shift=shift,
+                               date_shift=date,
+                               form=form,
+                               )
 
     date, shift = today_shift_date()
-    data={}
+    data = {}
     return render_template("history.html",
-                            data=data,
-                            shift=shift,
-                            date_shift = date,
-                            form=form,
-                            )
+                           data=data,
+                           shift=shift,
+                           date_shift=date,
+                           form=form,
+                           )
+
 
 @app.route("/list_api")
 def list_api():
-    ls_api=dir(API)
+    ls_api = dir(API)
     return render_template("list_api.html",
                            title='Posible_api',
                            ls_api=ls_api)
+
+
 @app.route("/per_shift")
 def per_shift():
     date_shift, shift = today_shift_date()
 
-    cursor = db.session.query(Post).filter(Post.date_shift==date_shift, Post.shift==shift).order_by(Post.mechanism_id).all()
-    data_per_shift={}
+    cursor = db.session.query(Post).filter(
+        Post.date_shift == date_shift, Post.shift == shift).order_by(Post.mechanism_id).all()
+    data_per_shift = {}
     for el in cursor:
         if data_per_shift.get(el.mech.id):
             data_per_shift[el.mech.id].append(el)
         else:
-            data_per_shift[el.mech.id]=[el]
+            data_per_shift[el.mech.id] = [el]
     return render_template("per_shift.html",
                            title='За смену',
                            date_shift=date_shift,
                            shift=shift,
                            data_per_shift=data_per_shift,
                            )
-

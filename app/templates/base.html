@@ -11,37 +11,33 @@
 	<meta name="viewport" charset="utf-8" content="width=device-width, initial-scale=1.0" >
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}"/>
-    <link rel="icon" href="{{url_for('static', filename='favicon.ico')}}">
-	<script           src="{{url_for('static', filename='js/main.js')}}"></script>
+	<link rel="icon" href="{{url_for('static', filename='favicon1.ico')}}">
+	<script src="{{url_for('static', filename='js/main.js')}}"></script>
 	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
 <body>
-	<!-- <div class= "container-fluid"> -->
-	<!-- 	<div class= "row"> -->
-	<!-- 		<div class ="col-1 bg-light"> </div> -->
-	<!-- 		<div class ="col-10"> -->
-				<header>
-					<nav>
-						<input type="checkbox" id="checkbox-menu">
-						<label for="checkbox-menu">
-							<ul class="menu touch">
-								<li><a class="today" href="/"> Today </a> </li>
-								<li><a  href="{{'history'}}"> History </a> </li>
-								<!-- <li><a href="{{'per_shift'}}"> Per-Shift </a> </li> -->
-								<!-- <li><a href="{{'show_all_mechanisms'}}"> Mechanisms </a> </li> -->
-								<!-- <li><a href="{{'vue'}}"> Vue </a> </li> -->
-								<li><a href="{{'last'}}"> Last </a> </li>
-								<!-- <li><a href="{{'form_mech'}}"> Form </a> </li> -->
-								<li><a href="{{'list_api'}}"> API</a> </li>
-							</ul>
-							<span class="toggle"> ☰ </span>
-						</label>
-					</nav>
-				</header>
-    <div class="block"> 
-				{% block main %} {% endblock %}
-    </div>
+	<header>
+		<nav>
+			<input type="checkbox" id="checkbox-menu">
+			<label for="checkbox-menu">
+				<ul class="menu touch">
+					<li><a class="today" href="/"> Today </a> </li>
+					<li><a  href="{{'history'}}"> History </a> </li>
+					<!-- <li><a href="{{'per_shift'}}"> Per-Shift </a> </li> -->
+					<!-- <li><a href="{{'show_all_mechanisms'}}"> Mechanisms </a> </li> -->
+					<!-- <li><a href="{{'vue'}}"> Vue </a> </li> -->
+					<li><a href="{{'last'}}"> Last </a> </li>
+					<li><a href="{{'maps'}}"> Maps </a> </li>
+					<li><a href="{{'list_api'}}"> API</a> </li>
+				</ul>
+				<span class="toggle"> ☰ </span>
+			</label>
+		</nav>
+	</header>
+	<div class="block"> 
+		{% block main %} {% endblock %}
+	</div>
 
 
 

@@ -4,15 +4,15 @@
 
 {% import 'bootstrap/wtf.html' as wtf %}
 
-	<div class= "row">
-		<div class ="col-6">
-			<form class="form form-horizontal" method="POST" action="">
-				{{ wtf.quick_form(form, button_map={'submit':'outline-dark'} ) }}
-			</form>
-		</div>
-		<div class ="col-6">
-		</div>
+<div class= "row">
+	<div class ="col-6">
+		<form class="form form-horizontal" method="POST" action="">
+			{{ wtf.quick_form(form, button_map={'submit':'outline-dark'} ) }}
+		</form>
 	</div>
+	<div class ="col-6">
+	</div>
+</div>
 
 
 <p class="date-shift"> дата: <strong>{{date_shift}} </strong>смена: <strong>{{shift}} </strong> </p>

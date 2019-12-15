@@ -9,9 +9,5 @@ date_shift, shift = today_shift_date()
 
 dd = time_for_shift(date_shift, shift)
 pprint(dd)
-bb= time_for_shift_list(date_shift, shift)
+bb = time_for_shift_list(date_shift, shift)
 print(bb)
-
-
-
-

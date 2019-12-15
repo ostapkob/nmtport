@@ -6,8 +6,8 @@ h1 {
 }   
 
 .block {
-   padding-left: 3%;
-   padding-right: 3%;
+ padding-left: 3%;
+ padding-right: 3%;
 }   
 
 .mechanism {
@@ -72,13 +72,13 @@ h1 {
 /*===================================*/
 
 *{ 
-   padding:0; 
-   margin:0; 
-   font-family: 'Roboto Condensed', sans-serif, times new roman; 
+ padding:0; 
+ margin:0; 
+ font-family: 'Roboto Condensed', sans-serif, times new roman; 
 } 
 
 label {
-   width: 100%;
+ width: 100%;
 }
 
 nav {
@@ -93,14 +93,14 @@ body, html{
 
 #checkbox-menu, 
 .toggle { 
-   display:none; 
+ display:none; 
 } 
 
 .menu{
     /*padding: 0;*/
-/* padding: 5%; */
-padding-left: 3%;
-padding-right: 3%;
+    /* padding: 5%; */
+    padding-left: 3%;
+    padding-right: 3%;
     margin: 0;
     height: 50px;
     display: flex;

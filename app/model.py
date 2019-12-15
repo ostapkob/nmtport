@@ -32,10 +32,10 @@ class Post(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     date_shift = db.Column(db.Date)
     shift = db.Column(db.Integer)
-    terminal = db.Column(db.SmallInteger, index=True) # this column must form by GPS
+    # this column must form by GPS
+    terminal = db.Column(db.SmallInteger, index=True)
 
     def __init__(self, value, latitude, longitude, mechanism_id):
-
         hour = datetime.now().hour
         if hour >= 8 and hour < 20:
             date_shift = datetime.now()
@@ -47,7 +47,7 @@ class Post(db.Model):
             date_shift = datetime.now()
             shift = 2
 
-        terminal = 1 #this column must form by GPS, may be
+        terminal = 1  # this column must form by GPS, may be
         self.value = value
         self.latitude = latitude
         self.longitude = longitude
