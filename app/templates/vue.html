@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block main %}
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css'>
+
+<div id="app1"> 
+    <div> {{ '{{ mesage }}' }} </div>
+    <button v-on:click="mesage=666"> Click </button>
+    <div> {{ '{{ counter }}' }} </div>
+    <button v-on:click="test()"> Click1 </button>
+
+    <div class='border m-2 p-4' :class="typeJob=='list' ? 'border-success' : 'border-danger'"> 
+        <div class='form-row'>
+            <div class='form-group col-md-6'>
+                <div class='form-grop'>
+                    <input type='radio' name='type' v-model='typeJob' value='list' :cheked="typeJob == 'list'"/> List
+                    <input type='radio' name='type' v-model='typeJob' value='search' :cheked="typeJob == 'search'"/> Search
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="typeJob=='search'" class='form-grop'> 
+        <input type='text' class='form-group' name='searh' v-model="search" placeholder="Input" />
+        <label> find: </label>
+        <label v-if="search.length"> total {{'{{search.length}}'}} </label>
+        <label> total {{'{{len(search)}}'}} </label>
+    </div>
+
+</div>
+
+<script> 
+var app1 = new Vue ({
+    el:'#app1',
+    data : {
+        mesage: 'Hi',
+        counter: 0,
+        typeJob: 'list',
+        search: '',
+    },
+    methods: {
+        test: function() {
+            this.counter++
+        },
+        len(n) {return n.length},
+        lookupHashtag: function() {
+            $.ajax ({
+        }
+    },
+    watch: {
+        search: function() {
+            this.search.length >= 2 ? this.lookupHashtag() : this.hashtags = [];
+        }
+    }
+
+})
+</script>
+
+
+====================================
+
+
+
+
+
+{% endblock %}

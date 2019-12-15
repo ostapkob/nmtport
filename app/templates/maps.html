@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block main %}
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEEA8HUpeyr66BT6arigNEcKgqckkSDUg"></script>
+<div id="app">
+  from: <input type="text"  v-model="origin"/>
+  to:   <input type="text"  v-model="destination"/>
+  <iframe width="100%" height="500px" v-bind:src="src()">   </iframe>
+
+
+
+
+  <div @click="get_data"> {{' {{ counter }} '}} </div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Value</th>
+        <th scope="col">Latitude</th>
+        <th scope="col">Time</th>
+      </tr>
+    </thead>
+    <tbody> 
+      <tr scope="row" v-for="el in all_data">
+        <td>  {{ '   {{ el.name }}  '}}   </td>
+        <td>  {{ '   {{ el.value }}  '}}   </td>
+        <td>     
+          <a :href="'https://www.google.ru/maps/place/'+el.latitude+','+el.longitude"> {{'{{el.latitude}}'}}, {{' {{el.longitude}}'}} </a>
+        </td> 
+        <td>  {{ '   {{ parse(el.time)  }} '}}   </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+
+
+
+<script>
+  var app = new Vue({
+    el: '#app',
+    data: {
+      url:"https://www.google.com/maps/embed/v1/directions?key=AIzaSyDEEA8HUpeyr66BT6arigNEcKgqckkSDUg",
+      origin: 'Nakhodka',
+      destination: 'Vladivostok', 
+      counter: 3,
+      all_data: [],
+      http : ['http://127.0.0.1:5000/api/v1.0/all_last_data', 'http://35.241.126.216/api/v1.0/all_last_data']
+    },
+    methods: {
+        src: function() {
+            return this.url+"&origin="+this.origin+"&destination="+this.destination
+        },
+
+
+      hight() {
+        this.counter++;
+        console.log(this.status);
+      },
+      get_data() {
+        axios.get(this.http[0]).then((response) => {
+          console.log(response.data);
+          this.all_data=response.data;
+        });
+      },
+      parse(n) {
+        return n;
+      }
+
+    },
+    mounted: function () {
+      this.$nextTick(function () {
+        window.setInterval(() => {
+          this.get_data();
+        },5000);
+      })
+    },
+
+    created: function () {
+      this.get_data();
+    },
+
+  })
+
+</script>
+
+
+{% endblock %}

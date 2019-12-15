@@ -15,8 +15,11 @@ class AddMechanism(FlaskForm):
 
 class SelectDataShift(FlaskForm):
     # company = StringField('company', validators=[Required()])
-    type = StringField('', validators=[Required()], default="usm",  render_kw={'class':'form-control','style':'font-size:100%'})
+    type = StringField('', validators=[Required()], default="usm",  render_kw={
+                       'class': 'form-control', 'style': 'font-size:100%'})
     date_shift = StringField('', validators=[Required()], render_kw={})
-    # date_shift = DateField('Start Date', format='%Y-%m-%d')#, validators=(validators.Optional(),))-control
-    shift = RadioField('shift',choices= [('1', 'День'), ('2', 'Ночь')],  render_kw={'class':'form-control','style':'font-size:100%'} )
+    # date_shift = DateField('Start Date', format='%Y-%m-%d')#,
+    # validators=(validators.Optional(),))-control
+    shift = RadioField('shift', choices=[('1', 'День'), ('2', 'Ночь')],  render_kw={
+                       'class': 'form-control', 'style': 'font-size:100%'})
     submit = SubmitField('Show', validators=[Required()])

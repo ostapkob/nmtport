@@ -10,19 +10,23 @@ from sqlalchemy import func
 from pprint import pprint
 from psw import post_pass
 
+
 @app.route("/api/v1.0/get_per_shift/<int:m_id>", methods=["GET"])
 def get_per_shift(m_id):
     '''get data for this shift by id mechanism'''
     date_shift, shift = today_shift_date()
-    data_per_shift = db.session.query(Post).filter( Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).all()
+    data_per_shift = db.session.query(Post).filter(
+        Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).all()
     try:
-        start = db.session.query(Post.timestamp).filter( Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).first()[0]
-        stop = db.session.query(Post.timestamp).filter(Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).order_by(Post.timestamp.desc()).first()[0]
+        start = db.session.query(Post.timestamp).filter(
+            Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).first()[0]
+        stop = db.session.query(Post.timestamp).filter(Post.date_shift == date_shift, Post.shift ==
+                                                       shift, Post.mechanism_id == m_id).order_by(Post.timestamp.desc()).first()[0]
     except TypeError:
         abort(405)
-    start += timedelta(hours=10) #it should be better
+    start += timedelta(hours=10)  # it should be better
     stop += timedelta(hours=10)
-    total = round(sum(el.value for el in data_per_shift)/60, 3)
+    total = round(sum(el.value for el in data_per_shift) / 60, 3)
     data = {'total': total, 'start': start, 'stop': stop}
     return jsonify(data)
 
@@ -38,13 +42,17 @@ def get_data(type_mechanism, date_shift, shift):
     data = time_for_shift(type_mechanism, date, shift)
     return jsonify(data)
 
+
 @app.route("/api/v1.0/all_last_data", methods=["GET"])
 def all_last_data():
     '''get all data mechanism'''
-    last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(Post.timestamp.desc()).first() for x in all_mechanisms_id()]
+    last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
+        Post.timestamp.desc()).first() for x in all_mechanisms_id()]
     # last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).first() for x in all_mechanisms_id()]
-    data = {el.mech.type+str(el.mech.number):{ 'id': el.mech.id, 'name':el.mech.name, 'value':el.value, 'latitude':el.latitude, 'longitude':el.longitude, 'time':el.timestamp+timedelta(hours=10)} for el in last_data_mech}
+    data = {el.mech.type + str(el.mech.number): {'id': el.mech.id, 'name': el.mech.name, 'value': el.value, 'latitude': el.latitude,
+                                                 'longitude': el.longitude, 'time': el.timestamp + timedelta(hours=10)} for el in last_data_mech}
     return jsonify(data)
+
 
 @app.route("/api/v1.0/get_mech/<int:m_id>", methods=["GET"])
 def get_mech(m_id):
@@ -52,6 +60,7 @@ def get_mech(m_id):
     mech = Mechanism.query.get(m_id)
     print(mech)
     return f'{mech.name}'
+
 
 @app.route('/api/v1.0/add_post', methods=['POST'])
 def add_post():
@@ -74,10 +83,11 @@ def add_post():
     latitude = request_j['latitude']
     longitude = request_j['longitude']
     mechanism_id = request_j['mechanism_id']
-    if float(latitude)==0 or float(longitude)==0:
+    if float(latitude) == 0 or float(longitude) == 0:
         mech = Mechanism.query.get(mechanism_id)
-        data_mech = db.session.query(Post).filter(Post.mechanism_id == mechanism_id).first()
-        latitude =data_mech.latitude
+        data_mech = db.session.query(Post).filter(
+            Post.mechanism_id == mechanism_id).first()
+        latitude = data_mech.latitude
         longitude = data_mech.longitude
     new_post = Post(value, latitude, longitude, mechanism_id)
     data = request.data
@@ -117,6 +127,8 @@ def add_mechanism():
     # return data
 
 # may be not use
+
+
 @app.route('/api/v1.0/add_mech_json', methods=['POST'])
 def add_mechanism_json():
     id = request.json['id']
