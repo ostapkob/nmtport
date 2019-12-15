@@ -26,12 +26,12 @@ while True:
     if time.time() - last_sent > 60.0:
         last_sent = time.time()
         print(datetime.now())
-        for i in range(1, 12, 2):
+        for i in range(0, 12, 1):
             data['mechanism_id'] =ids[i]
             # data['value']= round(random(), 2)
-            data['value']= 0
-            data['latitude'] = 42.814722 + randint(0, 10)
-            data['longitude'] = 42.814722 + randint(0, 10)
+            data['value']= 1
+            data['latitude'] = 42.8153 
+            data['longitude'] = 132.8905 
             jdata = json.dumps(data)
             r = requests.post(host,data=jdata, headers=head)
             print(ids[i], r.status_code, r.reason, sep=' : ', end = " | ")

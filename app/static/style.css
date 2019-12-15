@@ -53,6 +53,10 @@ h1 {
 }
 
 .line-mech{
+    display: flex;
+    justify-content: space-between;
+    align-content: left;
+    /* background: #cccccc; */
     border-bottom-style: solid;
     border-width: 1px;
     border-bottom-color: #cfcfce;
