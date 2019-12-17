@@ -4,15 +4,18 @@
 #include<stdio.h>
 #include<string.h>
 
-// Rx of GSM —> pin 9 of Arduino | Tx of GSM –> pin 8 of Arduino
-SoftwareSerial SimSerial(8, 9);
+SoftwareSerial SimSerial(8, 9); // Rx of GSM —> pin 9 (Tx) of Arduino | //Tx of GSM –> pin 8 (Rx) of Arduino
 
-String const mechanism_id = "32770"; //id number mechanism
 unsigned long timer, timerSent;
 String data[6], dataGPS, POST, statusSim;
 String latitude, longitude;
+String const mechanism_id = "32770";
 int count, sum;
 float  result;
+
+//helper variable
+boolean flag = true;
+
 
 void setup() {
   Serial.begin(9600);
@@ -22,13 +25,14 @@ void setup() {
   turnOnGPS();
   //  updateSerial();
   registrationSim();
+  //  updateSerial();
   pinMode (lever, INPUT_PULLUP);
   pinMode(led, OUTPUT);
-  ArduinoToSim("AT+GSMBUSY=1", 1000); //Reject incoming call
-  //  ArduinoToSim("ATE0", 1000);// echo
 }
 
+
 void loop() {
+
   if (millis() - timer > 100 ) {
     timer = millis();
     count ++;
@@ -40,18 +44,28 @@ void loop() {
       digitalWrite(led, 0);
     }
   }
+
   if (millis() - timerSent > 60000 ) {
     timerSent = millis();
-    statusShield();
-    dataGPS = sendData("AT + CGPSINF=2", 1000);
+    statusSim = sendData("AT", 500);
+    Serial.println(statusSim);
+    dataGPS = sendData("AT + CGPSINF=2", 2000);
     ParseGPS(dataGPS);
+    //    Serial.println("====================");
+    //    Serial.println("<<<<" + dataGPS + ">>>>");
+    //    Serial.println(latitude);
+    //    Serial.println(longitude);
+    //    Serial.println("====================");
     result = (float)sum / (float)count;
     count = 0;
     sum = 0;
     POST = "{\"password\":\"super\",\"value\":" + String(result) + ",\"latitude\":" + latitude + ",\"longitude\":" + longitude + ",\"mechanism_id\":" + mechanism_id + "}";
     sentPost(POST);
+    GET();
+    //    Serial.println(POST);
   }
 }
+
 
 void turnOnShield() {
   digitalWrite(11, HIGH);
@@ -60,13 +74,25 @@ void turnOnShield() {
   delay(3000); // give time to register Sim online
 }
 
-void statusShield() { // if Shild is turn of then turn on
-  updateSerial(); // clear Serial
-  statusSim = sendData("AT", 500);
-  if (statusSim.indexOf("OK") < 0) {
-    turnOnShield();
-    turnOnGPS();
-    registrationSim();
+void splitBuffer (String buffer, char simbol) {
+  int j = 0;
+  for (int x = 0; x < 6; x++) {
+    data[x] = "";
+  }
+  for (int i = 0; i < buffer.length(); i++) {
+    boolean flag = true; // flag to remove 0 at the beginning
+    if (buffer[i] == ',') {
+      j++;
+    }
+    else {
+      if (buffer[i] == '0' && flag) {
+        continue;
+      }
+      else {
+        data[j] += buffer[i];
+        flag = false;
+      }
+    }
   }
 }
 
@@ -78,16 +104,43 @@ void ParseGPS(String str) {
   v3 = str.indexOf(",", v2 + 1);
   v4 = str.indexOf(",", v3 + 1);
   v5 = str.indexOf(",", v4 + 1);
+
   latitude = str.substring(v2 + 3, v3);
   longitude = str.substring(v4 + 3, v5);
   if (latitude == "00.0000") {
-    latitude = "0"; // because server gets it how last data
+    latitude = "0";
     longitude = "0";
   }
 }
 
 
-String sendData (String command , const int timeout) { // sent data to serial port return ansver
+
+
+void statusGPRS (String buffer) {
+  int j = 0;
+  String dataIP[4];
+  for (int x = 0; x < 3; x++) {
+    dataIP[x] = "";
+  }
+  for (int i = 0; i < buffer.length(); i++) {
+    if (buffer[i] == ',') {
+      j++;
+    }
+    dataIP[j] += buffer[i];
+  }
+  Serial.println(dataIP[2]);
+}
+
+
+void GET() {
+  ArduinoToSim("AT+HTTPPARA=\"CID\",1", 100);
+  ArduinoToSim("AT+HTTPPARA=\"URL\", \"http://35.241.126.216/api/v1.0/get_mech/32772\"", 100);
+  ArduinoToSim("AT+HTTPACTION=0", 100);
+  ArduinoToSim("AT+HTTPREAD", 100);
+  ArduinoToSim("AT+HTTPTERM", 100);
+}
+
+String sendData (String command , const int timeout) {
   String response = "";
   SimSerial.println(command);
   long int time = millis();
@@ -102,6 +155,7 @@ String sendData (String command , const int timeout) { // sent data to serial po
 }
 
 void turnOnGPS() {
+  ArduinoToSim("AT", 1000);
   ArduinoToSim("AT + CGPSPWR=1", 1000);
   ArduinoToSim("AT + CGPSRST=2", 1000); // 1 HOT; 2 WARM
   ArduinoToSim("AT + CGPSINF=2", 1000);
@@ -109,18 +163,24 @@ void turnOnGPS() {
   ArduinoToSim("AT + CGPSSTATUS?", 1000);
 }
 
+
+
+
+
 void registrationSim() {
-  ArduinoToSim("AT", 100); // Status Shild
-  ArduinoToSim("AT+CSQ", 100); //Signal quality test, 0-31
-  ArduinoToSim("AT+CCID", 100); // SIM card information
-  ArduinoToSim("AT+CIPSHUT", 100); //Break all connections
-  ArduinoToSim("AT+CGATT=1", 100); // GPRS attach or deatach
-  ArduinoToSim("AT+CREG?", 100); // is module in network
-  ArduinoToSim("AT+SAPBR = 3,1, \"CONTYPE\", \"GPRS\"", 1000);
+  ArduinoToSim("AT", 100);
+  ArduinoToSim("AT+CSQ", 100);
+  ArduinoToSim("AT+CCID", 100);
+  ArduinoToSim("AT + CIPSHUT", 100);
+  ArduinoToSim("AT+CGATT=1", 100);
+  ArduinoToSim("AT + CREG?", 100);
+  ArduinoToSim("AT + SAPBR = 3,1, \"CONTYPE\", \"GPRS\"", 1000);
   ArduinoToSim("AT+SAPBR=3,1,\"APN\",\"internet.mts.ru\"", 1000);
   ArduinoToSim("AT+SAPBR=1,1", 2000);
   ArduinoToSim("AT+SAPBR=2,1", 1000);
+  ArduinoToSim("AT+SAPBR=2,1", 1000);
   ArduinoToSim("AT+HTTPINIT", 1000);
+
 }
 
 void sentPost(String msg) {
@@ -134,13 +194,15 @@ void sentPost(String msg) {
   ArduinoToSim("AT+HTTPTERM", 100);
 }
 
-void ArduinoToSim(String command, const int wait) { //it is more comfortable
+void ArduinoToSim(String command, const int wait) {
   SimSerial.println(command);
   delay(wait);
 }
 
-void updateSerial() { //message view function
-  delay(500);
+void updateSerial()
+//message view function
+{
+  delay(1000);
   while (Serial.available())
   {
     SimSerial.write(Serial.read());
@@ -149,14 +211,4 @@ void updateSerial() { //message view function
   {
     Serial.write(SimSerial.read());
   }
-}
-
-
-
-void GET() { //not use
-  ArduinoToSim("AT+HTTPPARA=\"CID\",1", 100);
-  ArduinoToSim("AT+HTTPPARA=\"URL\", \"http://35.241.126.216/api/v1.0/get_mech/32772\"", 100);
-  ArduinoToSim("AT+HTTPACTION=0", 100);
-  ArduinoToSim("AT+HTTPREAD", 100);
-  ArduinoToSim("AT+HTTPTERM", 100);
 }
