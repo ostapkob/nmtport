@@ -63,24 +63,26 @@ def get_mech(m_id):
 
 @app.route('/api/v1.0/add_get', methods=['GET'])
 def add_get():
-    password = request.args.get('password')
-    if password != post_pass:
-        return 'Bad password'
     mechanism_id = request.args.get('mechanism_id')
-    if int(mechanism_id) not in all_mechanisms_id():
-        return 'Not this id'
+    password = request.args.get('password')
     value = request.args.get('value')
     latitude = request.args.get('latitude')
     longitude = request.args.get('longitude')
-    test=   request.args.get('test')
+    items = mechanism_id, password, value, latitude, longitude
+    test_items = any([item==None for item in items])
+    print(items, test_items)
+    if test_items:
+        return 'Bad request'
+    if password != post_pass:
+        return 'Bad password'
+    if int(mechanism_id) not in all_mechanisms_id():
+        return 'Not this id'
     if float(latitude) == 0 or float(longitude) == 0:
         mech = Mechanism.query.get(mechanism_id)
         data_mech = db.session.query(Post).filter(
         Post.mechanism_id == mechanism_id).first()
         latitude = data_mech.latitude
         longitude = data_mech.longitude
-    items = (mechanism_id, value, latitude, longitude)
-    print(items)
     new_post = Post(value, latitude, longitude, mechanism_id)
     data = request.data
     db.session.add(new_post)
