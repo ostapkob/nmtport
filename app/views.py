@@ -44,9 +44,9 @@ def last():
                            title='Last')
 
 
-@app.route("/maps")
+@app.route("/map")
 def maps():
-    return render_template("maps.html",
+    return render_template("map.html",
                            title='Maps')
 
 
