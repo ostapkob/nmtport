@@ -33,39 +33,3 @@
                 document.write('</div>');
                 hours(shift);
               }
-
-  // function progress_bar_time_test(list, shift){
-  //   document.write('<div class="progress">') ;
-  //   var tmp = -1;
-  //   var lengthBar=0;
-  //   var start=0;
-  //   var count=0;
-
-  //   for (var id in list) {
-  //       n=list[id].value;
-
-  //       if (n!=tmp) {
-  //          tmp=n;
-  //          start=list[id].time;
-  
-  //           <!-- document.write(lengthBar+' | '); --> 
-  //           if (n==-1){
-  //               document.write('<div class="progress-bar bg-danger" role="progressbar"  style="width:'+ lengthBar+ '%" ></div>'); }
-  //           else if (n==0){
-  //               document.write('<div class="progress-bar bg-warning"  role="progressbar" style="width:'+lengthBar + '%"></div>'); }
-  //           else {
-  //               document.write('<div class="progress-bar"  role="progressbar" style="width:' + lengthBar +'%"></div>') ; }
-  //           lengthBar=0;
-  //           }
-  //       else {
-  //           count++;
-  //           lengthBar+=0.139;
-  //       }
-  //   }
-  //   document.write('</div>');
-  //   hours(shift);
-  //   tmp = -1;
-  //   lengthBar=0;
-  //   start=0;
-  //   count=0;
-  //   }

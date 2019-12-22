@@ -17,6 +17,8 @@
 
 <p class="date-shift"> дата: <strong>{{date_shift}} </strong>смена: <strong>{{shift}} </strong> </p>
 
+	<script src="{{url_for('static', filename='js/main.js')}}"></script>
+
 <script>
 	var valByMins = JSON.parse('{{  data | tojson | safe}}');
 	var shift = '{{shift}}';

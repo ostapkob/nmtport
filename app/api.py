@@ -9,6 +9,7 @@ from functions import today_shift_date, all_mechanisms_id, time_for_shift, time_
 from sqlalchemy import func
 from pprint import pprint
 from psw import post_pass
+from datetime import datetime
 
 
 @app.route("/api/v1.0/get_per_shift/<int:m_id>", methods=["GET"])
@@ -52,6 +53,38 @@ def all_last_data():
     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id, 'name': el.mech.name, 'value': el.value, 'latitude': el.latitude,
                                                  'longitude': el.longitude, 'time': el.timestamp + timedelta(hours=10)} for el in last_data_mech}
     return jsonify(data)
+
+@app.route("/api/v1.0/all_last_data_ico", methods=["GET"])
+def all_last_data_ico():
+    '''get all data mechanism'''
+    last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
+    Post.timestamp.desc()).first() for x in all_mechanisms_id()]
+    data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
+                                                 'name': el.mech.name,
+                                                 'value': el.value, 
+                                                 'latitude': el.latitude,
+                                                 'longitude': el.longitude,
+                                                 # 'src': './static/numbers/usm/empty/'+str(el.mech.number)+'.png', 
+                                                 'src': image_mechanism(el.value, el.mech.type, el.mech.number, el.timestamp+ timedelta(hours=10)), 
+                                                 'time': el.timestamp + timedelta(hours=10)} for el in last_data_mech}
+    return jsonify(data)
+
+
+def image_mechanism(value, type_mechanism, number, last_time):
+    dt = datetime.now()- last_time
+    dt =dt.seconds / 60
+    print(type_mechanism, number,datetime.now(), last_time,'================', dt)
+    if dt > 40.0:
+        return './static/numbers/'+str(type_mechanism)+'/notwork/'+str(number)+'.png'
+    if dt > 2.0:
+        return './static/numbers/'+str(type_mechanism)+'/off/'+str(number)+'.png'
+    if value<0.1:
+        return './static/numbers/'+str(type_mechanism)+'/empty/'+str(number)+'.png'
+    else:
+        return './static/numbers/'+str(type_mechanism)+'/full/'+str(number)+'.png'
+
+
+
 
 
 @app.route("/api/v1.0/get_mech/<int:m_id>", methods=["GET"])

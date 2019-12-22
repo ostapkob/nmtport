@@ -1,6 +1,7 @@
 import requests
 from requests.exceptions import HTTPError
 from psw import post_pass
+import time
 
 class Mechanism:
     def __init__(self, mechanism_id, value, latitude, longitude):
@@ -55,19 +56,25 @@ if __name__ == "__main__":
     U10 =Mechanism(32942, 0,42.8144,132.8913)
     E11 =Mechanism(33287, 0,42.8152,132.8910)
     Sen1 =Mechanism(32777, 0,42.8147,132.8913)
+    mechanisms=Pt1, Pt2, E3, S5, S6, S7, S8,  U10, E11
+    flag = True
+    lat= 0.0001
+    lng=-0.0001
+    last_sent = time.time() - 61
+    while True:
+        if time.time() - last_sent > 60.0:
+            last_sent = time.time()
+            [m.chenge_value(1) for m in mechanisms]
+            Pt1.chenge_value(0)
+            [m.chenge_position(lat, lng) for m in mechanisms]
+            [m.send_get_request() for m in mechanisms]
 
-    mechanisms=Pt1, Pt2, E3, E4, S5, S6, S7, S8, U9, U10, E11
-
-    Pt1.chenge_value(1)
-    Pt1.chenge_position(0.0001, -0.0001)
-    Pt1.show()
-    # Pt1.send_get_request()
-
-    [m.chenge_value(1) for m in mechanisms]
-    [m.chenge_position(0.0001, -0.0001) for m in mechanisms]
-    [m.send_get_request() for m in mechanisms]
-
-
-
-
+            if flag:
+                lat= 0.0001
+                lng=-0.0001
+                flag=False
+            else:
+                lat=-0.0001
+                lng= 0.0001
+                flag=True
 

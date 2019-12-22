@@ -2,7 +2,7 @@
     el: '#app',
     data: {
         counter: 3,
-        text: ' This is sample string to show trim method. ',
+        text: 'This is the latest data for each mechanism',
         all_data: [],
         http : ['http://127.0.0.1:5000/api/v1.0/all_last_data', 'http://35.241.126.216/api/v1.0/all_last_data']
     },
