@@ -10,6 +10,7 @@
         shift: '',
         date_shift: '',
         hs:[],
+        http: ['http://127.0.0.1:5000/api/v1.0/get_data/usm/', 'http://35.241.126.216/api/v1.0/get_data/usm/'],
     },
     methods: {
         hight() {
@@ -38,7 +39,9 @@
                 this.date_shift= today.getDate()+'.'+(today.getMonth()+1)+'.'+today.getFullYear();
                 this.shift=2
             }
-            this.api='http://127.0.0.1:5000/api/v1.0/get_data/usm/'+this.date_shift+'/'+this.shift
+
+            this.api=this.http[1]+this.date_shift+'/'+this.shift //think
+
             if (this.shift==1) {
                 this.hs = ["║",  "╵", "09",  "╵", "10",  "╵", "11",  "╵", "12",  "╵", "13",  "╵", "14",  "╵", "15",  "╵", "16",  "╵", "17",  "╵", "18",  "╵", "19",  "╵",  "║"] }
                 else {
