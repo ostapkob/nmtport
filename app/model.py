@@ -22,6 +22,8 @@ class Mechanism(db.Model):
     def __repr__(self):
         return f'<{self.name}>'
 
+    
+
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
