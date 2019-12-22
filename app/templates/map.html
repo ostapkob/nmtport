@@ -1,36 +1,51 @@
 {% extends "base.html" %}
 {% block main %}
-<style>
-#map {
-    height: 700px;
-}
-</style>
-
-<div id="map"></div>
-
-<script>
-let  p='ee';
-url = '/api/v1.0/all_last_data';
-items = [];
-function getData() {
-    return axios.get(url).then(response => {return response}, console.log( "Error response")) }
-p=getData();
-console.log(p.then());
-p.then(data=> {console.log('Prom', data.data)})
-p.then(data=> {items= data.data})
-
-console.log(items);
 
 
 
+  <div id="root">
+    <google-map   :center="{lat: 42.812881, lng: 132.889579}" :zoom="16"  style="width: 100%; height: 800px" >
 
 
-setTimeout(()=> {console.log('run...')}, 6000)
-setInterval(()=> {console.log('Go...')}, 6000)
 
-</script>
+    <google-marker
+        v-for="(item, index) in all_data"
+        :key="index"
+        :position="{lat: item.latitude, lng: item.longitude}"
+        :title="item.name"
+        :icon="item.src"
+        @click="center = item.position"
+        >
+    </google-marker>
 
-<script src="{{url_for('static', filename='js/mechanisms_map.js')}}">
-</script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEEA8HUpeyr66BT6arigNEcKgqckkSDUg&callback=initMap" async defer></script>
+	<google-poligon 
+		v-for="el in poligons"
+		:paths="el.paths"
+        :stroke-color="el.stroke-color" 
+        :stroke-opacity="el.stroke-opacity"
+        :stroke-weight="el.stroke-weight"
+        :fill-color="el.fill-color"
+        :fill-opacity="el.fill-opacity"
+        >
+	</google-poligon> 
+
+    </google-map>
+
+  </div>
+  <hr />
+  <div>
+    <ul>
+        <li>  <img src={{ url_for('static', filename='numbers/usm/green/1.png') }}> Уголь есть на ленте </li>
+        <li>  <img src={{ url_for('static', filename='numbers/usm/yellow/1.png') }}> Угля нет на ленте </li>
+        <li>  <img src={{ url_for('static', filename='numbers/usm/red/1.png') }}> Нет питания 3 минуты</li>
+        <li>  <img src={{ url_for('static', filename='numbers/usm/gray/1.png') }}> Нет питаня 2 часа</li>
+    </ul>
+  </div>
+
+<script  src="{{url_for('static', filename='js/vue-google-maps.js')}}"></script>
+<script  src="{{url_for('static', filename='js/app_map.js')}}"></script>
+
+
+
+
 {% endblock %}

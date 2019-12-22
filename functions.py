@@ -101,6 +101,18 @@ def time_for_shift(type_mechanism, date_shift, shift):
                 break
     return time_by_minuts
 
+def image_mechanism(value, type_mechanism, number, last_time):
+    dt = datetime.now()- last_time
+    dt =dt.seconds / 60
+    if dt > 120.0:
+        return './static/numbers/'+str(type_mechanism)+'/gray/'+str(number)+'.png'
+    if dt > 2.0:
+        return './static/numbers/'+str(type_mechanism)+'/red/'+str(number)+'.png'
+    if value<0.1:
+        return './static/numbers/'+str(type_mechanism)+'/yellow/'+str(number)+'.png'
+    else:
+        return './static/numbers/'+str(type_mechanism)+'/green/'+str(number)+'.png'
+
 
 # not use
 def time_for_shift_list(date_shift, shift):
