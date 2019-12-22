@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         methods: {
             get_data() {
-                axios.get(this.http[0]).then((response) => {
+                axios.get(this.http[1]).then((response) => {
                     this.all_data = response.data;
                 });
             },
