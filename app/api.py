@@ -40,7 +40,6 @@ def get_data(type_mechanism, date_shift, shift):
         date = datetime.strptime(date_shift, '%d.%m.%Y').date()
     except ValueError:
         return make_response(jsonify({'error': 'Bad format date'}), 400)
-
     data = time_for_shift(type_mechanism, date, shift)
     return jsonify(data)
 
@@ -57,7 +56,7 @@ def all_last_data():
 
 @app.route("/api/v1.0/all_last_data_ico", methods=["GET"])
 def all_last_data_ico():
-    '''get all data mechanism'''
+    '''get all data mechanism and mechanism state'''
     last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
     Post.timestamp.desc()).first() for x in all_mechanisms_id()]
     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
@@ -79,6 +78,7 @@ def get_mech(m_id):
 
 @app.route('/api/v1.0/add_get', methods=['GET'])
 def add_get():
+    '''add post by GET request from arduino'''
     mechanism_id = request.args.get('mechanism_id')
     password = request.args.get('password')
     value = request.args.get('value')
@@ -96,7 +96,7 @@ def add_get():
     if float(latitude) == 0 or float(longitude) == 0:
         mech = Mechanism.query.get(mechanism_id)
         data_mech = db.session.query(Post).filter(
-        Post.mechanism_id == mechanism_id).first()
+        Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
         latitude = data_mech.latitude
         longitude = data_mech.longitude
     new_post = Post(value, latitude, longitude, mechanism_id)
@@ -105,12 +105,9 @@ def add_get():
     db.session.commit()
     return str(items)
 
-
-
-
 @app.route('/api/v1.0/add_post', methods=['GET', 'POST'])
 def add_post():
-    '''add post from arduino'''
+    '''add post by POST request from arduino'''
     print(request.method)
     need_keys = 'password', 'value', 'latitude', 'longitude', 'mechanism_id'
     request_j = request.json
@@ -131,10 +128,10 @@ def add_post():
         mechanism_id = request_j['mechanism_id']
         if float(latitude) == 0 or float(longitude) == 0:
             mech = Mechanism.query.get(mechanism_id)
-            data_mech = db.session.query(Post).filter(
-                Post.mechanism_id == mechanism_id).first()
+            data_mech = db.session.query(Post).filter(Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
             latitude = data_mech.latitude
             longitude = data_mech.longitude
+            print('--->', latitude, longitude, )
     elif request.method=='GET':
         print('==', request)
         text = request.args
@@ -179,10 +176,10 @@ def add_mechanism():
     return redirect("http://localhost:5000/show_all_mechanisms", code=301)
     # return data
 
-# may be not use
 
 
 @app.route('/api/v1.0/add_mech_json', methods=['POST'])
+# may be not use
 def add_mechanism_json():
     id = request.json['id']
     company = request.json['company']
