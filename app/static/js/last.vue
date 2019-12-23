@@ -7,12 +7,8 @@
         http : ['http://127.0.0.1:5000/api/v1.0/all_last_data', 'http://35.241.126.216/api/v1.0/all_last_data']
     },
     methods: {
-        hight() {
-            this.counter++;
-            console.log(this.status);
-        },
         get_data() {
-            axios.get(this.http[1]).then((response) => {
+            axios.get(this.http[0]).then((response) => {
                 this.all_data=response.data;
             });
         },
