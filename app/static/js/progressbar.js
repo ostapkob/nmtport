@@ -17,12 +17,25 @@
             this.counter++;
             console.log(this.status);
         },
-        getData() {
-            axios.get(this.api).then((response) => {
-                console.log(response.data);
-                this.all_data=response.data;
-            });
+        // getData() {
+        //     axios.get(this.api).then((response) => {
+        //         console.log(response.data);
+        //         this.all_data=response.data;
+        //     }) ;
+        // },
+
+
+        getData () {
+        this.$http.get('/api/v1.0/get_data/usm/'+this.date_shift+'/'+this.shift).then(response => {
+            this.all_data = response.body
+        }, response => {
+            console.log('response err')
+        });
         },
+
+
+
+
         getNow: function() {
             let hour;
             const today = new Date();
@@ -40,7 +53,7 @@
                 this.shift=2
             }
 
-            this.api=this.http[1]+this.date_shift+'/'+this.shift //think
+            // this.api=this.http[0]+this.date_shift+'/'+this.shift //think
 
             if (this.shift==1) {
                 this.hs = ["║",  "╵", "09",  "╵", "10",  "╵", "11",  "╵", "12",  "╵", "13",  "╵", "14",  "╵", "15",  "╵", "16",  "╵", "17",  "╵", "18",  "╵", "19",  "╵",  "║"] }
@@ -56,6 +69,8 @@
             },10000);
         })
     },
+
+    function() {this.getData();},
 
     created: function () {
         this.getNow();
