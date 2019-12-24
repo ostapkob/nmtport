@@ -81,20 +81,27 @@ document.addEventListener('DOMContentLoaded', function() {
             ],
         },
         methods: {
-            get_data() {
-                axios.get(this.http[1]).then((response) => {
-                    this.all_data = response.data;
+            getData () {
+                this.$http.get('/api/v1.0/all_last_data_ico').then(response => {
+                    this.all_data = response.body
+                }, response => {
+                    console.log('response err')
                 });
             },
+            // get_data() {
+            //     axios.get(this.http[1]).then((response) => {
+            //         this.all_data = response.data;
+            //     });
+            // },
         },
         created: function() {
-            this.get_data();
+            this.getData();
         },
 
         mounted: function() {
             this.$nextTick(function() {
                 window.setInterval(() => {
-                    this.get_data();
+                    this.getData();
                 }, 5000);
             })
         },
