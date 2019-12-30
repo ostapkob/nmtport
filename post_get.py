@@ -56,7 +56,7 @@ if __name__ == "__main__":
     U10 =Mechanism(32942, 0,42.8144,132.8913)
     E11 =Mechanism(33287, 0,42.8152,132.8910)
     Sen1 =Mechanism(32777, 0,42.8147,132.8913)
-    mechanisms=Pt1, Pt2, E3, E4, S5,  S8, U10, E11
+    mechanisms=Pt1, Pt2, E3, E4, S5, S6,  S7,  S8, U9,  U10, E11
 
     flag = True
     lat= 0.0001
