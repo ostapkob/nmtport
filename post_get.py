@@ -2,6 +2,7 @@ import requests
 from requests.exceptions import HTTPError
 from psw import post_pass
 import time
+from datetime import datetime
 
 class Mechanism:
     def __init__(self, mechanism_id, value, latitude, longitude):
@@ -28,7 +29,7 @@ class Mechanism:
         except Exception as err:
             print(f'Other error occurred: {err}')  # Python 3.6
         else:
-            print('Success!')
+            print('Success!', datetime.now())
 
     def show(self):
         print(self.mechanism_id, self.password, self.value, self.latitude, self.longitude)
@@ -56,7 +57,7 @@ if __name__ == "__main__":
     U10 =Mechanism(32942, 0,42.8144,132.8913)
     E11 =Mechanism(33287, 0,42.8152,132.8910)
     Sen1 =Mechanism(32777, 0,42.8147,132.8913)
-    mechanisms=Pt1, Pt2, E3, E4, S5, S6,  S7,  S8, U9,  U10, E11
+    mechanisms=Pt1, Pt2, E3, E4, S5,  S6,  S7,  S8, U9,  U10, E11, Sen1
 
     flag = True
     lat= 0.0001
@@ -66,8 +67,8 @@ if __name__ == "__main__":
         if time.time() - last_sent > 60.0:
             last_sent = time.time()
             [m.chenge_value(1) for m in mechanisms]
-            E3.chenge_value(0)
-            E4.chenge_value(0)
+            # E3.chenge_value(0)
+            E4.chenge_value(1)
             [m.chenge_position(lat, lng) for m in mechanisms]
             [m.send_get_request() for m in mechanisms]
 

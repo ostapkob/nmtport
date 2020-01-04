@@ -6,7 +6,10 @@
     <p class="date-shift"> дата: <strong>{{ '{{date_shift }}' }} </strong>смена: <strong>{{ '{{shift}}' }} </strong> </p>
     <div scope="row" v-for="el in all_data">
         <div class="name-mech">  {{ '   {{ el.name }}  '}}   
-            <span class="badge badge-secondary">  {{ '   {{ el.total }}  '}} </span></div>
+            <span class="badge badge-secondary">  {{ '   {{ el.total }}  '}} </span>
+            <span class='time-start-finish text-right'> start<strong> {{'{{el.start }} '}}</strong> 
+             finish<strong> {{'{{el.finish }} '}} </strong> </span>
+        </div>
             <div class="progress">
                 <div v-for="minute in el.data" class="progress-bar" role="progressbar"
                 style="width: 0.1388%"   :class="{ 'bg-warning':minute.value==0, 'bg-danger':minute.value==-1}"></div>

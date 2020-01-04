@@ -30,10 +30,6 @@ def all_number(type, number):
     '''Need to do then'''
     return [m.id for m in Mechanism.query.all()]
 
-# def in_hours(n):
-#     return round(n/60, 3)
-
-
 def multiple_5(date):
     '''Return time multiple 5 minutes and remite microseconds'''
     global HOURS
@@ -42,7 +38,6 @@ def multiple_5(date):
     mul5 = date.minute - date.minute % 5
     date_n = date.replace(minute=mul5, second=0, microsecond=0)
     return date_n
-
 
 def time_for_shift(type_mechanism, date_shift, shift):
     '''get dict with all minute's values for the period, name and total'''
@@ -82,6 +77,8 @@ def time_for_shift(type_mechanism, date_shift, shift):
     # 0 may exist
     time_by_minuts = {}
     for key, value in data_per_shift.items():
+        flag_start=True
+        flag_finish = True
         time_by_minuts[key] = {}
         time_by_minuts[key]['name'] = data_per_shift[key]['mechanism'].name
         # translate hours into minutes and round
@@ -91,15 +88,20 @@ def time_for_shift(type_mechanism, date_shift, shift):
         delta_minutes = start
         for i in range(1, 60 * 12 + 1):
             date_t = delta_minutes.strftime("%H:%M")
-            val_minute = data_per_shift[key][
-                'data'].setdefault(delta_minutes, -1)
-            time_by_minuts[key]['data'][i] = {
-                'time': date_t, 'value': val_minute}
+            val_minute = data_per_shift[key]['data'].setdefault(delta_minutes, -1)
+            time_by_minuts[key]['data'][i] = {'time': date_t, 'value': val_minute}
             delta_minutes += timedelta(minutes=1)
             today_date, today_shift = today_shift_date()
+            if val_minute>0 and flag_start:
+                time_by_minuts[key]['start'] = date_t
+                flag_start =False
+            if val_minute > 0:
+                time_by_minuts[key]['finish'] = date_t
             if delta_minutes >= datetime.now() and date_shift == today_date and today_shift == shift:
                 break
     return time_by_minuts
+
+
 
 def image_mechanism(value, type_mechanism, number, last_time):
     dt = datetime.now()- last_time
@@ -159,10 +161,13 @@ def time_for_shift_list(date_shift, shift):
             start_m += timedelta(minutes=1)
             if start_m >= datetime.now():
                 break
-    print(shift)
     return time_by_minuts
 
 # date_shift, shift = today_shift_date()
 # print(date_shift, shift)
 # dd = time_for_shift('usm', date_shift, shift)
 # pprint(dd)
+
+
+
+

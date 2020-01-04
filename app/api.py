@@ -41,6 +41,7 @@ def get_data(type_mechanism, date_shift, shift):
     except ValueError:
         return make_response(jsonify({'error': 'Bad format date'}), 400)
     data = time_for_shift(type_mechanism, date, shift)
+
     return jsonify(data)
 
 
@@ -50,8 +51,12 @@ def all_last_data():
     last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
         Post.timestamp.desc()).first() for x in all_mechanisms_id()]
     # last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).first() for x in all_mechanisms_id()]
-    data = {el.mech.type + str(el.mech.number): {'id': el.mech.id, 'name': el.mech.name, 'value': el.value, 'latitude': el.latitude,
-                                                 'longitude': el.longitude, 'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
+    data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
+                                                 'name': el.mech.name,
+                                                 'value': el.value,
+                                                 'latitude': el.latitude,
+                                                 'longitude': el.longitude,
+                                                 'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
     return jsonify(data)
 
 @app.route("/api/v1.0/all_last_data_ico", methods=["GET"])
