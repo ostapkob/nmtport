@@ -52,6 +52,12 @@ h1 {
     font-size: .8em;
 }
 
+.time-start-finish{
+    margin-left:5px;
+    font-weight:normal;
+    color: #555;    
+    font-size: .7em;
+}
 .line-mech{
     display: flex;
     justify-content: space-between;

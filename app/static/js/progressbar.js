@@ -1,22 +1,16 @@
  var app = new Vue({
     el: '#app',
     data: {
-        timestamp: "",
-        counter: 4,
-        test: true,
         all_data: [],
-        http : jshttp,
-        api : '',
         shift: '',
         date_shift: '',
         hs:[],
-        http: ['http://127.0.0.1:5000/api/v1.0/get_data/usm/', 'http://35.241.126.216/api/v1.0/get_data/usm/'],
     },
     methods: {
-        hight() {
-            this.counter++;
-            console.log(this.status);
-        },
+        // hight() {
+        //     this.counter++;
+        //     console.log(this.status);
+        // },
         // getData() {
         //     axios.get(this.api).then((response) => {
         //         console.log(response.data);

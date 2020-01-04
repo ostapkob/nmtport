@@ -2,9 +2,67 @@
 from datetime import datetime, timedelta
 from app import db
 from app.model import Mechanism, Post
+from functions import today_shift_date
+
 # db.create_all()
+# m = Mechanism(32046, company='nmtp', type='usm', model='PowerTrack', number=1, name='PowerTrack-1')
+# db.session.add(m)
+# m = Mechanism(32047, company='nmtp', type='usm', model='PowerTrack', number=2, name='PowerTrack-2')
+# db.session.add(m)
+# m = Mechanism(32711, company='nmtp', type='usm', model='Edge', number=3, name='Edge-3')
+# db.session.add(m)
+# m = Mechanism(32740, company='nmtp', type='usm', model='Edge', number=4, name='Edge-4')
+# db.session.add(m)
+# m = Mechanism(32770, company='nmtp', type='usm', model='Screen', number=5, name='Screen-5')
+# db.session.add(m)
+# m = Mechanism(32771, company='nmtp', type='usm', model='Screen', number=6, name='Screen-6')
+# db.session.add(m)
+# m = Mechanism(32772, company='nmtp', type='usm', model='Screen', number=7, name='Screen-7')
+# db.session.add(m)
+# m = Mechanism(32773, company='nmtp', type='usm', model='Screen', number=8, name='Screen-8')
+# db.session.add(m)
+# m = Mechanism(32941, company='nmtp', type='usm', model='Electric', number=9, name='Electric-9')
+# db.session.add(m)
+# m = Mechanism(32942, company='nmtp', type='usm', model='Electric', number=10, name='Electric-10')
+# db.session.add(m)
+# m = Mechanism(33287, company='nmtp', type='usm', model='Edge', number=11, name='Edge-11')
+# db.session.add(m)
+# m = Mechanism(32777, company='nmtp', type='sennebogen', model='860', number=1, name='Sennebogen-1')
+# db.session.add(m)
+# db.session.commit()
+# a = [mech.id for mech in Mechanism.query.all()]
+# print(a)
+
+m_id = 32047
+print(datetime.now())
+now = datetime.utcnow() - timedelta(seconds=6200)
+print(now)
+print('------------')
+# p = Post(value=0.99, latitude=23, longitude=12, mechanism_id=m_id, timestamp=now)
+p = Post(value=0.99, latitude=23, longitude=12, mechanism_id=m_id) #, timestamp=now)
+db.session.add(p)
+db.session.commit()
+print (p.timestamp)
+
+date_shift, shift = today_shift_date()
+
+data_per_shift = db.session.query(Post).filter(
+        Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).all()
+for el in data_per_shift:
+    print(el.value, el.timestamp)
+
+
+
+# start = db.session.query(Post.timestamp).filter(Post.mechanism_id == 32046).first()
+# ss = db.session.query(Post).filter(Post.mechanism_id == 32046).order_by(Post.timestamp.desc()).first()
+# print(start.value, start.timestamp)
+# p1 = Post(body="post from john", author=u1, timestamp=now + timedelta(seconds=1))
 
 # u = User(username='maloy', email='maloy888@yandex.ru')
+
+
+
+
 # db.session.add(u)
 # db.session.commit()
 
@@ -17,34 +75,6 @@ from app.model import Mechanism, Post
 # p = Post(title='lin', body='yes')
 # c1.posts.append(p)
 # db.session.add(c2)
-
-
-m = Mechanism(32046, company='nmtp', type='usm', model='PowerTrack', number=1, name='PowerTrack-1')
-db.session.add(m)
-m = Mechanism(32047, company='nmtp', type='usm', model='PowerTrack', number=2, name='PowerTrack-2')
-db.session.add(m)
-m = Mechanism(32711, company='nmtp', type='usm', model='Edge', number=3, name='Edge-3')
-db.session.add(m)
-m = Mechanism(32740, company='nmtp', type='usm', model='Edge', number=4, name='Edge-4')
-db.session.add(m)
-m = Mechanism(32770, company='nmtp', type='usm', model='Screen', number=5, name='Screen-5')
-db.session.add(m)
-m = Mechanism(32771, company='nmtp', type='usm', model='Screen', number=6, name='Screen-6')
-db.session.add(m)
-m = Mechanism(32772, company='nmtp', type='usm', model='Screen', number=7, name='Screen-7')
-db.session.add(m)
-m = Mechanism(32773, company='nmtp', type='usm', model='Screen', number=8, name='Screen-8')
-db.session.add(m)
-m = Mechanism(32941, company='nmtp', type='usm', model='Electric', number=9, name='Electric-9')
-db.session.add(m)
-m = Mechanism(32942, company='nmtp', type='usm', model='Electric', number=10, name='Electric-10')
-db.session.add(m)
-m = Mechanism(33287, company='nmtp', type='usm', model='Edge', number=11, name='Edge-11')
-db.session.add(m)
-# m = Mechanism(32777, company='nmtp', type='sennebogen', model='860', number=1, name='Sennebogen-1')
-# db.session.add(m)
-db.session.commit()
-
 # print(User.query.all())
 # p = Post(value=0.5, latitude=23, longitude=12, mechanism_id=32046) #, timestamp=dt)
 # print(User.query.filter_by(username='potap').first())
@@ -59,8 +89,6 @@ db.session.commit()
 # print(c1.posts)
 
 # print(c1.posts)
-a = [mech.id for mech in Mechanism.query.all()]
-print(a)
 # posts = Post.query.all()
 # posts = Mechanism.query.all()
 # for p in posts:

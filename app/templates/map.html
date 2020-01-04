@@ -6,8 +6,6 @@
   <div id="root">
     <google-map   :center="{lat: 42.812881, lng: 132.889579}" :zoom="16"  style="width: 100%; height: 800px" >
 
-
-
     <google-marker
         v-for="(item, index) in all_data"
         :key="index"
@@ -21,11 +19,6 @@
 	<google-poligon 
 		v-for="el in poligons"
 		:paths="el.paths"
-        :stroke-color="el.stroke-color" 
-        :stroke-opacity="el.stroke-opacity"
-        :stroke-weight="el.stroke-weight"
-        :fill-color="el.fill-color"
-        :fill-opacity="el.fill-opacity"
         >
 	</google-poligon> 
 
@@ -35,10 +28,10 @@
   <hr />
   <div>
     <ul>
-        <li>  <img src={{ url_for('static', filename='numbers/usm/green/1.png') }}> Уголь есть на ленте </li>
-        <li>  <img src={{ url_for('static', filename='numbers/usm/yellow/1.png') }}> Угля нет на ленте </li>
-        <li>  <img src={{ url_for('static', filename='numbers/usm/red/1.png') }}> Нет питания 3 минуты</li>
-        <li>  <img src={{ url_for('static', filename='numbers/usm/gray/1.png') }}> Нет питаня 2 часа</li>
+        <li> <em> <img src={{ url_for('static', filename='numbers/usm/green/1.png') }}> Уголь есть на ленте </em> </li>
+        <li> <em> <img src={{ url_for('static', filename='numbers/usm/yellow/1.png') }}> Угля нет на ленте </em> </li>
+        <li> <em> <img src={{ url_for('static', filename='numbers/usm/red/1.png') }}> Нет питания 3 минуты </em></li>
+        <li> <em> <img src={{ url_for('static', filename='numbers/usm/gray/1.png') }}> Нет питаня 2 часа </em></li>
     </ul>
   </div>
 

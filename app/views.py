@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import request, json, jsonify, abort, make_response
-from flask import render_template, flash, redirect, url_for
+from flask import render_template, flash, redirect, url_for, send_from_directory
 from app import db, app
 from app.model import Mechanism, Post
 from app.form import AddMechanism, SelectDataShift
@@ -9,6 +9,9 @@ from functions import today_shift_date, all_mechanisms_id, time_for_shift, time_
 import app.api as API
 from sqlalchemy import func
 from pprint import pprint
+import os
+
+
 db.create_all()
 
 
@@ -25,6 +28,9 @@ def index():
                            date_shift=date_shift
                            )
 
+@app.route('/favicon.ico')
+def favicon():
+	return send_from_directory(os.path.join(app.root_path, 'static'),'favicon.ico')
 
 @app.route("/form_mech", methods=['GET', 'POST'])
 def form_mech():
