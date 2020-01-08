@@ -23,6 +23,7 @@ def index():
     # data = time_for_shift('sennebogen', date_shift, shift)
     # date_shift = datetime.strptime(date_shift, '%d.%m.%Y').date()
     return render_template("index.html",
+                           title='Мониторинг',
                            data=data,
                            shift=shift,
                            date_shift=date_shift
@@ -56,19 +57,19 @@ def maps():
                            title='Maps')
 
 
-@app.route("/vue")
-def vue():
-    date_shift, shift = today_shift_date()
-    date_shift = date_shift.strftime('%d.%m.%Y')
-    type_mech = 'usm'
-    http = 'http://127.0.0.1:5000/api/v1.0/get_data/'
-    http += type_mech + '/' + date_shift + '/' + str(shift)
-    print(http)
-    return render_template("vue.html",
-                           http=http,
-                           date_shift=date_shift,
-                           shift=shift,
-                           title='Vue')
+# @app.route("/vue")
+# def vue():
+#     date_shift, shift = today_shift_date()
+#     date_shift = date_shift.strftime('%d.%m.%Y')
+#     type_mech = 'usm'
+#     http = 'http://127.0.0.1:5000/api/v1.0/get_data/'
+#     http += type_mech + '/' + date_shift + '/' + str(shift)
+#     print(http)
+#     return render_template("vue.html",
+#                            http=http,
+#                            date_shift=date_shift,
+#                            shift=shift,
+#                            title='Vue')
 
 
 @app.route("/show_all_mechanisms")
@@ -117,21 +118,21 @@ def list_api():
                            ls_api=ls_api)
 
 
-@app.route("/per_shift")
-def per_shift():
-    date_shift, shift = today_shift_date()
+# @app.route("/per_shift")
+# def per_shift():
+#     date_shift, shift = today_shift_date()
 
-    cursor = db.session.query(Post).filter(
-        Post.date_shift == date_shift, Post.shift == shift).order_by(Post.mechanism_id).all()
-    data_per_shift = {}
-    for el in cursor:
-        if data_per_shift.get(el.mech.id):
-            data_per_shift[el.mech.id].append(el)
-        else:
-            data_per_shift[el.mech.id] = [el]
-    return render_template("per_shift.html",
-                           title='За смену',
-                           date_shift=date_shift,
-                           shift=shift,
-                           data_per_shift=data_per_shift,
-                           )
+#     cursor = db.session.query(Post).filter(
+#         Post.date_shift == date_shift, Post.shift == shift).order_by(Post.mechanism_id).all()
+#     data_per_shift = {}
+#     for el in cursor:
+#         if data_per_shift.get(el.mech.id):
+#             data_per_shift[el.mech.id].append(el)
+#         else:
+#             data_per_shift[el.mech.id] = [el]
+#     return render_template("per_shift.html",
+#                            title='За смену',
+#                            date_shift=date_shift,
+#                            shift=shift,
+#                            data_per_shift=data_per_shift,
+#                            )
