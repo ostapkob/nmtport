@@ -81,6 +81,18 @@ def get_mech(m_id):
     print(mech)
     return f'{mech.name}'
 
+def add_post(post):
+    ''' I use it fix because arduino sometimes accumulates an extra minute '''
+    dt_seconds =  (post.timestamp -last.timestamp).seconds
+    if dt_seconds < 200: # whatever the difference is not big
+        last_minute =  last.timestamp.minute
+        post_minute =  post.timestamp.minute
+        dt_minutes = post_minute - last_minute
+        if dt_minutes == 2 or dt_minutes == -58:
+            post.timestamp -= timedelta(seconds=30)
+    db.session.add(post)
+    db.session.commit()
+
 @app.route('/api/v1.0/add_get', methods=['GET'])
 def add_get():
     '''add post by GET request from arduino'''
@@ -105,9 +117,10 @@ def add_get():
         latitude = data_mech.latitude
         longitude = data_mech.longitude
     new_post = Post(value, latitude, longitude, mechanism_id)
-    data = request.data
-    db.session.add(new_post)
-    db.session.commit()
+    # data = request.data
+    # db.session.add(new_post)
+    # db.session.commit()
+    add_post(new_post)
     return str(items)
 
 @app.route('/api/v1.0/add_post', methods=['GET', 'POST'])

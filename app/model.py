@@ -65,3 +65,8 @@ class Post(db.Model):
 
     def __repr__(self):
         return f'{self.value}'
+
+    def add_post(self):
+        print(super().get_tables_for_bind())
+        # print(super().)
+

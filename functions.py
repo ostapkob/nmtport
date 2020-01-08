@@ -163,6 +163,14 @@ def time_for_shift_list(date_shift, shift):
                 break
     return time_by_minuts
 
+def add_post(post):
+    # new_post = Post(value, latitude, longitude, mechanism_id)
+    print(post)
+    # print(post.value, post.latitude)
+    # db.session.add(new_post)
+    # db.session.commit()
+
+
 # date_shift, shift = today_shift_date()
 # print(date_shift, shift)
 # dd = time_for_shift('usm', date_shift, shift)

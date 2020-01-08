@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta
 from app import db
 from app.model import Mechanism, Post
-from functions import today_shift_date
+from functions import today_shift_date, add_post
 
 # db.create_all()
 # m = Mechanism(32046, company='nmtp', type='usm', model='PowerTrack', number=1, name='PowerTrack-1')
@@ -34,18 +34,32 @@ from functions import today_shift_date
 # print(a)
 
 m_id = 32047
-print(datetime.now())
 now = datetime.utcnow() - timedelta(seconds=6200)
-print(now)
-print('------------')
 # p = Post(value=0.99, latitude=23, longitude=12, mechanism_id=m_id, timestamp=now)
-p = Post(value=0.99, latitude=23, longitude=12, mechanism_id=m_id) #, timestamp=now)
-db.session.add(p)
-db.session.commit()
-print (p.timestamp)
+post = Post(value=0.99, latitude=23, longitude=12, mechanism_id=m_id) #, timestamp=now)
+last = db.session.query(Post).filter(Post.mechanism_id==post.mechanism_id).order_by(Post.timestamp.desc()).first()
+
+# db.session.add(post)
+# db.session.commit()
+
+def add_post(post):
+    ''' I use it fix because arduino sometimes accumulates an extra minute '''
+    dt_seconds =  (post.timestamp -last.timestamp).seconds
+    if dt_seconds < 200: # whatever the difference is not big
+        last_minute =  last.timestamp.minute
+        post_minute =  post.timestamp.minute
+        dt_minutes = post_minute - last_minute
+        if dt_minutes == 2 or dt_minutes == -58:
+            post.timestamp -= timedelta(seconds=30)
+    db.session.add(post)
+    db.session.commit()
+
+add_post(post)
+
+
 
 date_shift, shift = today_shift_date()
-
+print('------------')
 data_per_shift = db.session.query(Post).filter(
         Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).all()
 for el in data_per_shift:
