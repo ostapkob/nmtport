@@ -50,7 +50,7 @@ void loop() {
     }
   }
 
-  if (millis() - timerSent > 60000 ) {
+  if (millis() - timerSent >= 60000 ) {
     timerSent = millis();
     statusShield();
     dataGPS = sendData("AT + CGPSINF=2", 2000);
@@ -67,14 +67,17 @@ void loop() {
   }
 }
 
+void(* resetFunc) (void) = 0;
 
 void statusShield() { // if Shild is turn of then turn on
   updateSerial(); // clear Serial
   statusSim = sendData("AT", 500);
   if (statusSim.indexOf("OK") < 0) {
-    turnOnShield();
-    turnOnGPS();
-    registrationSim();
+
+    resetFunc();
+//    turnOnShield();
+//    turnOnGPS();
+//    registrationSim();
   }
 }
 

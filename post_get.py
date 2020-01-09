@@ -57,14 +57,15 @@ if __name__ == "__main__":
     U10 =Mechanism(32942, 0,42.8144,132.8913)
     E11 =Mechanism(33287, 0,42.8152,132.8910)
     Sen1 =Mechanism(32777, 0,42.8147,132.8913)
-    mechanisms=Pt1, Pt2, E3, E4, S5,  S6,  S7,  S8, U9,  U10, E11, Sen1
+    # mechanisms=Pt1, Pt2, E3, E4, S5,  S6,  S7,  S8, U9,  U10, E11, Sen1
+    mechanisms=Pt1,
 
     flag = True
     lat= 0.0001
     lng=-0.0001
     last_sent = time.time() - 61
     while True:
-        if time.time() - last_sent > 60.0:
+        if time.time() - last_sent >= 60.0:
             last_sent = time.time()
             [m.chenge_value(1) for m in mechanisms]
             # E3.chenge_value(0)
