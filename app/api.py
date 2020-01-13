@@ -102,6 +102,9 @@ def add_get():
     value = request.args.get('value')
     latitude = request.args.get('latitude')
     longitude = request.args.get('longitude')
+    if latitude == '':
+        latitude = 0
+        longitude = 0
     items = mechanism_id, password, value, latitude, longitude
     test_items = any([item==None for item in items])
     print(items, test_items)
@@ -122,7 +125,7 @@ def add_get():
     # db.session.add(new_post)
     # db.session.commit()
     add_fix_post(new_post)
-    return str(items)
+    return str(items)+ str(datetime.now())
 
 @app.route('/api/v1.0/add_post', methods=['GET', 'POST'])
 def add_post():

@@ -8,7 +8,7 @@
 SoftwareSerial SimSerial(8, 9); 
 
 unsigned long timer, timerSent;
-String data[6], dataGPS, POST, GET, statusSim;
+String data[6], dataGPS, POST, GET, statusSim, statusGet;
 String latitude, longitude;
 String const ip_addr = "http://35.241.126.216";
 String const api = "/api/v1.0/add_get?";
@@ -81,6 +81,8 @@ void statusShield() { // if Shild is turn of then turn on
   }
 }
 
+
+
 void turnOnShield() {
   digitalWrite(11, HIGH);
   delay(1000);
@@ -113,7 +115,12 @@ void sentGet(String msg) {
   ArduinoToSim("AT+HTTPPARA=\"CID\",1", 100);
   ArduinoToSim(add_get, 100);
   ArduinoToSim("AT+HTTPACTION=0", 100);
-  ArduinoToSim("AT+HTTPREAD", 100);
+//  ArduinoToSim("AT+HTTPREAD", 100);
+  updateSerial();
+  statusGet = sendData("AT+HTTPREAD", 100);
+  Serial.print("========");
+  Serial.print(statusGet);
+  Serial.println("========");
   ArduinoToSim("AT+HTTPTERM", 100);
 }
 
