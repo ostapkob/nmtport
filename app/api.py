@@ -105,9 +105,10 @@ def add_get():
     if latitude == '':
         latitude = 0
         longitude = 0
+        print('fix-->', end=' ')
     items = mechanism_id, password, value, latitude, longitude
     test_items = any([item==None for item in items])
-    print(items, test_items)
+    print(items, datetime.now(), not test_items)
     if test_items:
         return 'Bad request'
     if password != post_pass:
