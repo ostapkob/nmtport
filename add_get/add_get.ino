@@ -1,24 +1,28 @@
 #include <SoftwareSerial.h>
-#define lever 12
+#define lever 2
 #define led  13
+#define onShield  12
 #include<stdio.h>
 #include<string.h>
 
-// Rx of GSM —> pin 9 of Arduino | Tx of GSM –> pin 8 of Arduino
-SoftwareSerial SimSerial(8, 9); 
+
+// Tx of GSM –> pin 5 of Arduino |  Rx of GSM —> pin 6 of Arduino 
+SoftwareSerial SimSerial(5, 6); //TX RX
 
 unsigned long timer, timerSent;
-String data[6], dataGPS, POST, GET, statusSim, statusGet;
+String data[6], dataGPS, POST, GET, statusSim;
 String latitude, longitude;
 String const ip_addr = "http://35.241.126.216";
 String const api = "/api/v1.0/add_get?";
-String const mechanism_id = "32772";
+String const mechanism_id = "32046";
 int count, sum;
 float  result;
 
+
+
 //helper variable
 boolean flag = true;
-
+int testLed = 6; 
 
 void setup() {
   Serial.begin(9600);
@@ -31,6 +35,7 @@ void setup() {
   //  updateSerial();
   pinMode (lever, INPUT_PULLUP);
   pinMode(led, OUTPUT);
+    pinMode (testLed, OUTPUT);
     ArduinoToSim("AT+GSMBUSY=1", 1000); //Reject incoming call
   //  ArduinoToSim("ATE0", 1000);// echo
 }
@@ -81,12 +86,10 @@ void statusShield() { // if Shild is turn of then turn on
   }
 }
 
-
-
 void turnOnShield() {
-  digitalWrite(11, HIGH);
+  digitalWrite(onShield, HIGH);
   delay(1000);
-  digitalWrite(11, LOW);
+  digitalWrite(onShield, LOW);
   delay(3000); // give time to register Sim online
 }
 
@@ -115,12 +118,7 @@ void sentGet(String msg) {
   ArduinoToSim("AT+HTTPPARA=\"CID\",1", 100);
   ArduinoToSim(add_get, 100);
   ArduinoToSim("AT+HTTPACTION=0", 100);
-//  ArduinoToSim("AT+HTTPREAD", 100);
-  updateSerial();
-  statusGet = sendData("AT+HTTPREAD", 100);
-  Serial.print("========");
-  Serial.print(statusGet);
-  Serial.println("========");
+  ArduinoToSim("AT+HTTPREAD", 100);
   ArduinoToSim("AT+HTTPTERM", 100);
 }
 
@@ -195,4 +193,14 @@ void updateSerial()
   {
     Serial.write(SimSerial.read());
   }
+}
+
+
+
+
+
+void LED () {
+  digitalWrite (testLed, HIGH);
+  delay(1000);
+  digitalWrite (testLed, LOW);
 }
