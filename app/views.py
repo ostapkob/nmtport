@@ -5,7 +5,7 @@ from app import db, app
 from app.model import Mechanism, Post
 from app.form import AddMechanism, SelectDataShift
 from datetime import datetime, timedelta
-from functions import today_shift_date, all_mechanisms_id, time_for_shift, time_for_shift_list
+from functions import today_shift_date, all_mechanisms_id, time_for_shift, handle_date
 import app.api as API
 from sqlalchemy import func
 from pprint import pprint
@@ -80,20 +80,21 @@ def show_all_mechanisms():
                            mechs=all_mech)
 
 
-@app.route("/history", methods=['GET', 'POST'])
-def history():
+
+@app.route("/archive", methods=['GET', 'POST'])
+def archive():
     form = SelectDataShift()
     if form.validate_on_submit():
-        date_shift = form.date_shift.data
+        date = handle_date(form.date_shift.data)
         shift = form.shift.data
         type_mechanism = form.type.data
-        try:
-            date = datetime.strptime(date_shift, '%d.%m.%Y').date()
-        except ValueError:
-            flash('Enter correct shift')
-            return redirect(url_for('index'))
+        # try:
+        #     date = datetime.strptime(date_shift, '%d.%m.%Y').date()
+        # except ValueError:
+        #     flash('Enter correct shift')
+        #     return redirect(url_for('index'))
         data = time_for_shift(type_mechanism, date, shift)
-        return render_template("history.html",
+        return render_template("archive.html",
                                data=data,
                                shift=shift,
                                date_shift=date,
@@ -102,7 +103,7 @@ def history():
 
     date, shift = today_shift_date()
     data = {}
-    return render_template("history.html",
+    return render_template("archive.html",
                            data=data,
                            shift=shift,
                            date_shift=date,

@@ -1,7 +1,9 @@
     function progress_per_shift(data) {
       for (var key in data) {
         document.write('<div class="name-mech">'+ valByMins[key].name+ '  ' );
-        document.write('<span class="badge badge-secondary">' + valByMins[key].total + '</span></div>');
+        document.write('<span class="badge badge-secondary">' + valByMins[key].total + '</span>');
+        document.write('<span class="time-start-finish text-right"> start <strong>' + valByMins[key].start + '</strong> </span>');
+        document.write('<span class="time-start-finish text-right"> finish <strong>' + valByMins[key].finish + '</strong> </span></div>');
         progress_bar_time(valByMins[key].data, shift); 
       }
     }

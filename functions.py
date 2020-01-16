@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from flask import render_template, flash
 from app.model import Post, Mechanism
 from app import db
 from pprint import pprint
@@ -162,6 +163,26 @@ def time_for_shift_list(date_shift, shift):
             if start_m >= datetime.now():
                 break
     return time_by_minuts
+
+def handle_date(date):
+    day = month = year = None
+    spl_date = date.split('.')
+    if len(spl_date) >3:
+        return redirect(url_for('index'))
+    try:
+        day = int(spl_date[0])
+        month = int(spl_date[1])
+        year = int(spl_date[2])
+    except IndexError:
+        print('ERR', day, month, year)
+    if not year: year=datetime.now().year
+    if not month: month=datetime.now().month
+    if not day: day=datetime.now().day
+    try:
+        return datetime(year, month, day).date()
+    except:
+        flash('Enter correct shift')
+        return datetime.now().date()
 
 def add_post(post):
     # new_post = Post(value, latitude, longitude, mechanism_id)

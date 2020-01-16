@@ -1,5 +1,5 @@
 #include <SoftwareSerial.h>
-#define lever 2
+#define lever 3
 #define led  13
 #define onShield  12
 #include<stdio.h>
