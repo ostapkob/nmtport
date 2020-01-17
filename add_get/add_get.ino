@@ -6,11 +6,11 @@
 #include<string.h>
 
 
-// Tx of GSM –> pin 5 of Arduino |  Rx of GSM —> pin 6 of Arduino 
+// Tx of GSM –> pin 5 of Arduino |  Rx of GSM —> pin 6 of Arduino
 SoftwareSerial SimSerial(5, 6); //TX RX
 
 unsigned long timer, timerSent;
-String data[6], dataGPS, POST, GET, statusSim;
+String dataGPS, POST, GET, firstGET,statusSim;
 String latitude, longitude;
 String const ip_addr = "http://35.241.126.216";
 String const api = "/api/v1.0/add_get?";
@@ -22,7 +22,7 @@ float  result;
 
 //helper variable
 boolean flag = true;
-int testLed = 6; 
+int testLed = 6;
 
 void setup() {
   Serial.begin(9600);
@@ -32,11 +32,14 @@ void setup() {
   turnOnGPS();
   //  updateSerial();
   registrationSim();
+  statusShield2();
   //  updateSerial();
   pinMode (lever, INPUT_PULLUP);
   pinMode(led, OUTPUT);
-    pinMode (testLed, OUTPUT);
-    ArduinoToSim("AT+GSMBUSY=1", 1000); //Reject incoming call
+  pinMode (testLed, OUTPUT);
+  ArduinoToSim("AT+GSMBUSY=1", 1000); //Reject incoming call
+//  firstGET = ip_addr + api + "mechanism_id=" + mechanism_id + "&password=super_pass&value=0.0001&latitude=0&longitude=0";
+//  sentGet(firstGET);
   //  ArduinoToSim("ATE0", 1000);// echo
 }
 
@@ -57,14 +60,14 @@ void loop() {
 
   if (millis() - timerSent >= 60000 ) {
     timerSent = millis();
-    statusShield();
+//    statusShield();
     dataGPS = sendData("AT + CGPSINF=2", 2000);
     ParseGPS(dataGPS);
     result = (float)sum / (float)count;
     count = 0;
     sum = 0;
     GET = ip_addr + api + "mechanism_id=" + mechanism_id + "&password=super_pass" + "&value=" + String(result) + "&latitude=" + latitude + "&longitude=" + longitude;
-    Serial.println(GET);
+//    Serial.println(GET);
     sentGet(GET);
     //    POST = "{\"password\":\"super_pass\",\"value\":" + String(result) + ",\"latitude\":" + latitude + ",\"longitude\":" + longitude + ",\"mechanism_id\":" + mechanism_id + "}";
     //    sentPost(POST);
@@ -80,17 +83,31 @@ void statusShield() { // if Shild is turn of then turn on
   if (statusSim.indexOf("OK") < 0) {
 
     resetFunc();
-//    turnOnShield();
-//    turnOnGPS();
-//    registrationSim();
+    //    turnOnShield();
+    //    turnOnGPS();
+    //    registrationSim();
   }
 }
+
+void statusShield2() { // if GPRS not conect then reset
+  updateSerial(); // clear Serial
+  statusSim = sendData("AT+SAPBR=2,1", 1000);
+  if (statusSim.indexOf("0.0.0.0") > 0) {
+
+    resetFunc();
+    //    turnOnShield();
+    //    turnOnGPS();
+    //    registrationSim();
+  }
+}
+
+
 
 void turnOnShield() {
   digitalWrite(onShield, HIGH);
   delay(1000);
   digitalWrite(onShield, LOW);
-  delay(3000); // give time to register Sim online
+  delay(2000); // give time to register Sim online
 }
 
 
@@ -114,7 +131,7 @@ void ParseGPS(String str) {
 
 void sentGet(String msg) {
   String add_get;
-  add_get = "AT+HTTPPARA=\"URL\", \"" +msg+ "\"";
+  add_get = "AT+HTTPPARA=\"URL\", \"" + msg + "\"";
   ArduinoToSim("AT+HTTPPARA=\"CID\",1", 100);
   ArduinoToSim(add_get, 100);
   ArduinoToSim("AT+HTTPACTION=0", 100);
