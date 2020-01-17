@@ -69,12 +69,12 @@ while True:
         last_numbers = range(len(data)-amount_elements, len(data))
         values_last_5_minutes = [data[str(num)]['value'] for num in last_numbers]
         if chech_values(values_last_5_minutes, -1):
-            bot.send_message(226566335, name_mech)
+            bot.send_message(226566335, "-1" + name_mech)
             print("-1 -bo---->", name_mech)
         if chech_values(values_last_5_minutes, 0):
-            bot.send_message(226566335, name_mech)
+            bot.send_message(226566335, "0" + name_mech)
             print("0 ----->", name_mech)
-    time.sleep(10)
+    time.sleep(31)
 
 
 
