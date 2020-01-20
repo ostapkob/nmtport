@@ -18,7 +18,6 @@
         //     }) ;
         // },
 
-
         getData () {
         this.$http.get('/api/v1.0/get_data/usm/'+this.date_shift+'/'+this.shift).then(response => {
             this.all_data = response.body
@@ -26,9 +25,6 @@
             console.log('response err')
         });
         },
-
-
-
 
         getNow: function() {
             let hour;
@@ -46,7 +42,6 @@
                 this.date_shift= today.getDate()+'.'+(today.getMonth()+1)+'.'+today.getFullYear();
                 this.shift=2
             }
-
             // this.api=this.http[0]+this.date_shift+'/'+this.shift //think
 
             if (this.shift==1) {

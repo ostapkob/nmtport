@@ -7,6 +7,7 @@ HOURS = 10
 
 
 def today_shift_date():
+    '''get date and shift'''
     hour = datetime.now().hour
     if hour >= 8 and hour < 20:
         date_shift = datetime.now()
@@ -31,7 +32,7 @@ def all_number(type, number):
     '''Need to do then'''
     return [m.id for m in Mechanism.query.all()]
 
-def multiple_5(date):
+def multiple_5(date): #not use
     '''Return time multiple 5 minutes and remite microseconds'''
     global HOURS
     # date -= timedelta(minutes=5)
@@ -106,10 +107,10 @@ def time_for_shift(type_mechanism, date_shift, shift):
 
 def image_mechanism(value, type_mechanism, number, last_time):
     dt = datetime.now()- last_time
-    dt =dt.seconds / 60
+    dt =dt.total_seconds()/60
     if dt > 120.0:
         return './static/numbers/'+str(type_mechanism)+'/gray/'+str(number)+'.png'
-    if dt > 2.0:
+    if dt >= 3.0:
         return './static/numbers/'+str(type_mechanism)+'/red/'+str(number)+'.png'
     if value<0.1:
         return './static/numbers/'+str(type_mechanism)+'/yellow/'+str(number)+'.png'
@@ -118,7 +119,7 @@ def image_mechanism(value, type_mechanism, number, last_time):
 
 
 # not use
-def time_for_shift_list(date_shift, shift):
+def time_for_shift_list(date_shift, shift): #not use
     '''get dict with all minute's values for the period'''
     # get data from db
     cursor = db.session.query(Post).filter(

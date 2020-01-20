@@ -86,6 +86,7 @@ def archive():
     form = SelectDataShift()
     if form.validate_on_submit():
         date = handle_date(form.date_shift.data)
+        # date = date.strftime("%d.%m.%y")
         shift = form.shift.data
         type_mechanism = form.type.data
         # try:
@@ -97,7 +98,7 @@ def archive():
         return render_template("archive.html",
                                data=data,
                                shift=shift,
-                               date_shift=date,
+                               date_shift=date.strftime("%d.%m.%Y"),
                                form=form,
                                )
 
@@ -106,7 +107,7 @@ def archive():
     return render_template("archive.html",
                            data=data,
                            shift=shift,
-                           date_shift=date,
+                            date_shift=date.strftime("%d.%m.%Y"),
                            form=form,
                            )
 

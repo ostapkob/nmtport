@@ -8,7 +8,11 @@ from datetime import datetime
 def chech_values(ls, num):
     if ls[0] == num:
         return False
-    return( all(el==num for el in ls[1:]))
+    if ls[0] != -1 and all((ls[0] == el for el in ls[1:])):
+        return True
+    if  all(el==num for el in ls[1:]):
+        return True
+    return False
 
 def today_shift_date():
     hour = datetime.now().hour
@@ -58,7 +62,7 @@ date = date_shift.strftime('%d.%m.%Y')
 shift = str(shift)
 API = f"/api/v1.0/get_data/{type_mechanism}/{date}/{shift}"
 TOKEN = "977352466:AAEgH-c6FFFGbv71pSBP8hbtu9oSS6JrY48"
-amount_elements = 5
+amount_elements = 6
 bot = telebot.TeleBot(TOKEN)
 while True:
     data = requests.get(host+API)
@@ -69,11 +73,12 @@ while True:
         last_numbers = range(len(data)-amount_elements, len(data))
         values_last_5_minutes = [data[str(num)]['value'] for num in last_numbers]
         if chech_values(values_last_5_minutes, -1):
-            bot.send_message(226566335, "-1" + name_mech)
-            print("-1 -bo---->", name_mech)
+            bot.send_message(226566335, f"-1 {name_mech} {values_last_5_minutes}")
+            print("-1 ----->", name_mech, values_last_5_minutes)
         if chech_values(values_last_5_minutes, 0):
-            bot.send_message(226566335, "0" + name_mech)
-            print("0 ----->", name_mech)
+            bot.send_message(226566335, f"0 {name_mech} {values_last_5_minutes}")
+            print("0 ----->", name_mech, values_last_5_minutes)
+    print('______________________________')
     time.sleep(31)
 
 
