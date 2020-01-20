@@ -25,9 +25,9 @@ class Mechanism:
             response = requests.get(self.ip, params)
             response.raise_for_status()
         except HTTPError as http_err:
-            print(f'HTTP error occurred: {http_err}')  # Python 3.6
+            print(f'HTTP error occurred: {http_err}')
         except Exception as err:
-            print(f'Other error occurred: {err}')  # Python 3.6
+            print(f'Other error occurred: {err}')
         else:
             print('Success!', datetime.now())
 

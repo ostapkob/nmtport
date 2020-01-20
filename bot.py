@@ -8,8 +8,8 @@ from datetime import datetime
 def chech_values(ls, num):
     if ls[0] == num:
         return False
-    if ls[0] != -1 and all((ls[0] == el for el in ls[1:])):
-        return True
+    # if ls[0] != -1 and all((ls[0] == el for el in ls[1:])):
+    #     return True
     if  all(el==num for el in ls[1:]):
         return True
     return False
@@ -79,7 +79,7 @@ while True:
             bot.send_message(226566335, f"0 {name_mech} {values_last_5_minutes}")
             print("0 ----->", name_mech, values_last_5_minutes)
     print('______________________________')
-    time.sleep(31)
+    time.sleep(50)
 
 
 
