@@ -65,8 +65,11 @@ TOKEN = "977352466:AAEgH-c6FFFGbv71pSBP8hbtu9oSS6JrY48"
 amount_elements = 6
 bot = telebot.TeleBot(TOKEN)
 while True:
-    data = requests.get(host+API)
-    mechanisms = json.loads(data.text)
+    try:
+        data = requests.get(host+API)
+        mechanisms = json.loads(data.text)
+    except:
+            bot.send_message(226566335, 'Trouble with server')
     for mech, data_mech in mechanisms.items():
         data = data_mech['data']
         name_mech = data_mech['name']
