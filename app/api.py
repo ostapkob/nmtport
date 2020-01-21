@@ -126,7 +126,7 @@ def add_get():
     # db.session.add(new_post)
     # db.session.commit()
     add_fix_post(new_post)
-    return f'OK {str(items)} {str(datetime.now())}'
+    return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
 
 @app.route('/api/v1.0/add_post', methods=['GET', 'POST'])
 def add_post():
