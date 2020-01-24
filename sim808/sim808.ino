@@ -10,7 +10,7 @@
 SoftwareSerial SimSerial(5, 6); //TX RX
 
 unsigned long timer, timerSent;
-String dataGPS, POST, GET, firstGET, statusSim, statusGet;
+String dataGPS, POST, GET, firstGET, statusGet;
 String latitude, longitude;
 String const ip_addr = "http://35.241.126.216";
 String const api = "/api/v1.0/add_get?";
@@ -18,7 +18,6 @@ String const mechanism_id = "32046";
 String const password = "super_pass";
 int count, sum;
 float  result;
-
 
 
 //helper variable
@@ -37,13 +36,14 @@ void setup() {
   pinMode(led, OUTPUT);
   pinMode (testLed, OUTPUT);
   ArduinoToSim("AT+GSMBUSY=1", 1000); //Reject incoming call
+  statusShield();
+  statusConect();
   //  get_send(0, "0", "0");
   //  ArduinoToSim("ATE0", 1000);// echo
 }
 
 
 void loop() {
-
   if (millis() - timer > 100 ) {
     timer = millis();
     count ++;
@@ -55,7 +55,6 @@ void loop() {
       digitalWrite(led, 0);
     }
   }
-
   if (millis() - timerSent >= 60000 ) {
     timerSent = millis();
 //    LED ();
@@ -67,21 +66,18 @@ void loop() {
 //    result += test; //del
 //    test += 0.01; //del
     get_send(result, latitude, longitude);
-    updateSerial();
   }
 }
 
-//void(* resetFunc) (void) = 0;
+void(* resetFunc) (void) = 0;
 
 void statusShield() { // if Shild is turn of then turn on
+  String statusSim;
   updateSerial(); // clear Serial
   statusSim = sendData("AT", 500);
   if (statusSim.indexOf("OK") < 0) {
-    true;
-    //    resetFunc();
-    //    turnOnShield();
-    //    turnOnGPS();
-    //    registrationSim();
+  	statusConect();
+  	resetFunc();
   }
 }
 
@@ -150,8 +146,8 @@ void statusConect() { // if GPRS not conect then reset
 }
 
 
-void get_send(float resultD, String latitudeD, String longitudeD) {  //Процедура отправки данных на сервер
-  //отправка данных на сайт
+void get_send(float resultD, String latitudeD, String longitudeD) {  
+  //sent data on server
   String get_request; //tempstr;
   get_request = "AT+HTTPPARA=\"URL\", \"" + ip_addr + api + "mechanism_id=" + mechanism_id + "&password=" + password + "&value=" + String(resultD) + "&latitude=" + latitudeD + "&longitude=" + longitudeD + "\"";
   ArduinoToSim("AT+HTTPPARA=\"CID\",1", 100);
@@ -162,7 +158,6 @@ void get_send(float resultD, String latitudeD, String longitudeD) {  //Проц�
   statusConect();
   updateSerial();
 }
-
 
 
 String sendData (String command , const int timeout) { // sent data to serial port return ansver
@@ -179,11 +174,13 @@ String sendData (String command , const int timeout) { // sent data to serial po
   return response;
 }
 
+
 void ArduinoToSim(String command, const int wait) { //it is more comfortable
   SimSerial.println(command);
   updateSerial();
   delay(wait);
 }
+
 
 void updateSerial()
 //message view function
