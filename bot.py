@@ -1,9 +1,15 @@
 import requests
-import telebot
 import json
 import time
 from pprint import pprint
 from datetime import datetime
+
+
+flag = True
+try:
+    import telebot
+except:
+    flag = False
 
 def chech_values(ls, num):
     if ls[0] == num:
@@ -60,27 +66,30 @@ date = date_shift.strftime('%d.%m.%Y')
 shift = str(shift)
 API = f"/api/v1.0/get_data/{type_mechanism}/{date}/{shift}"
 TOKEN = "977352466:AAEgH-c6FFFGbv71pSBP8hbtu9oSS6JrY48"
-amount_elements = 6
-bot = telebot.TeleBot(TOKEN)
+amount_elements = 5
+if flag:
+    bot = telebot.TeleBot(TOKEN)
+
+
 while True:
     try:
         data = requests.get(host+API)
         mechanisms = json.loads(data.text)
     except:
+        if flag:
             bot.send_message(226566335, 'Trouble with server')
     for mech, data_mech in mechanisms.items():
         data = data_mech['data']
         name_mech = data_mech['name']
         last_numbers = range(len(data)-amount_elements, len(data))
         values_last_5_minutes = [data[str(num)]['value'] for num in last_numbers]
+        print(values_last_5_minutes)
         if chech_values(values_last_5_minutes, -1):
-            bot.send_message(226566335, f"-1 {name_mech} {values_last_5_minutes}")
             print("-1 ----->", name_mech, values_last_5_minutes)
-        # if chech_values(values_last_5_minutes, 0):
-        #     # bot.send_message(226566335, f"0 {name_mech} {values_last_5_minutes}")
-        #     print("0 ----->", name_mech, values_last_5_minutes)
+            if flag:
+                bot.send_message(226566335, f"-1 {name_mech} {values_last_5_minutes}")
     print('______________________________')
-    time.sleep(50)
+    time.sleep(60)
 
 
 
