@@ -4,7 +4,7 @@
 #define onShield  12
 #include<stdio.h>
 #include<string.h>
-#define testLed  7
+//#define testLed  7
 
 // Tx of GSM –> pin 5 of Arduino |  Rx of GSM —> pin 6 of Arduino
 SoftwareSerial SimSerial(5, 6); //TX RX
@@ -27,18 +27,18 @@ float test = 0.01;
 void setup() {
   Serial.begin(9600);
   SimSerial.begin(9600);
-  SimSerial.setTimeout(3000);
+  SimSerial.setTimeout(1000);//3000
 //  updateSerial();
   turnOnShield();
   turnOnGPS();
   registrationSim();
-  pinMode (lever, INPUT_PULLUP);
+  pinMode (lever, INPUT); //_PULLUP);
   pinMode(led, OUTPUT);
-  pinMode (testLed, OUTPUT);
+//  pinMode (testLed, OUTPUT);
   ArduinoToSim("AT+GSMBUSY=1", 1000); //Reject incoming call
   statusShield();
   statusConect();
-  //  get_send(0, "0", "0");
+  //  GetSend(0, "0", "0");
   //  ArduinoToSim("ATE0", 1000);// echo
 }
 
@@ -65,7 +65,7 @@ void loop() {
     sum = 0;
 //    result += test; //del
 //    test += 0.01; //del
-    get_send(result, latitude, longitude);
+    GetSend(result, latitude, longitude);
   }
 }
 
@@ -146,7 +146,7 @@ void statusConect() { // if GPRS not conect then reset
 }
 
 
-void get_send(float resultD, String latitudeD, String longitudeD) {  
+void GetSend(float resultD, String latitudeD, String longitudeD) {  
   //sent data on server
   String get_request; //tempstr;
   get_request = "AT+HTTPPARA=\"URL\", \"" + ip_addr + api + "mechanism_id=" + mechanism_id + "&password=" + password + "&value=" + String(resultD) + "&latitude=" + latitudeD + "&longitude=" + longitudeD + "\"";
