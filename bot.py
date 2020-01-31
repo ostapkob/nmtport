@@ -2,7 +2,7 @@ import requests
 import json
 import time
 from pprint import pprint
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 flag = True
@@ -61,17 +61,17 @@ tests = ( [[1, -1, -1, -1, -1], True],
 
 host ="http://35.241.126.216"
 type_mechanism = "usm"
-date_shift, shift = today_shift_date()
-date = date_shift.strftime('%d.%m.%Y')
-shift = str(shift)
-API = f"/api/v1.0/get_data/{type_mechanism}/{date}/{shift}"
 TOKEN = "977352466:AAEgH-c6FFFGbv71pSBP8hbtu9oSS6JrY48"
-amount_elements = 5
+amount_elements = 4
 if flag:
     bot = telebot.TeleBot(TOKEN)
 
 
 while True:
+    date_shift, shift = today_shift_date()
+    date = date_shift.strftime('%d.%m.%Y')
+    shift = str(shift)
+    API = f"/api/v1.0/get_data/{type_mechanism}/{date}/{shift}"
     try:
         data = requests.get(host+API)
         mechanisms = json.loads(data.text)
