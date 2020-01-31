@@ -1,20 +1,20 @@
 #include <SoftwareSerial.h>
-#define lever 3
+#define lever 9
 #define led  13
-#define onShield  12
+#define onShield  2
 #include<stdio.h>
 #include<string.h>
 //#define testLed  7
 
 // Tx of GSM –> pin 5 of Arduino |  Rx of GSM —> pin 6 of Arduino
-SoftwareSerial SimSerial(5, 6); //TX RX
+SoftwareSerial SimSerial(6, 5); // RX  TX
 
-unsigned long timer, timerSent;
+unsigned long timer, timerSent, timerStatus;
 String dataGPS, POST, GET, firstGET, statusGet;
 String latitude, longitude;
 String const ip_addr = "http://35.241.126.216";
 String const api = "/api/v1.0/add_get?";
-String const mechanism_id = "32046";
+String const mechanism_id = "32740";
 String const password = "super_pass";
 int count, sum;
 float  result;
@@ -28,13 +28,13 @@ void setup() {
   Serial.begin(9600);
   SimSerial.begin(9600);
   SimSerial.setTimeout(1000);//3000
-//  updateSerial();
+  //  updateSerial();
   turnOnShield();
   turnOnGPS();
   registrationSim();
   pinMode (lever, INPUT); //_PULLUP);
   pinMode(led, OUTPUT);
-//  pinMode (testLed, OUTPUT);
+  //  pinMode (testLed, OUTPUT);
   ArduinoToSim("AT+GSMBUSY=1", 1000); //Reject incoming call
   statusShield();
   statusConect();
@@ -57,16 +57,24 @@ void loop() {
   }
   if (millis() - timerSent >= 60000 ) {
     timerSent = millis();
-//    LED ();
+    //    LED ();
     dataGPS = sendData("AT + CGPSINF=2", 2000);
     ParseGPS(dataGPS);
     result = (float)sum / (float)count;
     count = 0;
     sum = 0;
-//    result += test; //del
-//    test += 0.01; //del
+    //    result += test; //del
+    //    test += 0.01; //del
     GetSend(result, latitude, longitude);
   }
+
+  if (millis() - timerStatus >= 600000 ) {
+    timerStatus = millis();
+    statusConect();
+//    updateSerial();
+  }
+
+
 }
 
 void(* resetFunc) (void) = 0;
@@ -76,8 +84,8 @@ void statusShield() { // if Shild is turn of then turn on
   updateSerial(); // clear Serial
   statusSim = sendData("AT", 500);
   if (statusSim.indexOf("OK") < 0) {
-  	statusConect();
-  	resetFunc();
+    statusConect();
+    resetFunc();
   }
 }
 
@@ -132,7 +140,7 @@ void statusConect() { // if GPRS not conect then reset
   String statusGPRS;
   updateSerial(); // clear Serial
   statusGPRS = sendData("AT+SAPBR=2,1", 500);
-//  Serial.println("______________");
+  //  Serial.println("______________");
   if (statusGPRS.indexOf("SAPBR: 1,1,") > 0) {
   }
   else {
@@ -146,7 +154,7 @@ void statusConect() { // if GPRS not conect then reset
 }
 
 
-void GetSend(float resultD, String latitudeD, String longitudeD) {  
+void GetSend(float resultD, String latitudeD, String longitudeD) {
   //sent data on server
   String get_request; //tempstr;
   get_request = "AT+HTTPPARA=\"URL\", \"" + ip_addr + api + "mechanism_id=" + mechanism_id + "&password=" + password + "&value=" + String(resultD) + "&latitude=" + latitudeD + "&longitude=" + longitudeD + "\"";
@@ -155,8 +163,6 @@ void GetSend(float resultD, String latitudeD, String longitudeD) {
   ArduinoToSim("AT+HTTPACTION=0", 200);
   ArduinoToSim("AT+HTTPREAD", 200);
   //  ArduinoToSim("AT+HTTPTERM", 300);
-  statusConect();
-  updateSerial();
 }
 
 
