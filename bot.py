@@ -62,7 +62,7 @@ tests = ( [[1, -1, -1, -1, -1], True],
 host ="http://35.241.126.216"
 type_mechanism = "usm"
 TOKEN = "977352466:AAEgH-c6FFFGbv71pSBP8hbtu9oSS6JrY48"
-amount_elements = 4
+amount_elements = 3
 if flag:
     bot = telebot.TeleBot(TOKEN)
 
@@ -78,6 +78,8 @@ while True:
     except:
         if flag:
             bot.send_message(226566335, 'Trouble with server')
+    if mechanisms==None:
+        continue
     for mech, data_mech in mechanisms.items():
         data = data_mech['data']
         name_mech = data_mech['name']
