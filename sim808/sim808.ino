@@ -9,8 +9,8 @@
 // Tx of GSM –> pin 5 of Arduino |  Rx of GSM —> pin 6 of Arduino
 SoftwareSerial SimSerial(6, 5); // RX  TX
 
-unsigned long timer, timerSent, timerStatus;
-String dataGPS, POST, GET, firstGET, statusGet;
+unsigned long timer, timerSent;
+String dataGPS, statusGet;
 String latitude, longitude;
 String const ip_addr = "http://35.241.126.216";
 String const api = "/api/v1.0/add_get?";
@@ -19,10 +19,6 @@ String const password = "super_pass";
 int count, sum;
 float  result;
 
-
-//helper variable
-boolean flag = true;
-float test = 0.01;
 
 void setup() {
   Serial.begin(9600);
@@ -57,24 +53,14 @@ void loop() {
   }
   if (millis() - timerSent >= 60000 ) {
     timerSent = millis();
-    //    LED ();
+    statusConectFlight();
     dataGPS = sendData("AT + CGPSINF=2", 2000);
     ParseGPS(dataGPS);
     result = (float)sum / (float)count;
     count = 0;
     sum = 0;
-    //    result += test; //del
-    //    test += 0.01; //del
     GetSend(result, latitude, longitude);
   }
-
-  if (millis() - timerStatus >= 600000 ) {
-    timerStatus = millis();
-    statusConect();
-//    updateSerial();
-  }
-
-
 }
 
 void(* resetFunc) (void) = 0;
@@ -136,33 +122,40 @@ void ParseGPS(String str) {
   }
 }
 
+void statusConectFlight() { // if GPRS not conect then reset
+  String statusGPRS;
+  updateSerial(); // clear Serial
+  statusGPRS = sendData("AT+SAPBR=2,1", 500);
+  if (statusGPRS.indexOf("SAPBR: 1,1,") < 0) {
+    ArduinoToSim(" AT + CFUN = 0", 1000); //put module in flight mode
+    ArduinoToSim(" AT + CFUN = 1", 1000);
+  }
+}
+
+
 void statusConect() { // if GPRS not conect then reset
   String statusGPRS;
   updateSerial(); // clear Serial
   statusGPRS = sendData("AT+SAPBR=2,1", 500);
   //  Serial.println("______________");
-  if (statusGPRS.indexOf("SAPBR: 1,1,") > 0) {
-  }
-  else {
+  if (statusGPRS.indexOf("SAPBR: 1,1,") < 0) {
     ArduinoToSim("AT+CPOWD=1", 200);
     turnOnShield();
     turnOnGPS();
     registrationSim();
-    //      ArduinoToSim(" AT + CFUN = 0", 1000);
-    //      ArduinoToSim(" AT + CFUN = 1", 1000);
   }
 }
 
-
 void GetSend(float resultD, String latitudeD, String longitudeD) {
   //sent data on server
-  String get_request; //tempstr;
+  String get_request;
   get_request = "AT+HTTPPARA=\"URL\", \"" + ip_addr + api + "mechanism_id=" + mechanism_id + "&password=" + password + "&value=" + String(resultD) + "&latitude=" + latitudeD + "&longitude=" + longitudeD + "\"";
+  ArduinoToSim("AT+HTTPINIT", 1000);  // ???
   ArduinoToSim("AT+HTTPPARA=\"CID\",1", 100);
   ArduinoToSim(get_request, 200);
   ArduinoToSim("AT+HTTPACTION=0", 200);
   ArduinoToSim("AT+HTTPREAD", 200);
-  //  ArduinoToSim("AT+HTTPTERM", 300);
+  ArduinoToSim("AT+HTTPTERM", 300); // ???
 }
 
 
