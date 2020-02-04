@@ -78,19 +78,21 @@ while True:
     except:
         if flag:
             bot.send_message(226566335, 'Trouble with server')
-    if mechanisms==None:
+    if not mechanisms:
         continue
     for mech, data_mech in mechanisms.items():
         data = data_mech['data']
         name_mech = data_mech['name']
         last_numbers = range(len(data)-amount_elements, len(data))
-        values_last_5_minutes = [data[str(num)]['value'] for num in last_numbers]
+        try:
+            values_last_5_minutes = [data[str(num)]['value'] for num in last_numbers]
+        except:
+            continue
         print(values_last_5_minutes)
         if chech_values(values_last_5_minutes, -1):
             print("-1 ----->", name_mech, values_last_5_minutes)
             if flag:
                 bot.send_message(226566335, f"-1 {name_mech} {values_last_5_minutes}")
-    print('______________________________')
     time.sleep(60)
 
 

@@ -55,7 +55,7 @@
             window.setInterval(() => {
                 this.getNow();
                 this.getData();
-            },10000);
+            },5000);
         })
     },
 
