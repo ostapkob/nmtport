@@ -53,7 +53,7 @@ void loop() {
   }
   if (millis() - timerSent >= 60000 ) {
     timerSent = millis();
-    statusConectFlight();
+    statusConect();
     dataGPS = sendData("AT + CGPSINF=2", 2000);
     ParseGPS(dataGPS);
     result = (float)sum / (float)count;
