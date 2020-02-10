@@ -13,7 +13,10 @@ except:
     flag = False
 
 def chech_values(ls, find, quantity):
-    last_numbers = range(len(ls)-quantity, len(ls))
+    try:
+        last_numbers = range(len(ls)-quantity, len(ls))
+    except:
+        return False
     values = [data[str(num)]['value'] for num in last_numbers]
     print("----->", name_mech, values)
     if values[0] == find:
@@ -72,29 +75,29 @@ if flag:
     bot = telebot.TeleBot(TOKEN)
 
 
-# while True:
-date_shift, shift = today_shift_date()
-date = date_shift.strftime('%d.%m.%Y')
-shift = str(shift)
-API = f"/api/v1.0/get_data/{type_mechanism}/{date}/{shift}"
-try:
-    data = requests.get(host+API)
-    mechanisms = json.loads(data.text)
-except:
-    if flag:
-        bot.send_message(226566335, 'Trouble with server')
-# if not mechanisms:
-#     continue
-for mech, data_mech in mechanisms.items():
-    data = data_mech['data']
-    name_mech = data_mech['name']
-    if chech_values(data, -1, 2):
+while True:
+    date_shift, shift = today_shift_date()
+    date = date_shift.strftime('%d.%m.%Y')
+    shift = str(shift)
+    API = f"/api/v1.0/get_data/{type_mechanism}/{date}/{shift}"
+    try:
+        data = requests.get(host+API)
+        mechanisms = json.loads(data.text)
+    except:
         if flag:
-            bot.send_message(226566335, f"{red_circle} {name_mech}")
-    if chech_values(data, -1, 5):
-        if flag:
-            bot.send_message(226566335, f"{yellow_circle} {name_mech}")
-# time.sleep(60)
+            bot.send_message(226566335, 'Trouble with server')
+    if not mechanisms:
+        continue
+    for mech, data_mech in mechanisms.items():
+        data = data_mech['data']
+        name_mech = data_mech['name']
+        if chech_values(data, -1, 2):
+            if flag:
+                bot.send_message(226566335, f"{red_circle} {name_mech}")
+        if chech_values(data, -1, 5):
+            if flag:
+                bot.send_message(226566335, f"{yellow_circle} {name_mech}")
+    time.sleep(60)
 
 
 
