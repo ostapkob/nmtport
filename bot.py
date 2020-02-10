@@ -3,7 +3,8 @@ import json
 import time
 from pprint import pprint
 from datetime import datetime, timedelta
-
+red_circle=u'\U0001F534'
+yellow_circle=u'\U0001F7E1'
 
 flag = True
 try:
@@ -11,10 +12,13 @@ try:
 except:
     flag = False
 
-def chech_values(ls, num):
-    if ls[0] == num:
+def chech_values(ls, find, quantity):
+    last_numbers = range(len(ls)-quantity, len(ls))
+    values = [data[str(num)]['value'] for num in last_numbers]
+    print("----->", name_mech, values)
+    if values[0] == find:
         return False
-    if  all(el==num for el in ls[1:]):
+    if  all(el==find for el in values[1:]):
         return True
     return False
 
@@ -62,38 +66,35 @@ tests = ( [[1, -1, -1, -1, -1], True],
 host ="http://35.241.126.216"
 type_mechanism = "usm"
 TOKEN = "977352466:AAEgH-c6FFFGbv71pSBP8hbtu9oSS6JrY48"
-amount_elements = 3
+red_data = 2
+yellow_data = 5
 if flag:
     bot = telebot.TeleBot(TOKEN)
 
 
-while True:
-    date_shift, shift = today_shift_date()
-    date = date_shift.strftime('%d.%m.%Y')
-    shift = str(shift)
-    API = f"/api/v1.0/get_data/{type_mechanism}/{date}/{shift}"
-    try:
-        data = requests.get(host+API)
-        mechanisms = json.loads(data.text)
-    except:
+# while True:
+date_shift, shift = today_shift_date()
+date = date_shift.strftime('%d.%m.%Y')
+shift = str(shift)
+API = f"/api/v1.0/get_data/{type_mechanism}/{date}/{shift}"
+try:
+    data = requests.get(host+API)
+    mechanisms = json.loads(data.text)
+except:
+    if flag:
+        bot.send_message(226566335, 'Trouble with server')
+# if not mechanisms:
+#     continue
+for mech, data_mech in mechanisms.items():
+    data = data_mech['data']
+    name_mech = data_mech['name']
+    if chech_values(data, -1, 2):
         if flag:
-            bot.send_message(226566335, 'Trouble with server')
-    if not mechanisms:
-        continue
-    for mech, data_mech in mechanisms.items():
-        data = data_mech['data']
-        name_mech = data_mech['name']
-        last_numbers = range(len(data)-amount_elements, len(data))
-        try:
-            values_last_5_minutes = [data[str(num)]['value'] for num in last_numbers]
-        except:
-            continue
-        print(values_last_5_minutes)
-        if chech_values(values_last_5_minutes, -1):
-            print("-1 ----->", name_mech, values_last_5_minutes)
-            if flag:
-                bot.send_message(226566335, f"-1 {name_mech} {values_last_5_minutes}")
-    time.sleep(60)
+            bot.send_message(226566335, f"{red_circle} {name_mech}")
+    if chech_values(data, -1, 5):
+        if flag:
+            bot.send_message(226566335, f"{yellow_circle} {name_mech}")
+# time.sleep(60)
 
 
 
