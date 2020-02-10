@@ -15,9 +15,9 @@ except:
 def chech_values(ls, find, quantity):
     try:
         last_numbers = range(len(ls)-quantity, len(ls))
+        values = [data[str(num)]['value'] for num in last_numbers]
     except:
         return False
-    values = [data[str(num)]['value'] for num in last_numbers]
     print("----->", name_mech, values)
     if values[0] == find:
         return False
@@ -69,12 +69,8 @@ tests = ( [[1, -1, -1, -1, -1], True],
 host ="http://35.241.126.216"
 type_mechanism = "usm"
 TOKEN = "977352466:AAEgH-c6FFFGbv71pSBP8hbtu9oSS6JrY48"
-red_data = 2
-yellow_data = 5
 if flag:
     bot = telebot.TeleBot(TOKEN)
-
-
 while True:
     date_shift, shift = today_shift_date()
     date = date_shift.strftime('%d.%m.%Y')
@@ -91,10 +87,10 @@ while True:
     for mech, data_mech in mechanisms.items():
         data = data_mech['data']
         name_mech = data_mech['name']
-        if chech_values(data, -1, 2):
+        if chech_values(data, -1, 3):
             if flag:
                 bot.send_message(226566335, f"{red_circle} {name_mech}")
-        if chech_values(data, -1, 5):
+        if chech_values(data, 0, 5):
             if flag:
                 bot.send_message(226566335, f"{yellow_circle} {name_mech}")
     time.sleep(60)
