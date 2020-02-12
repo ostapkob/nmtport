@@ -18,7 +18,7 @@ String const mechanism_id = "32740";
 String const password = "super_pass";
 int count, sum;
 float  result;
-
+int bad_conect;
 
 void setup() {
   Serial.begin(9600);
@@ -53,7 +53,7 @@ void loop() {
   }
   if (millis() - timerSent >= 60000 ) {
     timerSent = millis();
-    statusConect();
+    statusConectCount();
     dataGPS = sendData("AT + CGPSINF=2", 2000);
     ParseGPS(dataGPS);
     result = (float)sum / (float)count;
@@ -122,7 +122,7 @@ void ParseGPS(String str) {
   }
 }
 
-void statusConectFlight() { // if GPRS not conect then reset
+void statusConectFlight() { // if GPRS not conect then on/off module in flight mode
   String statusGPRS;
   updateSerial(); // clear Serial
   statusGPRS = sendData("AT+SAPBR=2,1", 500);
@@ -145,6 +145,28 @@ void statusConect() { // if GPRS not conect then reset
     registrationSim();
   }
 }
+
+void statusConectCount() { // if bad conect more then 3 then reset
+  String statusGPRS;
+  updateSerial(); // clear Serial
+  statusGPRS = sendData("AT+SAPBR=2,1", 500);
+  //  Serial.println("______________");
+  if (statusGPRS.indexOf("SAPBR: 1,1,") < 0) {
+    bad_conect++;
+    if (bad_conect > 3) {
+      bad_conect=0;
+      ArduinoToSim("AT+CPOWD=1", 200);
+      turnOnShield();
+      turnOnGPS();
+      registrationSim();
+    }
+    else{
+      bad_conect=0;
+    }
+  }
+}
+
+
 
 void GetSend(float resultD, String latitudeD, String longitudeD) {
   //sent data on server
