@@ -2,7 +2,7 @@
 from flask import request, json, jsonify, abort, make_response
 from flask import render_template, flash, redirect, url_for, send_from_directory
 from app import db, app
-from app.model import Mechanism, Post
+from app.model import USM, USM_data
 from app.form import AddMechanism, SelectDataShift
 from datetime import datetime, timedelta
 from functions import today_shift_date, all_mechanisms_id, time_for_shift, handle_date
@@ -74,7 +74,7 @@ def maps():
 
 @app.route("/show_all_mechanisms")
 def show_all_mechanisms():
-    all_mech = Mechanism.query.all()
+    all_mech = USM.query.all()
     return render_template("mechanisms.html",
                            title='Механизмы',
                            mechs=all_mech)
@@ -124,8 +124,8 @@ def list_api():
 # def per_shift():
 #     date_shift, shift = today_shift_date()
 
-#     cursor = db.session.query(Post).filter(
-#         Post.date_shift == date_shift, Post.shift == shift).order_by(Post.mechanism_id).all()
+#     cursor = db.session.query(USM_data).filter(
+#         USM_data.date_shift == date_shift, USM_data.shift == shift).order_by(USM_data.mechanism_id).all()
 #     data_per_shift = {}
 #     for el in cursor:
 #         if data_per_shift.get(el.mech.id):
