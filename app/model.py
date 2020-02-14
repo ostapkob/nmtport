@@ -2,14 +2,14 @@ from app import db
 from datetime import datetime, timedelta
 
 
-class Mechanism(db.Model):
+class USM(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     company = db.Column(db.String(64), index=True)
     type = db.Column(db.String(64), index=True)
     model = db.Column(db.String(64), index=True)
     number = db.Column(db.SmallInteger, index=True)  # 32768 should be enough
     name = db.Column(db.String(64), index=True, unique=True)
-    posts = db.relationship('Post', backref='mech', lazy='dynamic')
+    posts = db.relationship('USM_data', backref='mech', lazy='dynamic')
 
     def __init__(self, id, company, type, model, number, name):
         self.id = id
@@ -23,11 +23,9 @@ class Mechanism(db.Model):
         return f'<{self.name}>'
 
 
-
-
-class Post(db.Model):
+class USM_data(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    mechanism_id = db.Column(db.Integer, db.ForeignKey('mechanism.id'))
+    mechanism_id = db.Column(db.Integer, db.ForeignKey('USM.id'))
     value = db.Column(db.Float)
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
