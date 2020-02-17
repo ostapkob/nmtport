@@ -1,32 +1,31 @@
 from app import db
-from app.model import Mechanism, Post
+from app.model import Mechanism
 
 db.create_all()
-m = Mechanism(32046, company='nmtp', type='usm', model='PowerTrack', number=1, name='PowerTrack-1')
-db.session.add(m)
-m = Mechanism(32047, company='nmtp', type='usm', model='PowerTrack', number=2, name='PowerTrack-2')
-db.session.add(m)
-m = Mechanism(32711, company='nmtp', type='usm', model='Edge', number=3, name='Edge-3')
-db.session.add(m)
-m = Mechanism(32740, company='nmtp', type='usm', model='Edge', number=4, name='Edge-4')
-db.session.add(m)
-m = Mechanism(32770, company='nmtp', type='usm', model='Screen', number=5, name='Screen-5')
-db.session.add(m)
-m = Mechanism(32771, company='nmtp', type='usm', model='Screen', number=6, name='Screen-6')
-db.session.add(m)
-m = Mechanism(32772, company='nmtp', type='usm', model='Screen', number=7, name='Screen-7')
-db.session.add(m)
-m = Mechanism(32773, company='nmtp', type='usm', model='Screen', number=8, name='Screen-8')
-db.session.add(m)
-m = Mechanism(32941, company='nmtp', type='usm', model='Electric', number=9, name='Electric-9')
-db.session.add(m)
-m = Mechanism(32942, company='nmtp', type='usm', model='Electric', number=10, name='Electric-10')
-db.session.add(m)
-m = Mechanism(33287, company='nmtp', type='usm', model='Edge', number=11, name='Edge-11')
-db.session.add(m)
-m = Mechanism(32777, company='nmtp', type='sennebogen', model='860', number=1, name='Sennebogen-1')
-db.session.add(m)
+
+mech = [ (32046, 'nmtp', 'usm', 'PowerTrack', 1, 'PowerTrack-1'),
+        (32047, 'nmtp', 'usm', 'PowerTrack', 2, 'PowerTrack-2'),
+        (32711, 'nmtp', 'usm', 'Edge', 3, 'Edge-3'),
+        (32740, 'nmtp', 'usm', 'Edge', 4, 'Edge-4'),
+        (32770, 'nmtp', 'usm', 'Screen', 5, 'Screen-5'),
+        (32771, 'nmtp', 'usm', 'Screen', 6, 'Screen-6'),
+        (32772, 'nmtp', 'usm', 'Screen', 7, 'Screen-7'),
+        (32773, 'nmtp', 'usm', 'Screen', 8, 'Screen-8'),
+        (32941, 'nmtp', 'usm', 'Electric', 9, 'Electric-9'),
+        (32942, 'nmtp', 'usm', 'Electric', 10, 'Electric-10'),
+        (33287, 'nmtp', 'usm', 'Edge', 11, 'Edge-11'),
+        (32777, 'nmtp', 'sennebogen', '860', 1, 'Sennebogen-1'),
+        (30301, 'nmtp', 'kran', 'sokol', 4, 'кран-4'),
+        (13893, 'nmtp', 'kran', 'sokol', 12, 'кран-12'),
+        (5908,  'nmtp', 'kran', 'sokol', 22, 'кран-22'),
+        ]
+
+
+for id, company, type, model, number, name in mech:
+    db.session.add(Mechanism(id, company, type, model, number, name))
+
 db.session.commit()
+
+# m = Mechanism(32777, company='nmtp', type='sennebogen', model='860', number=1, name='Sennebogen-1')
 a = [mech.id for mech in Mechanism.query.all()]
 print(a)
-

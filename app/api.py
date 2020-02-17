@@ -5,7 +5,8 @@ from app import db, app
 from app.model import Mechanism, Post
 from app.form import AddMechanism
 from datetime import datetime, timedelta
-from functions import today_shift_date, all_mechanisms_id, time_for_shift, time_for_shift_list, image_mechanism
+from functions import today_shift_date, all_mechanisms_id, time_for_shift, time_for_shift_list
+from functions import image_mechanism, all_mechanisms_type
 from sqlalchemy import func
 from pprint import pprint
 from psw import post_pass
@@ -51,6 +52,7 @@ def all_last_data():
     last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
         Post.timestamp.desc()).first() for x in all_mechanisms_id()]
     # last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).first() for x in all_mechanisms_id()]
+    print(last_data_mech)
     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
                                                  'name': el.mech.name,
                                                  'value': el.value,
@@ -59,11 +61,27 @@ def all_last_data():
                                                  'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
     return jsonify(data)
 
+
+@app.route("/api/v1.0/all_last_data_by_type_ico/<mech_type>", methods=["GET"])
+def all_last_data_by_type(mech_type):
+    '''get all data mechanism'''
+    last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
+        Post.timestamp.desc()).first() for x in all_mechanisms_id(mech_type)]
+    data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
+                                                 'name': el.mech.name,
+                                                 'value': el.value,
+                                                 'latitude': el.latitude,
+                                                 'longitude': el.longitude,
+                                                 'src': image_mechanism(el.value, el.mech.type, el.mech.number, el.timestamp+ timedelta(hours=HOURS)),
+                                                 'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
+    return jsonify(data)
+
+
 @app.route("/api/v1.0/all_last_data_ico", methods=["GET"])
 def all_last_data_ico():
     '''get all data mechanism and mechanism state'''
     last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
-    Post.timestamp.desc()).first() for x in all_mechanisms_id()]
+        Post.timestamp.desc()).first() for x in all_mechanisms_id()]
     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
                                                  'name': el.mech.name,
                                                  'value': el.value,
@@ -84,7 +102,10 @@ def get_mech(m_id):
 def add_fix_post(post):
     ''' I use it fix because arduino sometimes accumulates an extra minute '''
     last = db.session.query(Post).filter(Post.mechanism_id==post.mechanism_id).order_by(Post.timestamp.desc()).first()
-    dt_seconds =  (post.timestamp -last.timestamp).seconds
+    if last: #if not exist item in db not use function
+        dt_seconds =  (post.timestamp -last.timestamp).seconds
+    else:
+        dt_seconds= 201
     if dt_seconds < 200: # whatever the difference is not big
         last_minute =  last.timestamp.minute
         post_minute =  post.timestamp.minute
