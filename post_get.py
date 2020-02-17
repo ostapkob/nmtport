@@ -11,8 +11,8 @@ class Mechanism:
         self.value=value
         self.latitude=latitude
         self.longitude=longitude
-        self.ip ='http://127.0.0.1:5000/api/v1.0/add_get?'
-        # self.ip ='http://35.241.126.216/api/v1.0/add_get?'
+        #self.ip ='http://127.0.0.1:5000/api/v1.0/add_get?'
+        self.ip ='http://35.241.126.216/api/v1.0/add_get?'
 
     def send_get_request(self):
         print(self.mechanism_id, self.password, self.value, self.latitude, self.longitude)
@@ -57,8 +57,8 @@ if __name__ == "__main__":
     U10 =Mechanism(32942, 0,42.8144,132.8913)
     E11 =Mechanism(33287, 0,42.8152,132.8910)
     Sen1 =Mechanism(32777, 0,42.8147,132.8913)
-    mechanisms=Pt1, Pt2, E3, E4, S5,  S6,  S7,  S8, U9,  U10, E11
-    # mechanisms=Pt1,  #, E3, S5
+    # mechanisms=Pt1, Pt2, E3, E4, S5,  S6,  S7,  S8, U9,  U10, E11
+    mechanisms=Pt1,  #, E3, S5
 
     flag = True
     lat= 0.0001
@@ -68,7 +68,7 @@ if __name__ == "__main__":
         if time.time() - last_sent >= 60.0:
             last_sent = time.time()
             [m.chenge_value(1) for m in mechanisms]
-            E3.chenge_value(0)
+            # E3.chenge_value(0)
             Pt1.chenge_value(0)
             [m.chenge_position(lat, lng) for m in mechanisms]
             [m.send_get_request() for m in mechanisms]

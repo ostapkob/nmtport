@@ -2,7 +2,7 @@
 from flask import request, json, jsonify, abort, make_response
 from flask import render_template, flash, redirect
 from app import db, app
-from app.model import USM, USM_data
+from app.model import Mechanism, Post
 from app.form import AddMechanism
 from datetime import datetime, timedelta
 from functions import today_shift_date, all_mechanisms_id, time_for_shift, time_for_shift_list, image_mechanism
@@ -17,13 +17,13 @@ HOURS = 10
 def get_per_shift(m_id):
     '''get data for this shift by id mechanism'''
     date_shift, shift = today_shift_date()
-    data_per_shift = db.session.query(USM_data).filter(
-        USM_data.date_shift == date_shift, USM_data.shift == shift, USM_data.mechanism_id == m_id).all()
+    data_per_shift = db.session.query(Post).filter(
+        Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).all()
     try:
-        start = db.session.query(USM_data.timestamp).filter(
-            USM_data.date_shift == date_shift, USM_data.shift == shift, USM_data.mechanism_id == m_id).first()[0]
-        stop = db.session.query(USM_data.timestamp).filter(USM_data.date_shift == date_shift, USM_data.shift ==
-                                                       shift, USM_data.mechanism_id == m_id).order_by(USM_data.timestamp.desc()).first()[0]
+        start = db.session.query(Post.timestamp).filter(
+            Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).first()[0]
+        stop = db.session.query(Post.timestamp).filter(Post.date_shift == date_shift, Post.shift ==
+                                                       shift, Post.mechanism_id == m_id).order_by(Post.timestamp.desc()).first()[0]
     except TypeError:
         abort(405)
     start += timedelta(hours=HOURS)  # it should be better
@@ -43,12 +43,14 @@ def get_data(type_mechanism, date_shift, shift):
     data = time_for_shift(type_mechanism, date, shift)
 
     return jsonify(data)
+
+
 @app.route("/api/v1.0/all_last_data", methods=["GET"])
 def all_last_data():
     '''get all data mechanism'''
-    last_data_mech = [db.session.query(USM_data).filter(USM_data.mechanism_id == x).order_by(
-        USM_data.timestamp.desc()).first() for x in all_mechanisms_id()]
-    # last_data_mech = [db.session.query(USM_data).filter(USM_data.mechanism_id == x).first() for x in all_mechanisms_id()]
+    last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
+        Post.timestamp.desc()).first() for x in all_mechanisms_id()]
+    # last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).first() for x in all_mechanisms_id()]
     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
                                                  'name': el.mech.name,
                                                  'value': el.value,
@@ -60,8 +62,8 @@ def all_last_data():
 @app.route("/api/v1.0/all_last_data_ico", methods=["GET"])
 def all_last_data_ico():
     '''get all data mechanism and mechanism state'''
-    last_data_mech = [db.session.query(USM_data).filter(USM_data.mechanism_id == x).order_by(
-    USM_data.timestamp.desc()).first() for x in all_mechanisms_id()]
+    last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
+    Post.timestamp.desc()).first() for x in all_mechanisms_id()]
     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
                                                  'name': el.mech.name,
                                                  'value': el.value,
@@ -75,17 +77,14 @@ def all_last_data_ico():
 @app.route("/api/v1.0/get_mech/<int:m_id>", methods=["GET"])
 def get_mech(m_id):
     '''get name mechanism'''
-    mech = USM.query.get(m_id)
+    mech = Mechanism.query.get(m_id)
     print(mech)
     return f'{mech.name}'
 
 def add_fix_post(post):
     ''' I use it fix because arduino sometimes accumulates an extra minute '''
-    last = db.session.query(USM_data).filter(USM_data.mechanism_id==post.mechanism_id).order_by(USM_data.timestamp.desc()).first()
-    if last: #if not exist item in db not use function
-        dt_seconds =  (post.timestamp -last.timestamp).seconds
-    else:
-        dt_seconds= 201
+    last = db.session.query(Post).filter(Post.mechanism_id==post.mechanism_id).order_by(Post.timestamp.desc()).first()
+    dt_seconds =  (post.timestamp -last.timestamp).seconds
     if dt_seconds < 200: # whatever the difference is not big
         last_minute =  last.timestamp.minute
         post_minute =  post.timestamp.minute
@@ -117,12 +116,12 @@ def add_get():
     if int(mechanism_id) not in all_mechanisms_id():
         return 'Not this id'
     if float(latitude) == 0 or float(longitude) == 0:
-        mech = USM.query.get(mechanism_id)
-        data_mech = db.session.query(USM_data).filter(
-        USM_data.mechanism_id == mechanism_id).order_by(USM_data.timestamp.desc()).first()
+        mech = Mechanism.query.get(mechanism_id)
+        data_mech = db.session.query(Post).filter(
+        Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
         latitude = data_mech.latitude
         longitude = data_mech.longitude
-    new_post = USM_data(value, latitude, longitude, mechanism_id)
+    new_post = Post(value, latitude, longitude, mechanism_id)
     # data = request.data
     # db.session.add(new_post)
     # db.session.commit()
@@ -151,8 +150,8 @@ def add_post():
         longitude = request_j['longitude']
         mechanism_id = request_j['mechanism_id']
         if float(latitude) == 0 or float(longitude) == 0:
-            mech = USM.query.get(mechanism_id)
-            data_mech = db.session.query(USM_data).filter(USM_data.mechanism_id == mechanism_id).order_by(USM_data.timestamp.desc()).first()
+            mech = Mechanism.query.get(mechanism_id)
+            data_mech = db.session.query(Post).filter(Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
             latitude = data_mech.latitude
             longitude = data_mech.longitude
             print('--->', latitude, longitude, )
@@ -163,7 +162,7 @@ def add_post():
     else:
         abort(400)
 
-    new_post = USM_data(value, latitude, longitude, mechanism_id)
+    new_post = Post(value, latitude, longitude, mechanism_id)
     data = request.data
     db.session.add(new_post)
     db.session.commit()
@@ -185,7 +184,7 @@ def not_found(error):
 
 @app.route('/api/v1.0/add_mechanism', methods=['POST'])
 def add_mechanism():
-    all_mech_id = [mech.id for mech in USM.query.all()]
+    all_mech_id = [mech.id for mech in Mechanism.query.all()]
     request_f = request.form
     id = request_f['id']
     company = request_f['company']
@@ -193,7 +192,7 @@ def add_mechanism():
     model = request_f['model']
     number = request_f['number']
     name = request_f['name']
-    new_mech = USM(id, company, type, model, number, name)
+    new_mech = Mechanism(id, company, type, model, number, name)
     data = request.data
     db.session.add(new_mech)
     db.session.commit()
@@ -211,7 +210,7 @@ def add_mechanism_json():
     model = request.json['model']
     number = request.json['number']
     name = request.json['name']
-    new_mech = USM(id, company, type, model, number, name)
+    new_mech = Mechanism(id, company, type, model, number, name)
     data = request.data
     db.session.add(new_mech)
     db.session.commit()
