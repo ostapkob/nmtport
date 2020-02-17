@@ -29,6 +29,8 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     mechanism_id = db.Column(db.Integer, db.ForeignKey('mechanism.id'))
     value = db.Column(db.Float)
+    value2 = db.Column(db.Float)
+    value3 = db.Column(db.Integer)
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
     # timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)

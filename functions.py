@@ -27,6 +27,10 @@ def all_mechanisms_id(type=None):
         return [m.id for m in db.session.query(Mechanism).all()]
     return [m.id for m in db.session.query(Mechanism).filter(Mechanism.type == type).all()]
 
+def all_mechanisms_type():
+    '''Find all mechanisms type'''
+    ls = [m.type for m in db.session.query(Mechanism).all()]
+    return set(ls)
 
 def all_number(type, number):
     '''Need to do then'''
