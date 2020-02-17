@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from flask import render_template, flash
-from app.model import USM_data, USM
+from app.model import Post, Mechanism
 from app import db
 from pprint import pprint
 HOURS = 10
@@ -24,13 +24,13 @@ def today_shift_date():
 def all_mechanisms_id(type=None):
     '''Find all mechanisms id'''
     if type == None:
-        return [m.id for m in db.session.query(USM).all()]
-    return [m.id for m in db.session.query(USM).filter(USM.type == type).all()]
+        return [m.id for m in db.session.query(Mechanism).all()]
+    return [m.id for m in db.session.query(Mechanism).filter(Mechanism.type == type).all()]
 
 
 def all_number(type, number):
     '''Need to do then'''
-    return [m.id for m in USM.query.all()]
+    return [m.id for m in Mechanism.query.all()]
 
 def multiple_5(date): #not use
     '''Return time multiple 5 minutes and remite microseconds'''
@@ -46,8 +46,8 @@ def time_for_shift(type_mechanism, date_shift, shift):
     # get data from db
     shift = int(shift)
     all_mechs = all_mechanisms_id(type_mechanism)
-    cursor = db.session.query(USM_data).filter(USM_data.date_shift == date_shift, USM_data.shift ==
-                                           shift, USM_data.mechanism_id.in_(all_mechs)).order_by(USM_data.mechanism_id).all()
+    cursor = db.session.query(Post).filter(Post.date_shift == date_shift, Post.shift ==
+                                           shift, Post.mechanism_id.in_(all_mechs)).order_by(Post.mechanism_id).all()
     # create dict all works mechanism in shift
     data_per_shift = {}
     for el in cursor:
@@ -122,8 +122,8 @@ def image_mechanism(value, type_mechanism, number, last_time):
 def time_for_shift_list(date_shift, shift): #not use
     '''get dict with all minute's values for the period'''
     # get data from db
-    cursor = db.session.query(USM_data).filter(
-        USM_data.date_shift == date_shift, USM_data.shift == shift).order_by(USM_data.mechanism_id).all()
+    cursor = db.session.query(Post).filter(
+        Post.date_shift == date_shift, Post.shift == shift).order_by(Post.mechanism_id).all()
 
     # create dict all works mechanism in shift
     data_per_shift = {}
@@ -186,7 +186,7 @@ def handle_date(date):
         return datetime.now().date()
 
 def add_post(post):
-    # new_post = USM_data(value, latitude, longitude, mechanism_id)
+    # new_post = Post(value, latitude, longitude, mechanism_id)
     print(post)
     # print(post.value, post.latitude)
     # db.session.add(new_post)
