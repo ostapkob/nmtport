@@ -66,7 +66,7 @@ tests = ( [[1, -1, -1, -1, -1], True],
 #     if chech_values(values, 0) != res:
         # print(values)
 
-host ="http://35.241.126.216"
+host ="http://18.139.162.128"
 type_mechanism = "usm"
 TOKEN = "977352466:AAEgH-c6FFFGbv71pSBP8hbtu9oSS6JrY48"
 if flag:

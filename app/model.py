@@ -65,6 +65,11 @@ class Post(db.Model):
         self.date_shift = date_shift
         self.terminal = terminal
 
+        d = str(timestamp) + " " + str(hour) + " " + str(date_shift) + " " + str(shift)
+        with open('post.txt', 'w') as f:
+            f.write(d)
+
+
     def __repr__(self):
         return f'{self.value}'
 
