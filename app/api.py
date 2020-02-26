@@ -52,10 +52,12 @@ def all_last_data():
     last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
         Post.timestamp.desc()).first() for x in all_mechanisms_id()]
     # last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).first() for x in all_mechanisms_id()]
-    print(last_data_mech)
+    print(last_data_mech, '----------------')
     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
                                                  'name': el.mech.name,
                                                  'value': el.value,
+                                                 'value2': el.value2,
+                                                 'value3': el.value3,
                                                  'latitude': el.latitude,
                                                  'longitude': el.longitude,
                                                  'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
@@ -115,19 +117,20 @@ def add_fix_post(post):
     db.session.add(post)
     db.session.commit()
 
-@app.route('/api/v1.0/add_get', methods=['GET'])
+@app.route('/api/v1.0/add_get_usm', methods=['GET'])
 def add_get():
     '''add post by GET request from arduino'''
     mechanism_id = request.args.get('mechanism_id')
     password = request.args.get('password')
     value = request.args.get('value')
+    value2 = request.args.get('value2')
+    value3 = request.args.get('value3')
     latitude = request.args.get('latitude')
     longitude = request.args.get('longitude')
     if latitude == '':
         latitude = 0
         longitude = 0
-        print('fix-->', end=' ')
-    items = mechanism_id, password, value, latitude, longitude
+    items = mechanism_id, password, latitude, longitude
     test_items = any([item==None for item in items])
     print(items, datetime.now(), not test_items)
     if test_items:
@@ -142,7 +145,7 @@ def add_get():
         Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
         latitude = data_mech.latitude
         longitude = data_mech.longitude
-    new_post = Post(value, latitude, longitude, mechanism_id)
+    new_post = Post(value=value, value2=value2, value3=value3, latitude=latitude, longitude=longitude, mechanism_id=mechanism_id)
     # data = request.data
     # db.session.add(new_post)
     # db.session.commit()

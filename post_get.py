@@ -5,19 +5,23 @@ import time
 from datetime import datetime
 
 class Mechanism:
-    def __init__(self, mechanism_id, value, latitude, longitude):
+    def __init__(self, mechanism_id, value,value2, value3, latitude, longitude):
         self.mechanism_id= mechanism_id
         self.password=post_pass
         self.value=value
+        self.value2=value2
+        self.value3=value3
         self.latitude=latitude
         self.longitude=longitude
-        self.ip ='http://127.0.0.1:5000/api/v1.0/add_get?'
-        self.ip ='http://18.139.162.128/api/v1.0/add_get?'
+        self.ip ='http://127.0.0.1:5000/api/v1.0/add_get_usm?'
+        # self.ip ='http://18.139.162.128/api/v1.0/add_get?'
     def send_get_request(self):
         print(self.mechanism_id, self.password, self.value, self.latitude, self.longitude)
         params = {'mechanism_id': self.mechanism_id,
                  'password': self.password,
                  'value': self.value,
+                 'value2': self.value2,
+                 'value3': self.value3,
                  'latitude': round(self.latitude, 4),
                  'longitude':round(self.longitude, 4)}
         try:
@@ -44,22 +48,22 @@ class Mechanism:
         print(self.mechanism_id, self.password, self.value, self.latitude, self.longitude)
 
 if __name__ == "__main__":
-    Pt1=Mechanism(32046, 0,42.8089,132.8865)
-    Pt2=Mechanism(32047, 0,42.8082,132.8869)
-    E3 =Mechanism(32711, 0,42.8094,132.8878)
-    E4 =Mechanism(32740, 0,42.8106,132.8885)
-    S5 =Mechanism(32770, 0,42.8118,132.8893)
-    S6 =Mechanism(32771, 0,42.8122,132.8887)
-    S7 =Mechanism(32772, 0,42.8144,132.8899)
-    S8 =Mechanism(32773, 0,42.8171,132.8926)
-    U9 =Mechanism(32941, 0,42.8132,132.8899)
-    U10 =Mechanism(32942, 0,42.8144,132.8913)
-    E11 =Mechanism(33287, 0,42.8152,132.8910)
-    Sen1 =Mechanism(32777, 0,42.8147,132.8913)
-    kran4=Mechanism(30301, 0,42.8140,132.8913)
-    kran12=Mechanism(13893, 0,42.8138,132.8914)
-    kran22=Mechanism(5908, 0,42.8136,132.8912)
-    mechanisms=Pt1, Pt2, E3, E4, S5,  S6,  S7,  S8, U9,  U10, E11, Sen1, kran4, kran12, kran22
+    Pt1=     Mechanism(mechanism_id=32046, value=0, value2=0, value3=0, latitude=42.8089, longitude=132.8865)
+    Pt2=     Mechanism(mechanism_id=32047, value=0, value2=0, value3=0, latitude=42.8082, longitude=132.8869)
+    E3 =     Mechanism(mechanism_id=32711, value=0, value2=0, value3=0, latitude=42.8094, longitude=132.8878)
+    E4 =     Mechanism(mechanism_id=32740, value=0, value2=0, value3=0, latitude=42.8106, longitude=132.8885)
+    S5 =     Mechanism(mechanism_id=32770, value=0, value2=0, value3=0, latitude=42.8118, longitude=132.8893)
+    S6 =     Mechanism(mechanism_id=32771, value=0, value2=0, value3=0, latitude=42.8122, longitude=132.8887)
+    S7 =     Mechanism(mechanism_id=32772, value=0, value2=0, value3=0, latitude=42.8144, longitude=132.8899)
+    S8 =     Mechanism(mechanism_id=32773, value=0, value2=0, value3=0, latitude=42.8171, longitude=132.8926)
+    U9 =     Mechanism(mechanism_id=32941, value=0, value2=0, value3=0, latitude=42.8132, longitude=132.8899)
+    U10 =    Mechanism(mechanism_id=32942, value=0, value2=0, value3=0, latitude=42.8144, longitude=132.8913)
+    E11 =    Mechanism(mechanism_id=33287, value=0, value2=0, value3=0, latitude=42.8152, longitude=132.8910)
+    Sen1 =   Mechanism(mechanism_id=32777, value=0, value2=0, value3=0, latitude=42.8147, longitude=132.8913)
+    kran4=   Mechanism(mechanism_id=30301, value=0, value2=0, value3=0, latitude=42.8140, longitude=132.8913)
+    kran12=  Mechanism(mechanism_id=13893, value=0, value2=0, value3=0, latitude=42.8138, longitude=132.8914)
+    kran22=  Mechanism(mechanism_id=5908,  value=0, value2=0, value3=0, latitude=42.8136, longitude=132.8912)
+    mechanisms=Pt1, Pt2, E3, S5,  S6,  S7,  S8, U9,  U10, E11, Sen1, kran4, kran12, kran22
     # mechanisms=Pt1,  #, E3, S5
 
     flag = True

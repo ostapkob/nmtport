@@ -23,16 +23,14 @@ class Mechanism(db.Model):
         return f'<{self.name}>'
 
 
-
-
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     mechanism_id = db.Column(db.Integer, db.ForeignKey('mechanism.id'))
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
     value = db.Column(db.Float)
     value2 = db.Column(db.Float)
     value3 = db.Column(db.Integer)
-    latitude = db.Column(db.Float)
-    longitude = db.Column(db.Float)
     # timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     timestamp = db.Column(db.DateTime, index=True)
     date_shift = db.Column(db.Date)
@@ -40,7 +38,7 @@ class Post(db.Model):
     # this column must form by GPS
     terminal = db.Column(db.SmallInteger, index=True)
 
-    def __init__(self, value, latitude, longitude, mechanism_id, timestamp=None):
+    def __init__(self, mechanism_id, latitude=0, longitude=0, value=None,value2=None, value3=None,  timestamp=None):
         hour = datetime.now().hour
         if hour >= 8 and hour < 20:
             date_shift = datetime.now()
@@ -58,6 +56,8 @@ class Post(db.Model):
         else:
             self.timestamp = datetime.utcnow()
         self.value = value
+        self.value2 = value2
+        self.value3 = value3
         self.latitude = latitude
         self.longitude = longitude
         self.mechanism_id = mechanism_id
