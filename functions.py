@@ -58,6 +58,7 @@ def time_for_shift(type_mechanism, date_shift, shift):
         date_t = el.timestamp.replace(second=0, microsecond=0)
         date_t += timedelta(hours=10)
         # date_t = date_t.strftime("%H:%M")
+        el.value = -1 if el.value==None else el.value
         val_minute = 0 if el.value < 0.1 else el.value
 
         if data_per_shift.get(el.mech.number):

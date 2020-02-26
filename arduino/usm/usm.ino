@@ -7,13 +7,13 @@
 //#define testLed  7
 
 // Tx of GSM –> pin 5 of Arduino |  Rx of GSM —> pin 6 of Arduino
-SoftwareSerial SimSerial(6, 5); // RX  TX
+SoftwareSerial SimSerial(5, 6); // TX  RX
 
 unsigned long timer, timerSent;
 String dataGPS, statusGet;
 String latitude, longitude;
-String const ip_addr = "http://35.241.126.216";
-String const api = "/api/v1.0/add_get?";
+String const ip_addr = "http://18.139.162.128";
+String const api = "/api/v1.0/add_get_usm";
 String const mechanism_id = "32740";
 String const password = "super_pass";
 int count, sum;
@@ -23,7 +23,7 @@ int bad_conect;
 void setup() {
   Serial.begin(9600);
   SimSerial.begin(9600);
-  SimSerial.setTimeout(1000);//3000
+  SimSerial.setTimeout(1000);
   //  updateSerial();
   turnOnShield();
   turnOnGPS();
@@ -31,7 +31,7 @@ void setup() {
   pinMode (lever, INPUT); //_PULLUP);
   pinMode(led, OUTPUT);
   //  pinMode (testLed, OUTPUT);
-  ArduinoToSim("AT+GSMBUSY=1", 1000); //Reject incoming call
+  ArduinoToSim("AT+GSMBUSY=1", 500); //Reject incoming call
   statusShield();
   statusConect();
   //  GetSend(0, "0", "0");
@@ -99,7 +99,7 @@ void registrationSim() {
   ArduinoToSim("AT+CGATT=1", 100);// GPRS attach or deatach
   ArduinoToSim("AT + CREG?", 100);// is module in network
   ArduinoToSim("AT + SAPBR = 3,1, \"CONTYPE\", \"GPRS\"", 1000);
-  ArduinoToSim("AT+SAPBR=3,1,\"APN\",\"internet.mts.ru\"", 1000);
+  ArduinoToSim("AT+SAPBR=3,1,\"APN\",\"internet.beeline.ru\"", 1000);  //internet.mts.ru
   ArduinoToSim("AT+SAPBR=1,1", 2000); //Conect gprs
   ArduinoToSim("AT+SAPBR=2,1", 1000); //Status Conect gprs
   ArduinoToSim("AT+HTTPINIT", 1000);
@@ -122,35 +122,11 @@ void ParseGPS(String str) {
   }
 }
 
-//not use
-void statusConectFlight() { // if GPRS not conect then on/off module in flight mode
-  String statusGPRS;
-  updateSerial(); // clear Serial
-  statusGPRS = sendData("AT+SAPBR=2,1", 500);
-  if (statusGPRS.indexOf("SAPBR: 1,1,") < 0) {
-    ArduinoToSim(" AT + CFUN = 0", 1000); //put module in flight mode
-    ArduinoToSim(" AT + CFUN = 1", 1000);
-  }
-}
-
-//not use
-void statusConect() { // if GPRS not conect then reset
-  String statusGPRS;
-  updateSerial(); // clear Serial
-  statusGPRS = sendData("AT+SAPBR=2,1", 500);
-  //  Serial.println("______________");
-  if (statusGPRS.indexOf("SAPBR: 1,1,") < 0) {
-    ArduinoToSim("AT+CPOWD=1", 200);
-    turnOnShield();
-    turnOnGPS();
-    registrationSim();
-  }
-}
 
 void statusConectCount() { // if bad conect more then 3 then reset
   String statusGPRS;
   updateSerial(); // clear Serial
-  statusGPRS = sendData("AT+SAPBR=2,1", 500);
+  statusGPRS = sendData("AT+SAPBR=2,1", 200);
   //  Serial.println("______________");
   if (statusGPRS.indexOf("SAPBR: 1,1,") < 0) {
     bad_conect++;
@@ -167,18 +143,16 @@ void statusConectCount() { // if bad conect more then 3 then reset
   }
 }
 
-
-
 void GetSend(float resultD, String latitudeD, String longitudeD) {
   //sent data on server
   String get_request;
-  get_request = "AT+HTTPPARA=\"URL\", \"" + ip_addr + api + "mechanism_id=" + mechanism_id + "&password=" + password + "&value=" + String(resultD) + "&latitude=" + latitudeD + "&longitude=" + longitudeD + "\"";
-  ArduinoToSim("AT+HTTPINIT", 1000);  // ???
+  get_request = "AT+HTTPPARA=\"URL\", \"" + ip_addr + api + "?mechanism_id=" + mechanism_id + "&password=" + password + "&value=" + String(resultD) + "&latitude=" + latitudeD + "&longitude=" + longitudeD + "\"";
+  ArduinoToSim("AT+HTTPINIT", 100);  // ???
   ArduinoToSim("AT+HTTPPARA=\"CID\",1", 100);
-  ArduinoToSim(get_request, 200);
-  ArduinoToSim("AT+HTTPACTION=0", 200);
-  ArduinoToSim("AT+HTTPREAD", 200);
-  ArduinoToSim("AT+HTTPTERM", 300); // ???
+  ArduinoToSim(get_request, 100);
+  ArduinoToSim("AT+HTTPACTION=0", 100);
+  ArduinoToSim("AT+HTTPREAD", 100);
+  ArduinoToSim("AT+HTTPTERM", 100); // ???
 }
 
 
@@ -196,18 +170,17 @@ String sendData (String command , const int timeout) { // sent data to serial po
   return response;
 }
 
-
 void ArduinoToSim(String command, const int wait) { //it is more comfortable
+  delay(wait);
   SimSerial.println(command);
   updateSerial();
-  delay(wait);
 }
 
 
 void updateSerial()
 //message view function
 {
-  delay(1000);// Атдрюха  может эту строчку убрать? Или поменьше сделать?
+ // delay(1000);
   while (Serial.available())
   {
     SimSerial.write(Serial.read());
@@ -217,6 +190,30 @@ void updateSerial()
     Serial.write(SimSerial.read());
   }
 }
+
+void statusConect() { // if GPRS not conect then reset
+  String statusGPRS;
+  updateSerial(); // clear Serial
+  statusGPRS = sendData("AT+SAPBR=2,1", 500);
+  //  Serial.println("______________");
+  if (statusGPRS.indexOf("SAPBR: 1,1,") < 0) {
+    ArduinoToSim("AT+CPOWD=1", 200);
+    turnOnShield();
+    turnOnGPS();
+    registrationSim();
+  }
+}
+
+//not use
+//void statusConectFlight() { // if GPRS not conect then on/off module in flight mode
+//  String statusGPRS;
+//  updateSerial(); // clear Serial
+//  statusGPRS = sendData("AT+SAPBR=2,1", 500);
+//  if (statusGPRS.indexOf("SAPBR: 1,1,") < 0) {
+//    ArduinoToSim(" AT + CFUN = 0", 1000); //put module in flight mode
+//    ArduinoToSim(" AT + CFUN = 1", 1000);
+//  }
+//}
 
 //void LED () {
 //  digitalWrite (testLed, HIGH);
