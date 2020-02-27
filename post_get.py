@@ -13,8 +13,8 @@ class Mechanism:
         self.value3=value3
         self.latitude=latitude
         self.longitude=longitude
-        self.ip ='http://127.0.0.1:5000/api/v1.0/add_get_usm?'
-        # self.ip ='http://18.139.162.128/api/v1.0/add_get?'
+        # self.ip ='http://127.0.0.1:5000/api/v1.0/add_get_usm?'
+        self.ip ='http://18.139.162.128/api/v1.0/add_get_usm?'
     def send_get_request(self):
         print(self.mechanism_id, self.password, self.value, self.latitude, self.longitude)
         params = {'mechanism_id': self.mechanism_id,

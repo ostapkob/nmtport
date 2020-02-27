@@ -1,10 +1,10 @@
 #include <SoftwareSerial.h>
 #define lever 9
+#define roller 8
 #define led  13
 #define onShield  2
 #include<stdio.h>
 #include<string.h>
-//#define testLed  7
 
 // Tx of GSM –> pin 5 of Arduino |  Rx of GSM —> pin 6 of Arduino
 SoftwareSerial SimSerial(5, 6); // TX  RX
@@ -16,8 +16,8 @@ String const ip_addr = "http://18.139.162.128";
 String const api = "/api/v1.0/add_get_usm";
 String const mechanism_id = "32740";
 String const password = "super_pass";
-int count, sum;
-float  result;
+float count, sumLever, result;
+long speedRoller;
 int bad_conect;
 
 void setup() {
@@ -28,38 +28,48 @@ void setup() {
   turnOnShield();
   turnOnGPS();
   registrationSim();
-  pinMode (lever, INPUT); //_PULLUP);
+  pinMode (lever, INPUT_PULLUP);
+  pinMode (roller, INPUT_PULLUP);
   pinMode(led, OUTPUT);
-  //  pinMode (testLed, OUTPUT);
   ArduinoToSim("AT+GSMBUSY=1", 500); //Reject incoming call
   statusShield();
   statusConect();
-  //  GetSend(0, "0", "0");
   //  ArduinoToSim("ATE0", 1000);// echo
 }
 
 
 void loop() {
-  if (millis() - timer > 100 ) {
+  if (millis() - timer >= 50 ) {// I DON'T NOW 
     timer = millis();
     count ++;
     if (digitalRead(lever) == 1) { //push or not push
-      sum++;
+      sumLever++;
       digitalWrite(led, 1);
     }
     else {
       digitalWrite(led, 0);
     }
+
+    if (digitalRead(roller) == 0) { //if roller stant still
+      speedRoller++;
+    }
   }
+
   if (millis() - timerSent >= 60000 ) {
     timerSent = millis();
     statusConectCount();
     dataGPS = sendData("AT + CGPSINF=2", 2000);
     ParseGPS(dataGPS);
-    result = (float)sum / (float)count;
+    result = sumLever / count;
+
+    if ((float)speedRoller / count == 1) {
+      speedRoller = 0;
+    }
+
+    GetSend(result, speedRoller, latitude, longitude);
     count = 0;
-    sum = 0;
-    GetSend(result, latitude, longitude);
+    sumLever = 0;
+    speedRoller = 0;
   }
 }
 
@@ -131,22 +141,22 @@ void statusConectCount() { // if bad conect more then 3 then reset
   if (statusGPRS.indexOf("SAPBR: 1,1,") < 0) {
     bad_conect++;
     if (bad_conect > 3) {
-      bad_conect=0;
+      bad_conect = 0;
       ArduinoToSim("AT+CPOWD=1", 200);
       turnOnShield();
       turnOnGPS();
       registrationSim();
     }
-    else{
-      bad_conect=0;
+    else {
+      bad_conect = 0;
     }
   }
 }
 
-void GetSend(float resultD, String latitudeD, String longitudeD) {
+void GetSend(float resultLever, long resultRoller, String latitudeD, String longitudeD) {
   //sent data on server
   String get_request;
-  get_request = "AT+HTTPPARA=\"URL\", \"" + ip_addr + api + "?mechanism_id=" + mechanism_id + "&password=" + password + "&value=" + String(resultD) + "&latitude=" + latitudeD + "&longitude=" + longitudeD + "\"";
+  get_request = "AT+HTTPPARA=\"URL\", \"" + ip_addr + api + "?mechanism_id=" + mechanism_id + "&password=" + password + "&value=" + String(resultLever) + "&value2=" + String(resultRoller) +  "&latitude=" + latitudeD + "&longitude=" + longitudeD + "\"";
   ArduinoToSim("AT+HTTPINIT", 100);  // ???
   ArduinoToSim("AT+HTTPPARA=\"CID\",1", 100);
   ArduinoToSim(get_request, 100);
@@ -180,7 +190,7 @@ void ArduinoToSim(String command, const int wait) { //it is more comfortable
 void updateSerial()
 //message view function
 {
- // delay(1000);
+  // delay(1000);
   while (Serial.available())
   {
     SimSerial.write(Serial.read());
