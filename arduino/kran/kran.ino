@@ -1,90 +1,91 @@
-#include <SPI.h>
-#include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
-#define OLED_RESET 4
 #define sensor1 2
 #define sensor2 3
 #define sensor3 4
 #define sensor4 5
-Adafruit_SSD1306 display(OLED_RESET);
+/*
+           море
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-uint32_t Timer1, Timer2, Timer3, Timer4;
-int temp180;
-int p90, p180;
-String data, res;
+‾‾‾‾‾‾‾‾‾‾2-----3‾‾‾‾‾‾‾‾‾‾
+          |     |
+__________1-----4__________
+
+==============================
+*/
+
+uint32_t Timer1, Timer2, Timer3, Timer4, TimerPrint;
+int p90, p180; // один цикл 90 и один цикл 180
+int halfTurn180; // оборот в одну сторону на 180 градусов
+int p90Temp, p180Temp; // переменные для хранения предыдущих значений
+String data; 
 int Led = 13;//LED pin
 
 void setup()
 {
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-  display.clearDisplay();
   pinMode(Led, OUTPUT);
   pinMode(sensor1, INPUT_PULLUP);
   pinMode(sensor2, INPUT_PULLUP);
   pinMode(sensor3, INPUT_PULLUP);
-  pinMode(sensor4, INPUT);
+  pinMode(sensor4, INPUT_PULLUP);
   Serial.begin(9600);
 }
 
 void loop()
 {
-
-  if (digitalRead(sensor1) == LOW && millis() - Timer1 > 1000)
+  if (digitalRead(sensor1) == LOW && millis() - Timer1 > 2000)
   {
     Timer1 = millis();
     data += "1";
     LED();
   }
 
-  if (digitalRead(sensor2) == LOW && millis() - Timer2 > 1000)
+  if (digitalRead(sensor2) == LOW && millis() - Timer2 > 2000)
   {
     Timer2 = millis();
     data += "2";
     LED();
   }
 
-  if (digitalRead(sensor3) == LOW && millis() - Timer3 > 1000)
+  if (digitalRead(sensor3) == 1 && millis() - Timer3 > 2000)
   {
     Timer3 = millis();
     data += "3";
     LED();
   }
-  if (digitalRead(sensor4) == 1 && millis() - Timer4 > 1000)
+  if (digitalRead(sensor4) == 1 && millis() - Timer4 > 2000)
   {
     Timer4 = millis();
     data += "4";
     LED();
   }
 
-  Serial.println(data + "-" + p90 + "-" + p180);
+
+  if (millis() - TimerPrint > 500)
+  {
+    TimerPrint = millis();
+    Serial.println(data + ":" + p90 + "-" + p180);
+  }
+
   if (data.length() > 1) {
-    if (data == "11" || data == "22" || data == "33" || data == "44")  {
+    if (data == "11" || data == "22" || data == "33" || data == "44")  { // выгружает вагоны
       p90 += 1;
     }
-    if (data == "12" || data == "21" || data == "34" || data == "43")  {
-      temp180 += 1;
+    if (data == "12" || data == "21" || data == "34" || data == "43")  { // поворачивается на параход
+      halfTurn180 += 1;
     }
     data = "";
+    p180 = halfTurn180 / 2; // цикл считается когда кран повернулся на 180 туда и обратно
+    if (p90 - p90Temp == 1) { // если новое значение больше старого 
+      Serial.println(" отправляем на сервер 90 градусов" + p90);
+    }
+    if (p180 - p180Temp == 1) {// если новое значение больше старого 
+      Serial.println(" отправляем на сервер 180 градусов" +  p180);
+    }
+    p90Temp = p90;
+    p180Temp = p180;
+
   }
-  p180 = temp180 / 2;
-
-
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(0, 0);
-  display.println(data);
-  res = String(p90) + "     " + String(p180);
-  display.println("90          180");
-  //  display.println(p90);
-  //  display.println(p180);
-  display.setTextSize(2);
-  display.println(res);
-  display.display();
-  display.clearDisplay();
 }
-
-
 
 
 void LED() {
