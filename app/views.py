@@ -5,7 +5,7 @@ from app import db, app
 from app.model import Mechanism, Post
 from app.form import AddMechanism, SelectDataShift
 from datetime import datetime, timedelta
-from functions import today_shift_date, all_mechanisms_id, time_for_shift, handle_date
+from functions import today_shift_date, all_mechanisms_id, time_for_shift_usm, time_for_shift_kran, handle_date
 import app.api as API
 from sqlalchemy import func
 from pprint import pprint
@@ -19,12 +19,12 @@ db.create_all()
 @app.route("/index")
 def index():
     date_shift, shift = today_shift_date()
-    data = time_for_shift('usm', date_shift, shift)
+    # data = time_for_shift_usm(date_shift, shift)
     # data = time_for_shift('sennebogen', date_shift, shift)
     # date_shift = datetime.strptime(date_shift, '%d.%m.%Y').date()
     return render_template("index.html",
                            title='Мониторинг',
-                           data=data,
+                           # data=data,
                            shift=shift,
                            date_shift=date_shift
                            )
@@ -46,11 +46,18 @@ def form_mech():
 
 @app.route("/last")
 def last():
-
     return render_template("last.html",
                            title='Last')
 
+@app.route("/kran")
+def kran():
+    return render_template("kran.html",
+                           title='Краны')
 
+@app.route("/usm")
+def usm():
+    return render_template("usm.html",
+                           title='УСМ')
 @app.route("/map")
 def maps():
     return render_template("map.html",
@@ -94,7 +101,7 @@ def archive():
         # except ValueError:
         #     flash('Enter correct shift')
         #     return redirect(url_for('index'))
-        data = time_for_shift(type_mechanism, date, shift)
+        data = time_for_shift_kran(date, shift)
         return render_template("archive.html",
                                data=data,
                                shift=shift,
