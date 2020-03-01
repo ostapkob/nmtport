@@ -25,7 +25,7 @@ uint32_t TimerPrint, TimerLed;
 int p90, p180; // один цикл 90 и один цикл 180
 int halfTurn180; // оборот в одну сторону на 180 градусов
 int p90Temp, p180Temp; // переменные для хранения предыдущих значений
-int countGet=0 // счетчик отправленных запросов
+int countGet=0; // счетчик отправленных запросов
 String data, two_las_simvols;
 int Led = 13;//LED pin
 
@@ -124,10 +124,10 @@ void loop()
     p180 = halfTurn180 / 2; // цикл считается когда кран повернулся на 180 туда и обратно
     countGet++;
     if (p90 - p90Temp == 1) { // если новое значение больше старого
-      Serial.println(" отправляем на сервер 90 градусов" + p90 + " " + countGet);
+      Serial.println(" отправляем на сервер 90 градусов" +  String(p90) + " " + String(countGet));
     }
     if (p180 - p180Temp == 1) {// если новое значение больше старого
-      Serial.println(" отправляем на сервер 180 градусов" +  p180 + " " + countGet);
+      Serial.println(" отправляем на сервер 180 градусов" +  String(p90) + " " + String(countGet));
     }
     p90Temp = p90;
     p180Temp = p180;
