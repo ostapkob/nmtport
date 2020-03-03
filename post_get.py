@@ -14,7 +14,7 @@ class Mechanism:
         self.latitude=latitude
         self.longitude=longitude
         self.ip ='http://127.0.0.1:5000'
-        self.ip ='http://18.139.162.128'
+        # self.ip ='http://18.139.162.128'
         self.api_usm ='/api/v1.0/add_get_usm?'
         self.api_kran ='/api/v1.0/add_get_kran?'
     def send_get_request(self):
@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
             [m.chenge_position(lat, lng) for m in mechanisms]
             [m.send_get_request() for m in mechanisms]
-            # [m.increase_value3() for m in mechanisms]
+            [m.increase_value3() for m in mechanisms]
             if flag:
                 lat= 0.0001
                 lng=-0.0001

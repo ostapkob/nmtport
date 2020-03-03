@@ -66,15 +66,20 @@ def time_for_shift_kran(date_shift, shift):
         if data_per_shift.get(el.mech.number):
             data_per_shift[el.mech.number]['data'][date_t] = [el.value, el.value3]
             if el.value==1:
-                data_per_shift[el.mech.number]['total_180'] += 1
-            if el.value==2:
                 data_per_shift[el.mech.number]['total_90'] += 1
+            if el.value==2:
+                data_per_shift[el.mech.number]['total_180'] += 1
             pre_value=el.value3
         else:
             data_per_shift[el.mech.number] = {}
             data_per_shift[el.mech.number]['mechanism'] = el.mech
-            data_per_shift[el.mech.number]['total_180'] = 0
-            data_per_shift[el.mech.number]['total_90'] = 0
+            print('..', el.value)
+            if el.value==1:
+                data_per_shift[el.mech.number]['total_90'] = 1
+                data_per_shift[el.mech.number]['total_180'] = 0
+            if el.value==2:
+                data_per_shift[el.mech.number]['total_90'] = 0
+                data_per_shift[el.mech.number]['total_180'] = 1
             data_per_shift[el.mech.number]['data'] = {}
             data_per_shift[el.mech.number]['data'][date_t] = [el.value, el.value3]
             pre_value=el.value3

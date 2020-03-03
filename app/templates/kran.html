@@ -13,7 +13,7 @@
         </div>
         <div class="progress">
             <div v-for="minute in el.data" class="progress-bar" role="progressbar"
-            style="width: 0.1388%"   :class="{ 'bg-warning':minute.value==0, 'bg-dark':minute.value==2, 'bg-danger':minute.value==-1}"></div>
+            style="width: 0.1388%"   :class="{ 'bg-warning':minute.value==0, 'bg-dark':minute.value==1, 'bg-danger':minute.value==-1}"></div>
             </div>
         <div class="line-mech">
             <span class="time-mech" v-for="hour in hs"> {{ '{{ hour }} '}} </span>
