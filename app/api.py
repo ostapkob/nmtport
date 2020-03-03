@@ -56,7 +56,6 @@ def all_last_data():
     last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
         Post.timestamp.desc()).first() for x in all_mechanisms_id()]
     # last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).first() for x in all_mechanisms_id()]
-    print(last_data_mech, '----------------')
     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
                                                  'name': el.mech.name,
                                                  'value': el.value,
@@ -151,9 +150,8 @@ def add_get_usm():
         Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
         latitude = data_mech.latitude
         longitude = data_mech.longitude
-    new_post = Post(value=value, value2=value2, value3=value3, latitude=latitude, longitude=longitude, mechanism_id=mechanism_id)
-    db.session.add(new_post)
-    db.session.commit()
+    new_post = Post(value=value, value2=value2, latitude=latitude, longitude=longitude, mechanism_id=mechanism_id)
+    add_fix_post(new_post)
     return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
 
 @app.route('/api/v1.0/add_get_kran', methods=['GET'])
@@ -183,8 +181,9 @@ def add_get_kran():
         Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
         latitude = data_mech.latitude
         longitude = data_mech.longitude
-    new_post = Post(value=value, value3=value3, latitude=latitude, longitude=longitude, mechanism_id=mechanism_id)
-    add_fix_post(new_post)
+    new_post = Post(value=value,value3=value3, latitude=latitude, longitude=longitude, mechanism_id=mechanism_id)
+    db.session.add(new_post)
+    db.session.commit()
     return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
 
 
