@@ -231,12 +231,12 @@ void turnOnGPS() {
 }
 
 void registrationSim() {
-  ArduinoToSim("AT", 100);// Status Shild
-  ArduinoToSim("AT+CSQ", 100);//Signal quality test, 0-31
-  ArduinoToSim("AT+CCID", 100);// SIM card information
-  ArduinoToSim("AT + CIPSHUT", 100);//Break all connections
-  ArduinoToSim("AT+CGATT=1", 100);// GPRS attach or deatach
-  ArduinoToSim("AT + CREG?", 100);// is module in network
+  ArduinoToSim("AT", 1000);// Status Shild
+  ArduinoToSim("AT+CSQ", 1000);//Signal quality test, 0-31
+  ArduinoToSim("AT+CCID", 1000);// SIM card information
+  ArduinoToSim("AT + CIPSHUT", 1000);//Break all connections
+  ArduinoToSim("AT+CGATT=1", 1000);// GPRS attach or deatach
+  ArduinoToSim("AT + CREG?", 1000);// is module in network
   ArduinoToSim("AT + SAPBR = 3,1, \"CONTYPE\", \"GPRS\"", 1000);
   ArduinoToSim("AT+SAPBR=3,1,\"APN\",\"internet.beeline.ru\"", 1000);  //internet.mts.ru
   ArduinoToSim("AT+SAPBR=1,1", 2000); //Conect gprs
@@ -338,7 +338,7 @@ void statusConect() { // if GPRS not conect then reset
   statusGPRS = sendData("AT+SAPBR=2,1", 2000);
   //  Serial.println("______________");
   if (statusGPRS.indexOf("SAPBR: 1,1,") < 0) {
-    ArduinoToSim("AT+CPOWD=1", 200);
+    ArduinoToSim("AT+CPOWD=1", 1000);
     delay(3000);
     turnOnShield();
     turnOnGPS();
