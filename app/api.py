@@ -88,6 +88,8 @@ def all_last_data_ico():
     '''get all data mechanism and mechanism state'''
     last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
         Post.timestamp.desc()).first() for x in all_mechanisms_id()]
+    last_data_mech = filter(lambda x: x!=None, last_data_mech)
+    print('========')
     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
                                                  'name': el.mech.name,
                                                  'value': el.value,
@@ -141,7 +143,7 @@ def add_get_usm():
         return 'Bad request'
     if password != post_pass:
         return 'Bad password'
-    if int(mechanism_id) not in all_mechanisms_id():
+    if int(mechanism_id) not in all_mechanisms_id('usm'):
         return 'Not this id'
     if float(latitude) == 0 or float(longitude) == 0:
         mech = Mechanism.query.get(mechanism_id)

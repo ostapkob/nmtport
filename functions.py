@@ -56,13 +56,9 @@ def time_for_shift_kran(date_shift, shift):
                                            shift, Post.mechanism_id.in_(all_mechs)).order_by(Post.mechanism_id).all()
     # create dict all works mechanism in shift
     data_per_shift = {}
-    # print('-----------')
-    # print(cursor)
     for el in cursor:
         date_t = el.timestamp.replace(second=0, microsecond=0)
         date_t += timedelta(hours=10)
-        # val_minute = 0 if el.value < 1 else el.value
-        # el.value = -1 if el.value==None else el.value
         if data_per_shift.get(el.mech.number):
             data_per_shift[el.mech.number]['data'][date_t] = [el.value, el.value3]
             if el.value==1:
@@ -73,7 +69,6 @@ def time_for_shift_kran(date_shift, shift):
         else:
             data_per_shift[el.mech.number] = {}
             data_per_shift[el.mech.number]['mechanism'] = el.mech
-            print('..', el.value)
             if el.value==1:
                 data_per_shift[el.mech.number]['total_90'] = 1
                 data_per_shift[el.mech.number]['total_180'] = 0
@@ -93,9 +88,7 @@ def time_for_shift_kran(date_shift, shift):
 
     if data_per_shift == {}:
         return None
-    # create dict with all minutes to now if value is not return (-1) because
-    # 0 may exist
-    # pprint(data_per_shift)
+    # create dict with all minutes to now if value is not return (-1) because 0 may exist
     time_by_minuts = {}
     for key, value in data_per_shift.items():
         flag_start=True

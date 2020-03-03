@@ -26,7 +26,7 @@
 SoftwareSerial SimSerial(11, 10); // TX,  RX
 
 uint32_t Timer1, Timer2, Timer3, Timer4, Timer5, Timer6, Timer7, Timer8;
-uint32_t TimerPrint, TimerLed;
+uint32_t TimerPrint, TimerEmpty;
 int p90, p180; // один цикл 90 и один цикл 180
 int dalaySensors = 2000; //ожидание после срабатывания датчика
 int halfTurn180; // оборот в одну сторону на 180 градусов
@@ -57,7 +57,9 @@ void setup()
   pinMode(sensor7, INPUT_PULLUP);
   pinMode(sensor8, INPUT_PULLUP);
   Serial.begin(9600);
-
+  LED();
+  delay(100);
+  LED();
   SimSerial.begin(9600);
   SimSerial.setTimeout(1000);
   //  updateSerial();
@@ -65,8 +67,8 @@ void setup()
   turnOnGPS();
   registrationSim();
   ArduinoToSim("AT+GSMBUSY=1", 500); //Reject incoming call
-//  statusShield();
-//  statusConect();
+  statusShield();
+  statusConect();
 
 }
 
@@ -130,15 +132,18 @@ void loop()
   }
 
 
-//
-//  if (millis() - TimerPrint > 1000)
-//  {
-//    TimerPrint = millis();
-//    Serial.println(data + ":" + p90 + "-" + p180);
-//
-//  }
 
+  if (millis() - TimerPrint > 1000)
+  {
+    TimerPrint = millis();
+    Serial.println(data + ":" + p90 + "-" + p180 + " >" + bad_conect);
 
+  }
+
+  if (millis() - TimerEmpty > 300000) {
+    TimerEmpty = millis();
+    GetSend(0, countGet, latitude, longitude);
+  }
 
   if (data.length() >= 4) {
     if (data == "1234" || data == "4321" || data == "5678" || data == "8765") {
@@ -149,25 +154,21 @@ void loop()
       p90++;
     }
     data = "";
-    p180 = halfTurn180 / 2; // цикл считается когда кран повернулся на 180 туда и обратно
+    p180 += halfTurn180 / 2; // цикл считается когда кран повернулся на 180 туда и обратно
 
     if (p90 - p90Temp == 1) { // если новое значение больше старого
-      statusConectCount();
       dataGPS = sendData("AT + CGPSINF=2", 2000);
       ParseGPS(dataGPS);
-
       Serial.println(" отправляем на сервер 90 градусов" +  String(p90) + " " + String(countGet));
       GetSend(1, countGet, latitude, longitude);
-      countGet++;
+      AfterGet();
     }
     if (p180 - p180Temp == 1) {// если новое значение больше старого
-      statusConectCount();
       dataGPS = sendData("AT + CGPSINF=2", 2000);
       ParseGPS(dataGPS);
-
       Serial.println(" отправляем на сервер 180 градусов" +  String(p180) + " " + String(countGet));
       GetSend(2, countGet, latitude, longitude);
-      countGet++;
+      AfterGet();
     }
     p90Temp = p90;
     p180Temp = p180;
@@ -191,6 +192,15 @@ void LED() {
   digitalWrite(Led, LOW);
 }
 
+void AfterGet() {
+  statusConectCount();
+  countGet++;
+  halfTurn180 = 0;
+  LED();
+  delay(100);
+  LED();
+  TimerEmpty = millis();
+}
 
 void(* resetFunc) (void) = 0;
 
@@ -257,11 +267,13 @@ void statusConectCount() { // if bad conect more then 3 then reset
   updateSerial(); // clear Serial
   statusGPRS = sendData("AT+SAPBR=2,1", 500);
   //  Serial.println("______________");
+  //  Serial.println(statusGPRS);
   if (statusGPRS.indexOf("SAPBR: 1,1,") < 0) {
     bad_conect++;
     if (bad_conect > 3) {
       bad_conect = 0;
       ArduinoToSim("AT+CPOWD=1", 200);
+      delay(3000);
       turnOnShield();
       turnOnGPS();
       registrationSim();
@@ -327,6 +339,7 @@ void statusConect() { // if GPRS not conect then reset
   //  Serial.println("______________");
   if (statusGPRS.indexOf("SAPBR: 1,1,") < 0) {
     ArduinoToSim("AT+CPOWD=1", 200);
+    delay(3000);
     turnOnShield();
     turnOnGPS();
     registrationSim();

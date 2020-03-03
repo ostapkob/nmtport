@@ -143,6 +143,7 @@ void statusConectCount() { // if bad conect more then 3 then reset
     if (bad_conect > 3) {
       bad_conect = 0;
       ArduinoToSim("AT+CPOWD=1", 200);
+             delay(3000);
       turnOnShield();
       turnOnGPS();
       registrationSim();
@@ -208,6 +209,7 @@ void statusConect() { // if GPRS not conect then reset
   //  Serial.println("______________");
   if (statusGPRS.indexOf("SAPBR: 1,1,") < 0) {
     ArduinoToSim("AT+CPOWD=1", 200);
+        delay(3000);
     turnOnShield();
     turnOnGPS();
     registrationSim();
