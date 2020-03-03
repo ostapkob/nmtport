@@ -32,8 +32,8 @@ void setup() {
   pinMode (roller, INPUT_PULLUP);
   pinMode(led, OUTPUT);
   ArduinoToSim("AT+GSMBUSY=1", 500); //Reject incoming call
-  statusShield();
-  statusConect();
+//  statusShield();
+//  statusConect();
   //  ArduinoToSim("ATE0", 1000);// echo
 }
 

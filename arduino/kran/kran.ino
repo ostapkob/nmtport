@@ -23,7 +23,7 @@
 #include<stdio.h>
 #include<string.h>
 
-SoftwareSerial SimSerial(11, 10); // TX  RX
+SoftwareSerial SimSerial(11, 10); // TX,  RX
 
 uint32_t Timer1, Timer2, Timer3, Timer4, Timer5, Timer6, Timer7, Timer8;
 uint32_t TimerPrint, TimerLed;
@@ -65,8 +65,8 @@ void setup()
   turnOnGPS();
   registrationSim();
   ArduinoToSim("AT+GSMBUSY=1", 500); //Reject incoming call
- // statusShield();
- // statusConect();
+//  statusShield();
+//  statusConect();
 
 }
 
@@ -130,13 +130,13 @@ void loop()
   }
 
 
-
-  if (millis() - TimerPrint > 1000)
-  {
-    TimerPrint = millis();
-    Serial.println(data + ":" + p90 + "-" + p180);
-
-  }
+//
+//  if (millis() - TimerPrint > 1000)
+//  {
+//    TimerPrint = millis();
+//    Serial.println(data + ":" + p90 + "-" + p180);
+//
+//  }
 
 
 
@@ -145,7 +145,7 @@ void loop()
       halfTurn180++; // половина цикла поворота
     }
 
-    if (data == "1221" || data == "3443" || data == "5665" || data == "8778") {
+    if (data == "1221" || data == "4334" || data == "5665" || data == "8778") {
       p90++;
     }
     data = "";
@@ -157,7 +157,7 @@ void loop()
       ParseGPS(dataGPS);
 
       Serial.println(" отправляем на сервер 90 градусов" +  String(p90) + " " + String(countGet));
-      GetSend(2, countGet, latitude, longitude);
+      GetSend(1, countGet, latitude, longitude);
       countGet++;
     }
     if (p180 - p180Temp == 1) {// если новое значение больше старого
@@ -166,7 +166,7 @@ void loop()
       ParseGPS(dataGPS);
 
       Serial.println(" отправляем на сервер 180 градусов" +  String(p180) + " " + String(countGet));
-      GetSend(1, countGet, latitude, longitude);
+      GetSend(2, countGet, latitude, longitude);
       countGet++;
     }
     p90Temp = p90;
@@ -255,7 +255,7 @@ void ParseGPS(String str) {
 void statusConectCount() { // if bad conect more then 3 then reset
   String statusGPRS;
   updateSerial(); // clear Serial
-  statusGPRS = sendData("AT+SAPBR=2,1", 200);
+  statusGPRS = sendData("AT+SAPBR=2,1", 500);
   //  Serial.println("______________");
   if (statusGPRS.indexOf("SAPBR: 1,1,") < 0) {
     bad_conect++;
@@ -300,8 +300,8 @@ String sendData (String command , const int timeout) { // sent data to serial po
 }
 
 void ArduinoToSim(String command, const int wait) { //it is more comfortable
-  delay(wait);
   SimSerial.println(command);
+  delay(wait);
   updateSerial();
 }
 
@@ -323,7 +323,7 @@ void updateSerial()
 void statusConect() { // if GPRS not conect then reset
   String statusGPRS;
   updateSerial(); // clear Serial
-  statusGPRS = sendData("AT+SAPBR=2,1", 500);
+  statusGPRS = sendData("AT+SAPBR=2,1", 2000);
   //  Serial.println("______________");
   if (statusGPRS.indexOf("SAPBR: 1,1,") < 0) {
     ArduinoToSim("AT+CPOWD=1", 200);
