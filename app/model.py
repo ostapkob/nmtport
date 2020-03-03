@@ -65,7 +65,9 @@ class Post(db.Model):
         self.date_shift = date_shift
         self.terminal = terminal
 
-        d = str(timestamp) + " " + str(hour) + " " + str(date_shift) + " " + str(shift)
+        # d = str(date_shift) + ": " + str(latitude) +', ' + str(longitude) + ', '  + str(value) + ', ' + str(value2) + ', ' + str(value3)
+        # d = date_shift + ": " + latitude +', ' + longitude + ', '  + value + ', ' + value2 + ', ' + value3
+        d = f'{date_shift}: {latitude}, {longitude}, {value},  {value2}, {value3}'
         with open('post.txt', 'w') as f:
             f.write(d)
 
