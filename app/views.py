@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#int -*- coding: utf-8 -*-
 from flask import request, json, jsonify, abort, make_response
 from flask import render_template, flash, redirect, url_for, send_from_directory
 from app import db, app
@@ -95,7 +95,6 @@ def archive():
         date = handle_date(form.date_shift.data)
         shift = form.shift.data
         type_mechanism = form.type.data
-        print(type_mechanism)
         if type_mechanism == 'usm':
             data = time_for_shift_usm(date, shift)
         if type_mechanism =='kran':
