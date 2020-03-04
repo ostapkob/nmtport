@@ -13,8 +13,8 @@ class Mechanism:
         self.value3=value3
         self.latitude=latitude
         self.longitude=longitude
-        # self.ip ='http://127.0.0.1:5000'
-        self.ip ='http://18.139.162.128'
+        self.ip ='http://127.0.0.1:5000'
+        # self.ip ='http://18.139.162.128'
         self.api_usm ='/api/v1.0/add_get_usm?'
         self.api_kran ='/api/v1.0/add_get_kran?'
     def send_get_request(self):
@@ -72,6 +72,7 @@ if __name__ == "__main__":
     kran22=  Mechanism(mechanism_id=5908,  value=0, value2=0, value3=0, latitude=42.8136, longitude=132.8912)
     #mechanisms=Pt1, Pt2, E3, S5,  S6,  S7,  S8, U9,  U10, E11, Sen1, kran4, kran12, kran22
     # mechanisms=Pt1, Pt2, E3, S5,  S6,  S7,  S8, U9,  U10, E11
+    mechanisms=Pt1, E3
     mechanisms=kran4, kran12, kran22
 
     flag = True

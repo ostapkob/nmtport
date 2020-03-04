@@ -1,9 +1,10 @@
- var app = new Vue({
-    el: '#app',
+var app_kran = new Vue({
+    el: '#app_usm',
     data: {
         all_data: [],
         shift: '',
         date_shift: '',
+        flag: true,
         hs:[],
     },
     methods: {
@@ -17,14 +18,6 @@
         //         this.all_data=response.data;
         //     }) ;
         // },
-
-        getData () {
-        this.$http.get('/api/v1.0/get_data/usm/'+this.date_shift+'/'+this.shift).then(response => {
-            this.all_data = response.body
-        }, response => {
-            console.log('response err')
-        });
-        },
 
         getNow: function() {
             let hour;
@@ -47,20 +40,40 @@
                 else {
                     this.hs = ["║",  "╵", "21",  "╵", "22",  "╵", "23",  "╵", "00",  "╵", "01",  "╵", "02",  "╵", "03",  "╵", "04",  "╵", "05",  "╵", "06",  "╵", "07",  "╵",  "║"] }
                 },
+
+
+
+        getData () {
+            console.log(this.date_shift);
+
+            this.$http.get('/api/v1.0/get_data/usm/'+this.date_shift+'/'+this.shift).then(response => {
+                this.all_data = response.body
+            }, response => {
+                console.log('response err')
+            });
+        },
+
+
             },
     mounted: function () {
         this.$nextTick(function () {
             window.setInterval(() => {
+                
+            if (this.shift=='' && this.date_shift=='' && this.flag) {
+                console.log('yessssss')
                 this.getNow();
+            };
                 this.getData();
             },5000);
         })
     },
 
     function() {this.getData();},
-
     created: function () {
-        this.getNow();
+            if (this.shift=='' && this.date_shift=='' && this.flag) {
+                console.log('yessssss')
+                this.getNow();
+            };
         this.getData();
     },
 })
