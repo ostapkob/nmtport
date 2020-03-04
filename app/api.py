@@ -89,7 +89,6 @@ def all_last_data_ico():
     last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
         Post.timestamp.desc()).first() for x in all_mechanisms_id()]
     last_data_mech = filter(lambda x: x!=None, last_data_mech)
-    print('========')
     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
                                                  'name': el.mech.name,
                                                  'value': el.value,
@@ -104,7 +103,6 @@ def all_last_data_ico():
 def get_mech(m_id):
     '''get name mechanism'''
     mech = Mechanism.query.get(m_id)
-    print(mech)
     return f'{mech.name}'
 
 def add_fix_post(post):
@@ -194,10 +192,9 @@ def add_get_kran():
 @app.route('/api/v1.0/add_post', methods=['GET', 'POST'])
 def add_post():
     '''add post by POST request from arduino'''
-    print(request.method)
     need_keys = 'password', 'value', 'latitude', 'longitude', 'mechanism_id'
     request_j = request.json
-    print(request_j, datetime.now().strftime("%d.%m.%Y %H:%M:%S"))
+    # print(request_j, datetime.now().strftime("%d.%m.%Y %H:%M:%S"))
     if request.method == 'POST':
         if not request_j:
             abort(400)
@@ -217,7 +214,6 @@ def add_post():
             data_mech = db.session.query(Post).filter(Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
             latitude = data_mech.latitude
             longitude = data_mech.longitude
-            print('--->', latitude, longitude, )
     elif request.method=='GET':
         print('==', request)
         text = request.args
