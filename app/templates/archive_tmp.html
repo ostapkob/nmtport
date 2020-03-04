@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block main %}
+
+
+{% import 'bootstrap/wtf.html' as wtf %}
+
+<div class= "row">
+	<div class ="col-6">
+		<form class="form form-horizontal" method="POST" action="">
+			{{ wtf.quick_form(form, button_map={'submit':'outline-dark'} ) }}
+		</form>
+	</div>
+	<div class ="col-6">
+	</div>
+</div>
+
+<div id="app_kran">
+    <button @click="shift=2, date_shift='03.03.2020'"> test </button>
+    <p class="date-shift"> дата: <strong>{{ '{{date_shift }}' }} </strong>смена: <strong>{{ '{{shift}}' }} </strong> </p>
+    <p class="type-mech"> Краны </p>
+    <div scope="row" v-for="el in all_data">
+        <div class="name-mech">  {{ '   {{ el.name }}  '}}   
+            <span class="badge badge-primary">  {{ '   {{ el.total_180 }}  '}} </span>
+            <span class="badge badge-dark">  {{ '   {{ el.total_90 }}  '}} </span>
+            <span class='time-start-finish text-right'> start<strong> {{'{{el.start }} '}}</strong> 
+               finish<strong> {{'{{el.finish }} '}} </strong> </span>
+        </div>
+        <div class="progress">
+            <div v-for="minute in el.data" class="progress-bar" role="progressbar"
+            style="width: 0.1388%"   :class="{ 'bg-warning':minute.value==0, 'bg-dark':minute.value==1, 'bg-danger':minute.value==-1}"></div>
+            </div>
+        <div class="line-mech">
+            <span class="time-mech" v-for="hour in hs"> {{ '{{ hour }} '}} </span>
+        </div>
+    </div>
+</div>
+
+<script  src="{{url_for('static', filename='js/progressbar_kran.js')}}"></script>
+
+
+<div id="app_usm">
+    <button @click="shift=2, date_shift='03.03.2020'"> test </button>
+    <p class="type-mech"> УСМ </p>
+    <div scope="row" v-for="el in all_data">
+        <div class="name-mech">  {{ '   {{ el.name }}  '}}   
+            <span class="badge badge-secondary">  {{ '   {{ el.total }}  '}} </span>
+            <span class='time-start-finish text-right'> start<strong> {{'{{el.start }} '}}</strong> 
+               finish<strong> {{'{{el.finish }} '}} </strong> </span>
+        </div>
+        <div class="progress">
+            <div v-for="minute in el.data" class="progress-bar" role="progressbar"
+            style="width: 0.1388%"   :class="{ 'bg-warning':minute.value==0, 'bg-danger':minute.value==-1}"></div>
+            </div>
+        <div class="line-mech">
+            <span class="time-mech" v-for="hour in hs"> {{ '{{ hour }} '}} </span>
+        </div>
+    </div>
+</div>
+<script  src="{{url_for('static', filename='js/progressbar_usm.js')}}"></script>
+
+
+<script type="text/JavaScript"> 
+  var dateShift = '{{date_shift}}';
+  var Shift = '{{shift}}';
+   console.log(dateShift); 
+   console.log(Shift); 
+</script>
+
+
+{% endblock %}

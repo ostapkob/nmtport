@@ -101,9 +101,14 @@ def archive():
         # except ValueError:
         #     flash('Enter correct shift')
         #     return redirect(url_for('index'))
-        data = time_for_shift_kran(date, shift)
+        if type_mechanism == 'usm':
+            data = time_for_shift_kran(date, shift)
+        if type_mechanism =='kran':
+            data = time_for_shift_kran(date, shift)
+
         return render_template("archive.html",
                                data=data,
+                               type_mechanism = type_mechanism,
                                shift=shift,
                                date_shift=date.strftime("%d.%m.%Y"),
                                form=form,
