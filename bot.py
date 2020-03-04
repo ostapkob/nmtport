@@ -72,6 +72,7 @@ TOKEN = "977352466:AAEgH-c6FFFGbv71pSBP8hbtu9oSS6JrY48"
 if flag:
     bot = telebot.TeleBot(TOKEN)
 while True:
+    time.sleep(60)
     date_shift, shift = today_shift_date()
     date = date_shift.strftime('%d.%m.%Y')
     shift = str(shift)
@@ -82,6 +83,7 @@ while True:
     except:
         if flag:
             bot.send_message(226566335, 'Trouble with server')
+            continue
     if not mechanisms:
         continue
     for mech, data_mech in mechanisms.items():
@@ -93,7 +95,6 @@ while True:
         if chech_values(data, 0, 5):
             if flag:
                 bot.send_message(226566335, f"{yellow_circle} {name_mech}")
-    time.sleep(60)
 
 
 
