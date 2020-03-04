@@ -22,6 +22,7 @@
 <script>
 	var valByMins = JSON.parse('{{  data | tojson | safe}}');
 	var shift = '{{shift}}';
+    var type_mechanism='{{type_mechanism}}';
 	progress_per_shift(valByMins);
 </script>
 {% endblock %}

@@ -93,16 +93,11 @@ def archive():
     form = SelectDataShift()
     if form.validate_on_submit():
         date = handle_date(form.date_shift.data)
-        # date = date.strftime("%d.%m.%y")
         shift = form.shift.data
         type_mechanism = form.type.data
-        # try:
-        #     date = datetime.strptime(date_shift, '%d.%m.%Y').date()
-        # except ValueError:
-        #     flash('Enter correct shift')
-        #     return redirect(url_for('index'))
+        print(type_mechanism)
         if type_mechanism == 'usm':
-            data = time_for_shift_kran(date, shift)
+            data = time_for_shift_usm(date, shift)
         if type_mechanism =='kran':
             data = time_for_shift_kran(date, shift)
 
@@ -119,7 +114,7 @@ def archive():
     return render_template("archive.html",
                            data=data,
                            shift=shift,
-                            date_shift=date.strftime("%d.%m.%Y"),
+                           date_shift=date.strftime("%d.%m.%Y"),
                            form=form,
                            )
 
