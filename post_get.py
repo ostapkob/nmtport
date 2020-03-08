@@ -14,20 +14,20 @@ class Mechanism:
         self.latitude=latitude
         self.longitude=longitude
         self.ip ='http://127.0.0.1:5000'
-        self.ip ='http://18.139.162.128'
+        # self.ip ='http://18.139.162.128'
         self.api_usm ='/api/v1.0/add_get_usm?'
         self.api_kran ='/api/v1.0/add_get_kran?'
     def send_get_request(self):
         params = {'mechanism_id': self.mechanism_id,
                  'password': self.password,
                  'value': self.value,
-                 'value2': self.value2,
-                 # 'value3': self.value3,
+                 # 'value2': self.value2,
+                 'value3': self.value3,
                  'latitude': round(self.latitude, 4),
                  'longitude':round(self.longitude, 4)}
         try:
             http = (self.ip+self.api_kran)
-            http = (self.ip+self.api_usm)
+            # http = (self.ip+self.api_usm)
             response = requests.get(http, params)
             response.raise_for_status()
             print(self.mechanism_id, http, self.password, self.value, self.latitude, self.longitude)
@@ -67,15 +67,15 @@ if __name__ == "__main__":
     U10 =    Mechanism(mechanism_id=32942, value=0, value2=0, value3=0, latitude=42.8144, longitude=132.8913)
     E11 =    Mechanism(mechanism_id=33287, value=0, value2=0, value3=0, latitude=42.8152, longitude=132.8910)
     Sen1 =   Mechanism(mechanism_id=32777, value=0, value2=0, value3=0, latitude=42.8147, longitude=132.8913)
-    kran4=   Mechanism(mechanism_id=30301, value=0, value2=0, value3=0, latitude=42.8140, longitude=132.8913)
-    kran12=  Mechanism(mechanism_id=13893, value=0, value2=0, value3=0, latitude=42.8138, longitude=132.8914)
-    kran22=  Mechanism(mechanism_id=5908,  value=0, value2=0, value3=0, latitude=42.8136, longitude=132.8912)
+    kran4=   Mechanism(mechanism_id=30301, value=0, value2=0, value3=0, latitude=42.8106, longitude=132.8880)
+    kran12=  Mechanism(mechanism_id=13893, value=0, value2=0, value3=0, latitude=42.8099, longitude=132.8884)
+    kran22=  Mechanism(mechanism_id=5908,  value=0, value2=0, value3=0, latitude=42.8088, longitude=132.8877)
     #mechanisms=Pt1, Pt2, E3, S5,  S6,  S7,  S8, U9,  U10, E11, Sen1, kran4, kran12, kran22
     # mechanisms=Pt1, Pt2, E3, S5,  S6,  S7,  S8, U9,  U10, E11
     mechanisms=Pt1, E3
 
     mechanisms=Pt1, Pt2, E3, S5,  S6,  S7,  S8, U9,  U10, E11
-    # mechanisms=kran4, kran12, kran22
+    mechanisms=kran4, kran12, kran22
 
     flag = True
     lat= 0.0001
@@ -92,7 +92,7 @@ if __name__ == "__main__":
 
             [m.chenge_position(lat, lng) for m in mechanisms]
             [m.send_get_request() for m in mechanisms]
-            # [m.increase_value3() for m in mechanisms]
+            [m.increase_value3() for m in mechanisms]
             if flag:
                 lat= 0.0001
                 lng=-0.0001
