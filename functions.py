@@ -200,14 +200,28 @@ def time_for_shift_usm(date_shift, shift):
 def image_mechanism(value, type_mechanism, number, last_time):
     dt = datetime.now()- last_time
     dt =dt.total_seconds()/60
-    if dt > 120.0:
-        return './static/numbers/'+str(type_mechanism)+'/gray/'+str(number)+'.png'
-    if dt >= 3.0:
-        return './static/numbers/'+str(type_mechanism)+'/red/'+str(number)+'.png'
-    if value<0.1:
-        return './static/numbers/'+str(type_mechanism)+'/yellow/'+str(number)+'.png'
-    else:
-        return './static/numbers/'+str(type_mechanism)+'/green/'+str(number)+'.png'
+    if type_mechanism=="usm":
+        if dt > 120.0:
+            return './static/numbers/'+str(type_mechanism)+'/gray/'+str(number)+'.png'
+        if dt >= 3.0:
+            return './static/numbers/'+str(type_mechanism)+'/red/'+str(number)+'.png'
+        if value<0.1:
+            return './static/numbers/'+str(type_mechanism)+'/yellow/'+str(number)+'.png'
+        else:
+            return './static/numbers/'+str(type_mechanism)+'/green/'+str(number)+'.png'
+
+    if type_mechanism=="kran":
+        if dt > 120.0:
+            return './static/numbers/'+str(type_mechanism)+'/gray/'+str(number)+'.png'
+        if dt >= 5.0:
+            return './static/numbers/'+str(type_mechanism)+'/red/'+str(number)+'.png'
+        if value==1:
+            return './static/numbers/'+str(type_mechanism)+'/black/'+str(number)+'.png'
+        if value==2:
+            return './static/numbers/'+str(type_mechanism)+'/blue/'+str(number)+'.png'
+        else:
+            return './static/numbers/'+str(type_mechanism)+'/yellow/'+str(number)+'.png'
+
 
 
 # not use
