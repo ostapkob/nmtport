@@ -147,6 +147,8 @@ def time_for_shift_usm(date_shift, shift):
         # date_t = date_t.strftime("%H:%M")
         el.value = -1 if el.value is None else el.value
         val_minute = 0 if el.value < 0.1 else el.value
+        el.value = 0 if el.value2<10 else el.value # maybe more
+        val_minute = 0 if el.value2<10 else el.value # maybe more
 
         if data_per_shift.get(el.mech.number):
             data_per_shift[el.mech.number]['data'][date_t] = val_minute
