@@ -31,6 +31,7 @@ class Post(db.Model):
     value = db.Column(db.Float)
     value2 = db.Column(db.Float)
     value3 = db.Column(db.Integer)
+    count = db.Column(db.Integer)
     # timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     timestamp = db.Column(db.DateTime, index=True)
     date_shift = db.Column(db.Date)
@@ -38,7 +39,7 @@ class Post(db.Model):
     # this column must form by GPS
     terminal = db.Column(db.SmallInteger, index=True)
 
-    def __init__(self, mechanism_id, latitude=0, longitude=0, value=None,value2=None, value3=None,  timestamp=None):
+    def __init__(self, mechanism_id, latitude=0, longitude=0, value=None, value2=None, value3=None, count=None,  timestamp=None):
         hour = datetime.now().hour
         if hour >= 8 and hour < 20:
             date_shift = datetime.now()
@@ -58,6 +59,7 @@ class Post(db.Model):
         self.value = value
         self.value2 = value2
         self.value3 = value3
+        self.count = count
         self.latitude = latitude
         self.longitude = longitude
         self.mechanism_id = mechanism_id
@@ -67,10 +69,9 @@ class Post(db.Model):
 
         # d = str(date_shift) + ": " + str(latitude) +', ' + str(longitude) + ', '  + str(value) + ', ' + str(value2) + ', ' + str(value3)
         # d = date_shift + ": " + latitude +', ' + longitude + ', '  + value + ', ' + value2 + ', ' + value3
-        d = f'{date_shift}: {latitude}, {longitude}, {value},  {value2}, {value3}'
+        d = f'{date_shift}: {self.mechanism_id} - {value}, {value2}, {value3}, {count}, {latitude}, {longitude}'
         with open('post.txt', 'w') as f:
             f.write(d)
-
 
     def __repr__(self):
         return f'{self.value}'

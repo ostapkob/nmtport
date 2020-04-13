@@ -29,4 +29,3 @@ db.session.commit()
 # m = Mechanism(32777, company='nmtp', type='sennebogen', model='860', number=1, name='Sennebogen-1')
 a = [mech.id for mech in Mechanism.query.all()]
 print(a)
-dbm

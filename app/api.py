@@ -129,6 +129,7 @@ def add_get_usm():
     value = request.args.get('value')
     value2 = request.args.get('value2')
     value3 = request.args.get('value3')
+    count = request.args.get('count')
     latitude = request.args.get('latitude')
     longitude = request.args.get('longitude')
     if latitude == '':
@@ -149,7 +150,7 @@ def add_get_usm():
         Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
         latitude = data_mech.latitude
         longitude = data_mech.longitude
-    new_post = Post(value=value, value2=value2, latitude=latitude, longitude=longitude, mechanism_id=mechanism_id)
+    new_post = Post(value=value, value2=value2, value3=value3, count=count, latitude=latitude, longitude=longitude, mechanism_id=mechanism_id)
     add_fix_post(new_post)
     return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
 

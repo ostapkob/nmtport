@@ -58,14 +58,14 @@ def time_for_shift_kran(date_shift, shift):
     data_per_shift = {}
     for el in cursor:
         date_t = el.timestamp.replace(second=0, microsecond=0)
-        date_t += timedelta(hours=10)
+        date_t += timedelta(hours=HOURS)
         if data_per_shift.get(el.mech.number):
-            data_per_shift[el.mech.number]['data'][date_t] = [el.value, el.value3]
+            data_per_shift[el.mech.number]['data'][date_t] = el.value, el.count
             if el.value==1:
                 data_per_shift[el.mech.number]['total_90'] += 1
             if el.value==2:
                 data_per_shift[el.mech.number]['total_180'] += 1
-            pre_value=el.value3
+            pre_value=el.count
         else:
             data_per_shift[el.mech.number] = {}
             data_per_shift[el.mech.number]['mechanism'] = el.mech
@@ -76,8 +76,8 @@ def time_for_shift_kran(date_shift, shift):
             if el.value==2:
                 data_per_shift[el.mech.number]['total_180'] = 1
             data_per_shift[el.mech.number]['data'] = {}
-            data_per_shift[el.mech.number]['data'][date_t] = [el.value, el.value3]
-            pre_value=el.value3
+            data_per_shift[el.mech.number]['data'][date_t] = el.value, el.count
+            pre_value=el.count
 
     # get start time for this shift
     start = datetime.combine(date_shift, datetime.min.time())
@@ -122,18 +122,13 @@ def time_for_shift_kran(date_shift, shift):
                 time_by_minuts[key]['finish'] = date_t
             if delta_minutes >= datetime.now() and date_shift == today_date and today_shift == shift:
                 break
-
-
-
     return time_by_minuts
 
 
-
-
-
-
 def time_for_shift_usm(date_shift, shift):
-    '''get dict with all minute's values for the period, name and total'''
+    '''get dict with all minute's values for the period, name and total
+    value is lever, value3 is speed roler,
+    '''
     # get data from db
     shift = int(shift)
     all_mechs = all_mechanisms_id('usm')
@@ -143,23 +138,23 @@ def time_for_shift_usm(date_shift, shift):
     data_per_shift = {}
     for el in cursor:
         date_t = el.timestamp.replace(second=0, microsecond=0)
-        date_t += timedelta(hours=10)
+        date_t += timedelta(hours=HOURS)
         # date_t = date_t.strftime("%H:%M")
         el.value = -1 if el.value is None else el.value
+        el.value3 = 0 if el.value3 is None else el.value3
         val_minute = 0 if el.value < 0.1 else el.value
-        el.value = 0 if el.value2<10 else el.value # maybe more
-        val_minute = 0 if el.value2<10 else el.value # maybe more
+        el.value = 0 if el.value3<10 else el.value # maybe more
+        val_minute = 0 if el.value3<10 else el.value # maybe more
 
         if data_per_shift.get(el.mech.number):
-            data_per_shift[el.mech.number]['data'][date_t] = val_minute
+            data_per_shift[el.mech.number]['data'][date_t] = val_minute, el.value3
             data_per_shift[el.mech.number]['total'] += el.value
         else:
             data_per_shift[el.mech.number] = {}
             data_per_shift[el.mech.number]['mechanism'] = el.mech
             data_per_shift[el.mech.number]['total'] = el.value
             data_per_shift[el.mech.number]['data'] = {}
-            data_per_shift[el.mech.number]['data'][date_t] = val_minute
-
+            data_per_shift[el.mech.number]['data'][date_t] = val_minute, el.value3
     # get start time for this shift
     start = datetime.combine(date_shift, datetime.min.time())
     if shift == 1:
@@ -172,7 +167,7 @@ def time_for_shift_usm(date_shift, shift):
     # create dict with all minutes to now if value is not return (-1) because
     # 0 may exist
     time_by_minuts = {}
-    for key, value in data_per_shift.items():
+    for key  in data_per_shift.keys():
         flag_start=True
         flag_finish = True
         time_by_minuts[key] = {}
@@ -184,14 +179,14 @@ def time_for_shift_usm(date_shift, shift):
         delta_minutes = start
         for i in range(1, 60 * 12 + 1):
             date_t = delta_minutes.strftime("%H:%M")
-            val_minute = data_per_shift[key]['data'].setdefault(delta_minutes, -1)
-            time_by_minuts[key]['data'][i] = {'time': date_t, 'value': val_minute}
+            val_minute = data_per_shift[key]['data'].setdefault(delta_minutes, (-1, -1))
+            time_by_minuts[key]['data'][i] = {'time': date_t, 'value': val_minute[0], "speed": val_minute[1]}
             delta_minutes += timedelta(minutes=1)
             today_date, today_shift = today_shift_date()
-            if val_minute>0 and flag_start:
+            if val_minute[0]>0 and flag_start:
                 time_by_minuts[key]['start'] = date_t
                 flag_start =False
-            if val_minute > 0:
+            if val_minute[0] > 0:
                 time_by_minuts[key]['finish'] = date_t
             if delta_minutes >= datetime.now() and date_shift == today_date and today_shift == shift:
                 break

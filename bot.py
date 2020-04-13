@@ -19,6 +19,8 @@ def chech_values(ls, find, quantity):
     except:
         return False
     print("----->", name_mech, values)
+    if values[0] == -1:
+        return False
     if values[0] == find:
         return False
     if  all(el==find for el in values[1:]):
@@ -54,7 +56,7 @@ tests = ( [[1, -1, -1, -1, -1], True],
         [[-1, -1, 1, -1], False],
         [[0,-1, -1, 1, -1], False],
         [[0.5, 0, -1, 1, -1], False],
-        [[-1, 0, 0, 0, 0], False],
+        [[-1, 0, 0, 0, 0], True],
          )
 
 # for values, res in tests:
