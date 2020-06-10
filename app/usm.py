@@ -1,9 +1,8 @@
-from functions import all_mechanisms_id
+from app.functions import all_mechanisms_id, today_shift_date
+from app.functions import HOURS
 from app.model import Post, Mechanism
 from app import db
 from datetime import datetime, timedelta
-from functions import HOURS
-from functions import today_shift_date
 
 def time_for_shift_usm(date_shift, shift):
     '''get dict with all minute's values for the period, name and total

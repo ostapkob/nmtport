@@ -1,9 +1,11 @@
-from functions import all_mechanisms_id
+from app.functions import all_mechanisms_id, today_shift_date
+from app.functions import HOURS
 from app.model import Post, Mechanism
 from app import db
 from datetime import datetime, timedelta
-from functions import HOURS
-from functions import today_shift_date
+from collections import UserDict
+
+
 
 def time_for_shift_kran(date_shift, shift):
     '''get dict with all minute's values for the period, name and total'''
@@ -81,4 +83,5 @@ def time_for_shift_kran(date_shift, shift):
             if delta_minutes >= datetime.now() and date_shift == today_date and today_shift == shift:
                 break
     return time_by_minuts
+
 

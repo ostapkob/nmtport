@@ -5,7 +5,7 @@ from app import db, app
 from app.model import Mechanism, Post
 from app.form import AddMechanism, SelectDataShift
 from datetime import datetime, timedelta
-from functions import today_shift_date, all_mechanisms_id, handle_date
+from app.functions import today_shift_date, all_mechanisms_id, handle_date
 from app.usm import time_for_shift_usm
 from app.kran import time_for_shift_kran
 import app.api as API

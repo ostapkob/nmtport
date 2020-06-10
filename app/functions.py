@@ -3,7 +3,7 @@ from flask import render_template, flash
 from app.model import Post, Mechanism
 from app import db
 from pprint import pprint
-HOURS = 10
+HOURS = 10 #your timezone
 
 
 def today_shift_date():
@@ -44,10 +44,6 @@ def multiple_5(date): #not use
     mul5 = date.minute - date.minute % 5
     date_n = date.replace(minute=mul5, second=0, microsecond=0)
     return date_n
-
-
-
-
 
 
 def image_mechanism(value, type_mechanism, number, last_time):
