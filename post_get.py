@@ -6,7 +6,7 @@ from datetime import datetime
 
 class Mechanism:
     ip ='http://18.139.162.128'
-    # ip ='http://127.0.0.1:5000'
+    ip ='http://127.0.0.1:5000'
     def __init__(self, mechanism_id, value,value2, value3, count, latitude, longitude):
         self.mechanism_id= mechanism_id
         self.password=post_pass

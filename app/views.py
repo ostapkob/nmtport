@@ -2,8 +2,8 @@
 from flask import request, json, jsonify, abort, make_response
 from flask import render_template, flash, redirect, url_for, send_from_directory
 from app import db, app
-from app.model import Mechanism, Post
-from app.form import AddMechanism, SelectDataShift
+from app.model import Mechanism, Post, User
+from app.form import AddMechanism, SelectDataShift, LoginForm
 from datetime import datetime, timedelta
 from app.functions import today_shift_date, all_mechanisms_id, handle_date
 from app.usm import time_for_shift_usm
@@ -12,6 +12,7 @@ import app.api as API
 from sqlalchemy import func
 from pprint import pprint
 import os
+from flask_login import current_user, login_user
 
 
 db.create_all()
@@ -58,13 +59,51 @@ def kran():
 
 @app.route("/usm")
 def usm():
-    return render_template("usm.html",
+    # is_login('usm.html', title='УСМ')
+    # return render_template("usm.html",
+    #                        title='УСМ')
+
+    if current_user.is_authenticated:
+        print('........', current_user.is_authenticated)
+        return render_template("usm.html",
                            title='УСМ')
+    else:
+        print('+++++++++',  current_user.is_authenticated)
+        return redirect("/")
+
 @app.route("/map")
 def maps():
     return render_template("map.html",
                            title='Maps')
 
+
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    print('<<<<<LOGIN>>>>>>', current_user.is_authenticated)
+    if current_user.is_authenticated:
+        print('===================', current_user)
+        return redirect("/")
+    form=LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        print('--->', user.username, user.password_hash)
+        if user is None or not user.check_password(form.password.data):
+            return redirect('login')
+        login_user(user, remember=form.remember_me.data)
+        flash(f'Login for user {form.username.data} : {form.remember_me.data}')
+        return redirect("/")
+    return render_template("login.html",
+                           title='Log In',
+                           form=form)
+
+def is_login(url, title):
+    if current_user.is_authenticated:
+        print('===================', current_user.is_authenticated)
+        return render_template(url,
+                            title=title)
+    else:
+        print('------------------', current_user.is_authenticated)
+        return render_template('/')
 
 # @app.route("/vue")
 # def vue():
@@ -126,6 +165,7 @@ def list_api():
     return render_template("list_api.html",
                            title='Posible_api',
                            ls_api=ls_api)
+
 
 
 # @app.route("/per_shift")

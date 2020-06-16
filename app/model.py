@@ -1,6 +1,12 @@
-from app import db
+from app import db, login
 from datetime import datetime, timedelta
+from flask_login import UserMixin
+from app import login
+from werkzeug.security import generate_password_hash, check_password_hash
 
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
 
 class Mechanism(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -80,3 +86,18 @@ class Post(db.Model):
         print(super().get_tables_for_bind())
         # print(super().)
 
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), index=True, unique=True)
+    password_hash = db.Column(db.String(128))
+
+    def __init__(self, id, username, password_hash):
+        self.id = id
+        self.username = username
+        self.password_hash = generate_password_hash(password_hash)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)

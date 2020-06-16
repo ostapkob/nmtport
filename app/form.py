@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, DateField, RadioField, SelectField
+from wtforms import PasswordField, BooleanField
 from wtforms.validators import DataRequired, Required
 
 
@@ -26,3 +27,9 @@ class SelectDataShift(FlaskForm):
     shift = RadioField('shift', choices=[('1', 'День'), ('2', 'Ночь')],  render_kw={
                        'class': 'form-control', 'style': 'font-size:100%'})
     submit = SubmitField('Show', validators=[Required()])
+
+class LoginForm(FlaskForm):
+    username = StringField('User', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    remember_me = BooleanField('Запомни меня')
+    submit = SubmitField('Log in')
