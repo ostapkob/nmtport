@@ -12,8 +12,7 @@ import app.api as API
 from sqlalchemy import func
 from pprint import pprint
 import os
-from flask_login import current_user, login_user
-
+from flask_login import current_user, login_user, logout_user
 
 db.create_all()
 
@@ -21,6 +20,8 @@ db.create_all()
 @app.route("/")
 @app.route("/index")
 def index():
+    if not current_user.is_authenticated:
+        return redirect("login")
     date_shift, shift = today_shift_date()
     # data = time_for_shift_usm(date_shift, shift)
     # data = time_for_shift('sennebogen', date_shift, shift)
@@ -38,6 +39,8 @@ def favicon():
 
 @app.route("/form_mech", methods=['GET', 'POST'])
 def form_mech():
+    if not current_user.is_authenticated:
+        return redirect("login")
     form_m = AddMechanism()
     if form_m.validate_on_submit():
         flash('Ostap')
@@ -49,44 +52,40 @@ def form_mech():
 
 @app.route("/last")
 def last():
+    if not current_user.is_authenticated:
+        return redirect("login")
     return render_template("last.html",
                            title='Last')
 
 @app.route("/kran")
 def kran():
+    if not current_user.is_authenticated:
+        return redirect("login")
     return render_template("kran.html",
                            title='Краны')
 
 @app.route("/usm")
 def usm():
-    # is_login('usm.html', title='УСМ')
-    # return render_template("usm.html",
-    #                        title='УСМ')
+    if not current_user.is_authenticated:
+        return redirect("login")
 
-    if current_user.is_authenticated:
-        print('........', current_user.is_authenticated)
-        return render_template("usm.html",
-                           title='УСМ')
-    else:
-        print('+++++++++',  current_user.is_authenticated)
-        return redirect("/")
+    return render_template("usm.html", title='УСМ')
 
 @app.route("/map")
 def maps():
+    if not current_user.is_authenticated:
+        return redirect("login")
     return render_template("map.html",
                            title='Maps')
 
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
-    print('<<<<<LOGIN>>>>>>', current_user.is_authenticated)
     if current_user.is_authenticated:
-        print('===================', current_user)
         return redirect("/")
     form=LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
-        print('--->', user.username, user.password_hash)
         if user is None or not user.check_password(form.password.data):
             return redirect('login')
         login_user(user, remember=form.remember_me.data)
@@ -96,41 +95,16 @@ def login():
                            title='Log In',
                            form=form)
 
-def is_login(url, title):
-    if current_user.is_authenticated:
-        print('===================', current_user.is_authenticated)
-        return render_template(url,
-                            title=title)
-    else:
-        print('------------------', current_user.is_authenticated)
-        return render_template('/')
-
-# @app.route("/vue")
-# def vue():
-#     date_shift, shift = today_shift_date()
-#     date_shift = date_shift.strftime('%d.%m.%Y')
-#     type_mech = 'usm'
-#     http = 'http://127.0.0.1:5000/api/v1.0/get_data/'
-#     http += type_mech + '/' + date_shift + '/' + str(shift)
-#     print(http)
-#     return render_template("vue.html",
-#                            http=http,
-#                            date_shift=date_shift,
-#                            shift=shift,
-#                            title='Vue')
-
-
-@app.route("/show_all_mechanisms")
-def show_all_mechanisms():
-    all_mech = Mechanism.query.all()
-    return render_template("mechanisms.html",
-                           title='Механизмы',
-                           mechs=all_mech)
-
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect('/')
 
 
 @app.route("/archive", methods=['GET', 'POST'])
 def archive():
+    if not current_user.is_authenticated:
+        return redirect("login")
     form = SelectDataShift()
     if form.validate_on_submit():
         date = handle_date(form.date_shift.data)
@@ -158,13 +132,35 @@ def archive():
                            form=form,
                            )
 
+@app.route("/show_all_mechanisms")
+def show_all_mechanisms():
+    if not current_user.is_authenticated:
+        return redirect("login")
+    all_mech = Mechanism.query.all()
+    return render_template("mechanisms.html",
+                           title='Механизмы',
+                           mechs=all_mech)
 
-@app.route("/list_api")
-def list_api():
-    ls_api = dir(API)
-    return render_template("list_api.html",
-                           title='Posible_api',
-                           ls_api=ls_api)
+# @app.route("/vue")
+# def vue():
+#     date_shift, shift = today_shift_date()
+#     date_shift = date_shift.strftime('%d.%m.%Y')
+#     type_mech = 'usm'
+#     http = 'http://127.0.0.1:5000/api/v1.0/get_data/'
+#     http += type_mech + '/' + date_shift + '/' + str(shift)
+#     print(http)
+#     return render_template("vue.html",
+#                            http=http,
+#                            date_shift=date_shift,
+#                            shift=shift,
+#                            title='Vue')
+
+# @app.route("/list_api")
+# def list_api():
+#     ls_api = dir(API)
+#     return render_template("list_api.html",
+#                            title='Posible_api',
+#                            ls_api=ls_api)
 
 
 
