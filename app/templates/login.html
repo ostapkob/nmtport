@@ -1,0 +1,17 @@
+
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block main %}
+
+    <div class="row">
+        <div class="col-md-4">
+			{{ wtf.quick_form(form, button_map={'submit':'outline-dark'} ) }}
+        </div>
+    </div>
+
+</br>
+<div class="alert alert-warning" role="alert">
+<i>Узнать пароль можно в диспетчерской.</i>
+</div>
+{% endblock %}

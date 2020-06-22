@@ -5,14 +5,16 @@ from app import db, app
 from app.model import Mechanism, Post
 from app.form import AddMechanism
 from datetime import datetime, timedelta
-from functions import today_shift_date, all_mechanisms_id, time_for_shift_usm, time_for_shift_kran
-from functions import image_mechanism, all_mechanisms_type
+from app.functions import today_shift_date, all_mechanisms_id
+from app.usm import time_for_shift_usm
+from app.kran import time_for_shift_kran
+from app.functions import image_mechanism, all_mechanisms_type
 from sqlalchemy import func
 from pprint import pprint
 from psw import post_pass
 from datetime import datetime
 
-HOURS = 10
+from app.functions import HOURS
 
 @app.route("/api/v1.0/get_per_shift/<int:m_id>", methods=["GET"])
 def get_per_shift(m_id):

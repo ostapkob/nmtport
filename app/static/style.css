@@ -110,8 +110,8 @@ body, html{
 } 
 
 .menu{
-    /*padding: 0;*/
-    /* padding: 5%; */
+    /* padding: 0; */
+    /*  padding: 1%; */ 
     padding-left: 3%;
     padding-right: 3%;
     margin: 0;
@@ -129,7 +129,7 @@ body, html{
     color: #222222;
     text-decoration: none;
     align-self: center;
-    font-size: 14px;
+    font-size: 20px;
     padding: 10px 20px;
     transition: background .2s linear; 
 
@@ -144,6 +144,38 @@ body, html{
     font-size: 25px;
     margin-right: 50px;
 }
+
+
+.menu-mech{
+    margin-top: 3px;
+    list-style-type: none;
+    height: 50px;
+    display: flex;
+    align-items: flex-start;
+    justify-content:space-around;
+}
+
+.menu-mech li a {
+    color: #222222;
+    transition: background .3s linear; 
+    border:1px solid #eee;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.menu-mech li a:hover{
+    background: #eee;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+
+ 
+
+
+
+
+
 
 @media screen and (max-width: 765px) {
     .toggle{
@@ -203,7 +235,9 @@ body, html{
         color: #222222;    
         font-size: 0.6em;
     }
-
+    .menu-mech{
+        margin-top:5px;
+    }
 
 
 }

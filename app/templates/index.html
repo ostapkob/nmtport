@@ -2,15 +2,17 @@
 {% block main %}
 
 <div class="block"> 
-	<ul>
+	<ul class="menu-mech">
 		<li><a href="{{'usm'}}">  
-			<img src="{{ url_for('static', filename='img/usm.png') }}" height="40" />
-
-		</a> </li>
-		<br />
+			<img src="{{ url_for('static', filename='img/usm.svg') }}" height="40" /> </a> </li>
 		<li><a  href="{{'kran'}}">
-			<img src="{{ url_for('static', filename='img/kran.png') }}" height="50" />
-		</a> </li>
+			<img src="{{ url_for('static', filename='img/kran.svg') }}" height="40" /> </a> </li>
+		<li><a  href="{{'/'}}">
+			<img src="{{ url_for('static', filename='img/sen.svg') }}" height="40" /> </a> </li>
+		<!-- <li><a  href="{{'/'}}"> -->
+		<!-- 	<img src="{{ url_for('static', filename='img/toyota.svg') }}" height="40" /> </a> </li> -->
+		<li><a  href="{{'/'}}">
+			<img src="{{ url_for('static', filename='img/wa.svg') }}" height="40" /> </a> </li>
 	</ul>
 	<script type="text/JavaScript"> 
 		var jshttp = '{{http}}';
