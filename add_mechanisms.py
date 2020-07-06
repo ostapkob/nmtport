@@ -2,7 +2,7 @@ from app import db
 from app.model import Mechanism, User, generate_password_hash
 db.create_all()
 
-mech = [ (32046, 'nmtp', 'usm', 'PowerTrack', 1, 'PowerTrack-1'),
+mech = [(32046, 'nmtp', 'usm', 'PowerTrack', 1, 'PowerTrack-1'),
         (32047, 'nmtp', 'usm', 'PowerTrack', 2, 'PowerTrack-2'),
         (32711, 'nmtp', 'usm', 'Edge', 3, 'Edge-3'),
         (32740, 'nmtp', 'usm', 'Edge', 4, 'Edge-4'),
@@ -24,9 +24,8 @@ mech = [ (32046, 'nmtp', 'usm', 'PowerTrack', 1, 'PowerTrack-1'),
 #     db.session.add(Mechanism(id, company, type, model, number, name))
 
 
-users = [ (1, 'ostap', '1813'),
-         (3, 'ya', '123'),
-         (2, 'nmtp', 'port')]
+users = [(1, 'ostap', 'disp1813'),
+         (2, 'nmtp', 'port2020')]
 
 for id, username, password in users:
     db.session.add(User(id, username, password))

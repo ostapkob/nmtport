@@ -25,7 +25,7 @@ def time_for_shift_kran(date_shift, shift):
                 data_per_shift[el.mech.number]['total_90'] += 1
             if el.value==2:
                 data_per_shift[el.mech.number]['total_180'] += 1
-            pre_value=el.count
+            # pre_value=el.count
         else:
             data_per_shift[el.mech.number] = {}
             data_per_shift[el.mech.number]['mechanism'] = el.mech
@@ -37,7 +37,7 @@ def time_for_shift_kran(date_shift, shift):
                 data_per_shift[el.mech.number]['total_180'] = 1
             data_per_shift[el.mech.number]['data'] = {}
             data_per_shift[el.mech.number]['data'][date_t] = el.value, el.count
-            pre_value=el.count
+            # pre_value=el.count
 
     # get start time for this shift
     start = datetime.combine(date_shift, datetime.min.time())
@@ -53,9 +53,6 @@ def time_for_shift_kran(date_shift, shift):
     for key, value in data_per_shift.items():
         flag_start=True
         flag_finish = True
-        pre_value3 = 0
-        flag_work = True
-        count_work = 0
         time_by_minuts[key] = {}
         time_by_minuts[key]['name'] = data_per_shift[key]['mechanism'].name
         # translate hours into minutes and round
@@ -67,12 +64,14 @@ def time_for_shift_kran(date_shift, shift):
             date_t = delta_minutes.strftime("%H:%M")
             try:
                 val_minute = data_per_shift[key]['data'][delta_minutes][0]
-                pre_value =  data_per_shift[key]['data'][delta_minutes][1]
+                # pre_value =  data_per_shift[key]['data'][delta_minutes][1]
             except KeyError:
                 val_minute = -1
 
 
             time_by_minuts[key]['data'][i] = {'time': date_t, 'value': val_minute}
+
+
             delta_minutes += timedelta(minutes=1)
             today_date, today_shift = today_shift_date()
             if val_minute>0 and flag_start:
@@ -82,6 +81,18 @@ def time_for_shift_kran(date_shift, shift):
                 time_by_minuts[key]['finish'] = date_t
             if delta_minutes >= datetime.now() and date_shift == today_date and today_shift == shift:
                 break
+
+        # replace items from -1 to 0 if kran work
+        pre_items = -1
+        work_count = 0
+        for number_item, data in time_by_minuts[key]['data'].items():
+            if data['value'] == -1 and pre_items !=-1 and work_count<5:
+                time_by_minuts[key]['data'][number_item]['value']=0
+                work_count+=1
+            else:
+                work_count =0
+            pre_items = data['value']
+
     return time_by_minuts
 
 
