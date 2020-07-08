@@ -7,10 +7,10 @@
     <div scope="row" v-for="el in all_data">
         <div class="name-mech">  {{ '   {{ el.name }}  '}}   
             <span class="badge badge-primary"> 
-                <img src="{{ url_for('static', filename='img/ship.png') }}" height="15" /> </a> </li>
+                <img src="{{ url_for('static', filename='img/ship.png') }}" height="18" /> 
                 {{ '   {{ el.total_180 }}  '}} </span>
             <span class="badge badge-dark"> 
-                <img src="{{ url_for('static', filename='img/vagon.png') }}" height="15" /> </a> </li>
+                <img src="{{ url_for('static', filename='img/vagon.png') }}" height="18" />
                 {{ '   {{ el.total_90 }}  '}} </span>
             <span class='time-start-finish text-right'> start<strong> {{'{{el.start }} '}}</strong> 
                finish<strong> {{'{{el.finish }} '}} </strong> </span>
