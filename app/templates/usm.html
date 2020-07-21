@@ -10,11 +10,11 @@
             <span class="badge badge-info">  {{ '   {{ el.total_time }}  '}} </span>
             <span class="badge badge-primary">  {{ '   {{ el.work_time }}  '}} </span>
             <span class='time-start-finish text-right'> start<strong> {{'{{el.start }} '}}</strong> 
-               finish<strong> {{'{{el.finish }} '}} </strong> </span>
+               finish<strong> {{'{{el.finish }} '}}</strong> </span>
         </div>
         <div class="progress">
-            <div v-for="minute in el.data" class="progress-bar" role="progressbar"
-            style="width: 0.1388%"   :class="{ 'bg-warning':minute.value==0, 'bg-danger':minute.value==-1}"></div>
+            <div v-for="minute in el.data" class="progress-bar text-left time-progress" role="progressbar"
+                :style="{width: minute.step*0.1388+'%'}"   :class="{ 'bg-warning text-dark':minute.value==0, 'bg-danger progress-bar-striped':minute.value==-1}">{{ '{{minute.time}}'}}</div>
             </div>
         <div class="line-mech">
             <span class="time-mech" v-for="hour in hs"> {{ '{{ hour }} '}} </span>

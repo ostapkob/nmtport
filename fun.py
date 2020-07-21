@@ -20,6 +20,7 @@ def usm_periods(mechanisms_data):
                 counter +=1
             else:
                 step +=1
+
         mechanisms_data[mech]['data'] = new_data
     return mechanisms_data
 

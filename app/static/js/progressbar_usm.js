@@ -6,6 +6,7 @@ var app_kran = new Vue({
         date_shift: '',
         flag: true,
         hs:[],
+        mm: 50,
     },
     methods: {
         // hight() {
@@ -48,7 +49,7 @@ var app_kran = new Vue({
         getData () {
             console.log(this.date_shift);
 
-            this.$http.get('/api/v1.0/get_data/usm/'+this.date_shift+'/'+this.shift).then(response => {
+            this.$http.get('/api/v1.0/get_data_period/usm/'+this.date_shift+'/'+this.shift).then(response => {
                 this.all_data = response.body
             }, response => {
                 console.log('response err')

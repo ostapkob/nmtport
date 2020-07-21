@@ -3,7 +3,9 @@
         document.write('<div class="name-mech">'+ valByMins[key].name+ '  ' );
 
         if (type_mechanism=='usm' ) {
-        document.write('<span class="badge badge-secondary">' + valByMins[key].time_coal + '</span>');
+        document.write('<span class="badge badge-dark">' + valByMins[key].time_coal + '</span> ');
+        document.write('<span class="badge badge-info">' + valByMins[key].total_time + '</span> ');
+        document.write('<span class="badge badge-primary">' + valByMins[key].work_time + '</span>');
         }
 
         if (type_mechanism=='kran' ) {
@@ -39,7 +41,7 @@
           for (var id in list) {
             n=list[id].value;
             if (n==-1){
-              document.write('<div class="progress-bar bg-danger" role="progressbar"  style="width: 0.14%" ></div>'); }
+              document.write('<div class="progress-bar progress-bar-striped bg-danger " role="progressbar"  style="width: 0.14%" ></div>'); }
               else if (n==0){
                 document.write('<div class="progress-bar bg-warning"  role="progressbar" style="width: 0.14%"></div>'); }
                 else {
