@@ -60,4 +60,5 @@ die-on-term = true
 sudo systemctl restart nmtport
 sudo systemctl restart nginx
 
-
+sudo apt-get install unixodbc-dev
+sudo pip install pyodbc

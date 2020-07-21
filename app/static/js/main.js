@@ -3,7 +3,7 @@
         document.write('<div class="name-mech">'+ valByMins[key].name+ '  ' );
 
         if (type_mechanism=='usm' ) {
-        document.write('<span class="badge badge-secondary">' + valByMins[key].total + '</span>');
+        document.write('<span class="badge badge-secondary">' + valByMins[key].time_coal + '</span>');
         }
 
         if (type_mechanism=='kran' ) {

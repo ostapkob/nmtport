@@ -1,7 +1,7 @@
 import os
 from sys import platform
 from psw import form_pass
-import pyodbc
+# import pyodbc
 import urllib.parse
 
 class Configuration(object):
@@ -17,14 +17,14 @@ class Configuration(object):
                                  "UID=sa;"
                                  "PWD=17404")
 
-    SQLALCHEMY_DATABASE_URI = "mssql+pyodbc:///?odbc_connect=%s" % params
+    # SQLALCHEMY_DATABASE_URI = "mssql+pyodbc:///?odbc_connect=%s" % params
 
-    # SQLALCHEMY_DATABASE_URI='mysql+mysqlconnector://ostap:1@localhost/test1'
+    SQLALCHEMY_DATABASE_URI='mysql+mysqlconnector://ostap:1@localhost/test1'
 
-    # SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/nmtp-mechanisms.db'
-    # if platform == 'win32':
-    #     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + \
-    #         os.path.join(basedir, 'nmtp-mechanisms.db')
-    # else:
-    #     SQLALCHEMY_DATABASE_URI = 'sqlite:////' + \
-    #         os.path.join(basedir, 'nmtp-mechanisms.db')
+    SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/nmtp-mechanisms.db'
+    if platform == 'win32':
+        SQLALCHEMY_DATABASE_URI = 'sqlite:///' + \
+            os.path.join(basedir, 'nmtp-mechanisms.db')
+    else:
+        SQLALCHEMY_DATABASE_URI = 'sqlite:////' + \
+            os.path.join(basedir, 'nmtp-mechanisms.db')

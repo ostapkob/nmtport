@@ -239,6 +239,12 @@ body, html{
         margin-top:5px;
     }
 
+    .name-mech{
+        margin-top: 20px;
+        margin-bottom: 7px;
+        font-size: 14px;
+        font-weight: bold;
+        color: #444444;
 
 }
 

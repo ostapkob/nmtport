@@ -80,7 +80,8 @@ if __name__ == "__main__":
     kran12= Kran(mechanism_id=13893, value=0, value2=0, value3=0, count=0, latitude=42.8099, longitude=132.8884)
     kran22= Kran(mechanism_id=5908,  value=0, value2=0, value3=0, count=0, latitude=42.8088, longitude=132.8877)
 
-    usms=Pt1, Pt2, E3,  E4, S5,  S6,  S7,  S8, U9,  U10, E11
+    # usms=Pt1, Pt2, E3,  E4, S5,  S6,  S7,  S8, U9,  U10, E11
+    usms=Pt1, Pt2, S5,  S6,  S7,  S8, U9,  U10, E11
     krans=  kran4, kran12, kran22
     mechanisms =usms+krans
 
@@ -88,8 +89,9 @@ if __name__ == "__main__":
     lat= 0.0001
     lng=-0.0001
     last_sent = time.time() - 61
-    [x.chenge_value(0.5) for x in usms[1:]]
-    [x.chenge_value3(230) for x in usms]
+    [x.chenge_value(0) for x in usms[2:]]
+    # Pt1.chenge_value(0.7)
+    [x.chenge_value3(50) for x in usms]
     [x.chenge_value(2) for x in krans]
     [print(x) for x in mechanisms]
     kran22.chenge_value(1)

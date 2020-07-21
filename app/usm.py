@@ -3,7 +3,7 @@ from app.functions import HOURS
 from app.model import Post, Mechanism
 from app import db
 from datetime import datetime, timedelta
-
+from pprint import pprint
 def time_for_shift_usm(date_shift, shift):
     '''get dict with all minute's values for the period, name and total
     value is lever, value3 is speed roler,
@@ -27,13 +27,20 @@ def time_for_shift_usm(date_shift, shift):
 
         if data_per_shift.get(el.mech.number):
             data_per_shift[el.mech.number]['data'][date_t] = val_minute, el.value3
-            data_per_shift[el.mech.number]['total'] += el.value
+            data_per_shift[el.mech.number]['time_coal'] += el.value
+            data_per_shift[el.mech.number]['total_time'] += 1
+
         else:
             data_per_shift[el.mech.number] = {}
             data_per_shift[el.mech.number]['mechanism'] = el.mech
-            data_per_shift[el.mech.number]['total'] = el.value
+            data_per_shift[el.mech.number]['time_coal'] = el.value
+            data_per_shift[el.mech.number]['total_time'] = 1
             data_per_shift[el.mech.number]['data'] = {}
             data_per_shift[el.mech.number]['data'][date_t] = val_minute, el.value3
+
+        data_per_shift[el.mech.number].setdefault('work_time',0)
+        if el.value>0:
+                data_per_shift[el.mech.number]['work_time'] += 1
     # get start time for this shift
     start = datetime.combine(date_shift, datetime.min.time())
     if shift == 1:
@@ -46,14 +53,16 @@ def time_for_shift_usm(date_shift, shift):
     # create dict with all minutes to now if value is not return (-1) because
     # 0 may exist
     time_by_minuts = {}
+    # pprint(data_per_shift)
     for key  in data_per_shift.keys():
         flag_start=True
         flag_finish = True
         time_by_minuts[key] = {}
         time_by_minuts[key]['name'] = data_per_shift[key]['mechanism'].name
         # translate hours into minutes and round
-        time_by_minuts[key]['total'] = round(
-            data_per_shift[key]['total'] / 60, 2)
+        time_by_minuts[key]['time_coal'] = round(data_per_shift[key]['time_coal'] / 60, 2)
+        time_by_minuts[key]['total_time'] = round(data_per_shift[key]['total_time'] / 60, 2)
+        time_by_minuts[key]['work_time'] = round(data_per_shift[key]['work_time'] / 60, 2)
         time_by_minuts[key]['data'] = {}
         delta_minutes = start
         for i in range(1, 60 * 12 + 1):
@@ -70,4 +79,26 @@ def time_for_shift_usm(date_shift, shift):
             if delta_minutes >= datetime.now() and date_shift == today_date and today_shift == shift:
                 break
     return time_by_minuts
+
+def usm_periods(mechanisms_data):
+    for mech, data_mech in mechanisms_data.items():
+        vaues_period = -1
+        new_data ={}
+        step = 0
+        pre_time = data_mech['data'][1]['time']
+        counter = 1
+        for number, value_number in data_mech['data'].items():
+            if value_number['value'] !=vaues_period:
+                if vaues_period>0:
+                    vaues_period=1
+                new_data[counter]={'time': pre_time, 'value': vaues_period, 'step':step}
+                step=1
+                vaues_period = value_number['value']
+                pre_time = value_number['time']
+                counter +=1
+            else:
+                step +=1
+        mechanisms_data[mech]['data'] = new_data
+    return mechanisms_data
+
 

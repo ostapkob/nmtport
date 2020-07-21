@@ -6,7 +6,7 @@ from app.model import Mechanism, Post
 from app.form import AddMechanism
 from datetime import datetime, timedelta
 from app.functions import today_shift_date, all_mechanisms_id
-from app.usm import time_for_shift_usm
+from app.usm import time_for_shift_usm, usm_periods
 from app.kran import time_for_shift_kran
 from app.functions import image_mechanism, all_mechanisms_type
 from sqlalchemy import func
@@ -51,6 +51,20 @@ def get_data(type_mechanism, date_shift, shift):
 
     return jsonify(data)
 
+@app.route("/api/v1.0/get_data_period/<type_mechanism>/<date_shift>/<int:shift>", methods=['GET', 'POST'])
+def get_data_period(type_mechanism, date_shift, shift):
+    '''get data shift for by type of mechanism'''
+    try:
+        date = datetime.strptime(date_shift, '%d.%m.%Y').date()
+    except ValueError:
+        return make_response(jsonify({'error': 'Bad format date'}), 400)
+    if type_mechanism=='usm':
+        data = usm_periods(time_for_shift_usm(date, shift))
+
+    if type_mechanism=='kran':
+        data = time_for_shift_kran(date, shift)
+
+    return jsonify(data)
 
 @app.route("/api/v1.0/all_last_data", methods=["GET"])
 def all_last_data():
