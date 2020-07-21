@@ -20,8 +20,8 @@ mech = [(32046, 'nmtp', 'usm', 'PowerTrack', 1, 'PowerTrack-1'),
         ]
 
 
-# for id, company, type, model, number, name in mech:
-#     db.session.add(Mechanism(id, company, type, model, number, name))
+for id, company, type, model, number, name in mech:
+    db.session.add(Mechanism(id, company, type, model, number, name))
 
 
 users = [(1, 'ostap', 'disp1813'),
