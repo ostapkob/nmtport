@@ -1,5 +1,4 @@
-var app_kran = new Vue({
-    el: '#app_usm',
+var app_kran = new Vue({ el: '#app_usm',
     data: {
         all_data: [],
         shift: '',

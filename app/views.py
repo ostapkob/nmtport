@@ -6,7 +6,7 @@ from app.model import Mechanism, Post, User
 from app.form import AddMechanism, SelectDataShift, LoginForm
 from datetime import datetime, timedelta
 from app.functions import today_shift_date, all_mechanisms_id, handle_date
-from app.usm import time_for_shift_usm
+from app.usm import time_for_shift_usm, usm_periods
 from app.kran import time_for_shift_kran
 import app.api as API
 from sqlalchemy import func
@@ -111,7 +111,8 @@ def archive():
         shift = form.shift.data
         type_mechanism = form.type.data
         if type_mechanism == 'usm':
-            data = time_for_shift_usm(date, shift)
+            # data = time_for_shift_usm(date, shift)
+            data = usm_periods(time_for_shift_usm(date, shift))
         if type_mechanism =='kran':
             data = time_for_shift_kran(date, shift)
 

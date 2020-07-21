@@ -1,11 +1,17 @@
     function progress_per_shift(data) {
+        if (type_mechanism=='usm' ) {
+        document.write('<em> <span class="badge badge-dark">   1.1</span> - время нахождения угля на ленте   ');
+        document.write('<span class="badge badge-primary">1.2</span> - время работы    ');
+        document.write('<span class="badge badge-info">   1.3</span> - время работы c учетом простоев </em>');
+        }
+
       for (var key in data) {
         document.write('<div class="name-mech">'+ valByMins[key].name+ '  ' );
 
         if (type_mechanism=='usm' ) {
         document.write('<span class="badge badge-dark">' + valByMins[key].time_coal + '</span> ');
+        document.write('<span class="badge badge-primary">' + valByMins[key].work_time + '</span> ');
         document.write('<span class="badge badge-info">' + valByMins[key].total_time + '</span> ');
-        document.write('<span class="badge badge-primary">' + valByMins[key].work_time + '</span>');
         }
 
         if (type_mechanism=='kran' ) {
@@ -40,12 +46,13 @@
         if (type_mechanism=='usm' ) {
           for (var id in list) {
             n=list[id].value;
+            width = list[id].step*0.139; 
             if (n==-1){
-              document.write('<div class="progress-bar progress-bar-striped bg-danger " role="progressbar"  style="width: 0.14%" ></div>'); }
+              document.write('<div class="progress-bar progress-bar-striped bg-danger time-progress text-left" role="progressbar"  style="width:' + width + '%" >' + list[id].time + '</div>'); }
               else if (n==0){
-                document.write('<div class="progress-bar bg-warning"  role="progressbar" style="width: 0.14%"></div>'); }
+                document.write('<div class="progress-bar bg-warning text-left time-progress text-dark"  role="progressbar" style="width:' + width +'%">' + list[id].time + '</div>'); }
                 else {
-                  document.write('<div class="progress-bar"  role="progressbar" style="width: 0.14%"></div>') ; }
+                  document.write('<div class="progress-bar time-progress text-left"  role="progressbar" style="width:' + width + '%">' + list[id].time + '</div>') ; }
                 }
         }
 
