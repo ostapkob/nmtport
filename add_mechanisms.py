@@ -16,6 +16,7 @@ mech = [(32046, 'nmtp', 'usm', 'PowerTrack', 1, 'PowerTrack-1'),
         (32777, 'nmtp', 'sennebogen', '860', 1, 'Sennebogen-1'),
         (30301, 'nmtp', 'kran', 'sokol', 4, 'кран-4'),
         (13893, 'nmtp', 'kran', 'sokol', 12, 'кран-12'),
+        (15125, 'nmtp', 'kran', 'sokol', 13, 'кран-13'),
         (5908,  'nmtp', 'kran', 'sokol', 22, 'кран-22'),
         ]
 

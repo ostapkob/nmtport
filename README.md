@@ -27,11 +27,11 @@ server {
 
     location / {
             include proxy_params;
-            proxy_pass http://unix:/home/ubuntu/nmtport/nmtport.sock;
+            proxy_pass http://unix:/home/UBUNTU/nmtport/nmtport.sock;
         }
 }
 
-#/etc/nginx/sites-enabled/nmtport.service
+#/etc/systemd/system/nmtport.service
 [Unit]
 Description=Gunicorn instance to serve nmtport
 After=network.target
@@ -39,16 +39,16 @@ After=network.target
 [Service]
 User=ubuntu
 Group=www-data
-WorkingDirectory=/home/ubuntu/nmtport
-Environment="PATH=/home/ubuntu/nmtport/venv/bin"
-ExecStart=/home/ubuntu/nmtport/venv/bin/gunicorn --workers 3 --bind unix:nmtport.sock -m 007 wsgi:app
+WorkingDirectory=/home/UBUNTU/nmtport
+Environment="PATH=/home/UBUNTU/nmtport/venv/bin"
+ExecStart=/home/UBUNTU/nmtport/venv/bin/gunicorn --workers 3 --bind unix:nmtport.sock -m 007 wsgi:app
 
 [Install]
 WantedBy=multi-user.target
 
 
 
-#/etc/nginx/sites-enabled/nmtport.ini
+#nmtport.ini
 [uwsgi]
 module = wsgi:app
 master = true
