@@ -1,5 +1,6 @@
 from app import db
 from app.model import Mechanism, User, generate_password_hash
+from psw import users
 db.create_all()
 
 mech = [(32046, 'nmtp', 'usm', 'PowerTrack', 1, 'PowerTrack-1'),
@@ -24,10 +25,6 @@ mech = [(32046, 'nmtp', 'usm', 'PowerTrack', 1, 'PowerTrack-1'),
 for id, company, type, model, number, name in mech:
     db.session.add(Mechanism(id, company, type, model, number, name))
 
-
-users = [(1, 'ostap', 'disp1813'),
-         (2, 'nmtp', 'port2020')]
-
 for id, username, password in users:
     db.session.add(User(id, username, password))
 
@@ -38,8 +35,8 @@ db.session.commit()
 
 # m = Mechanism(32777, company='nmtp', type='sennebogen', model='860', number=1, name='Sennebogen-1')
 a = [mech.id for mech in Mechanism.query.all()]
-b = [(user.username, user.password_hash) for user in User.query.all()]
 print(a)
+b = [(user.username, user.password_hash) for user in User.query.all()]
 print('---------------')
 print(b)
 

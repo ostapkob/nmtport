@@ -7,7 +7,7 @@ from datetime import datetime
 class Mechanism:
     # ip ='http://18.139.162.128'
     ip ='http://127.0.0.1:5000'
-    # ip = 'http://192.168.99.107'
+    # ip = 'http://94.154.76.136'
     def __init__(self, mechanism_id, value,value2, value3, count, latitude, longitude):
         self.mechanism_id= mechanism_id
         self.password=post_pass
@@ -79,12 +79,12 @@ if __name__ == "__main__":
     E11 =    USM(mechanism_id=33287, value=0, value2=0, value3=0, count=0, latitude=42.8152, longitude=132.8910)
     kran4=  Kran(mechanism_id=30301, value=0, value2=0, value3=0, count=0, latitude=42.8106, longitude=132.8880)
     kran12= Kran(mechanism_id=13893, value=0, value2=0, value3=0, count=0, latitude=42.8099, longitude=132.8884)
+    kran13= Kran(mechanism_id=15125, value=0, value2=0, value3=0, count=0, latitude=42.8099, longitude=132.8884)
     kran22= Kran(mechanism_id=5908,  value=0, value2=0, value3=0, count=0, latitude=42.8088, longitude=132.8877)
-
     usms=Pt1, Pt2,  E4, S5,  S6,  S7,  S8, U9,  U10, E11
     # usms= E3,  E4, S5,  S6,  S7,  S8, U9,  U10, E11
     # usms=Pt1, Pt2, S5,  S6,  S7,  S8, U9,  U10, E11
-    krans=  kran4, kran12, kran22
+    krans=  kran4, kran12, kran13, kran22
     mechanisms =usms+krans
 
     flag = True
@@ -95,9 +95,9 @@ if __name__ == "__main__":
     [x.chenge_value(0.8) for x in usms[::2]]
     # Pt1.chenge_value(0.7)
     [x.chenge_value3(50) for x in usms]
-    [x.chenge_value(2) for x in krans]
+
     [print(x) for x in mechanisms]
-    kran22.chenge_value(1)
+    kran13.chenge_value(1)
     kran12.chenge_value(2)
 
     while True:

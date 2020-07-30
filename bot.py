@@ -2,6 +2,7 @@ import requests
 import json
 import time
 from pprint import pprint
+from psw import TOKEN
 from datetime import datetime, timedelta
 red_circle=u'\U0001F534'
 yellow_circle=u'\U0001F7E1'
@@ -18,7 +19,7 @@ def chech_values(ls, find, quantity):
         values = [data[str(num)]['value'] for num in last_numbers]
     except:
         return False
-    print("----->", name_mech, values)
+    print(values)
     if values[0] == -1:
         return False
     if values[0] == find:
@@ -56,21 +57,21 @@ tests = ( [[1, -1, -1, -1, -1], True],
         [[-1, -1, 1, -1], False],
         [[0,-1, -1, 1, -1], False],
         [[0.5, 0, -1, 1, -1], False],
-        [[-1, 0, 0, 0, 0], True],
+        [[-1, 0, 0, 0, 0], False],
          )
 
-# for values, res in tests:
-#     if chech_values(values, -1) != res:
-#         print(values)
+for values, res in tests:
+    if chech_values(values, -1, 3) != res:
+        print(values)
 
-# print('===================')
-# for values, res in tests:
-#     if chech_values(values, 0) != res:
-        # print(values)
+print('===================')
+for values, res in tests:
+    if chech_values(values, 0, 6) != res:
+        print(values)
 
-host ="http://18.139.162.128"
+host ="http://94.154.76.136"
 type_mechanism = "usm"
-TOKEN = "977352466:AAEgH-c6FFFGbv71pSBP8hbtu9oSS6JrY48"
+
 if flag:
     bot = telebot.TeleBot(TOKEN)
 while True:
@@ -94,10 +95,11 @@ while True:
         if chech_values(data, -1, 3):
             if flag:
                 bot.send_message(226566335, f"{red_circle} {name_mech}")
-        if chech_values(data, 0, 5):
+                print("--->", name_mech, data)
+        if chech_values(data, 0, 6):
             if flag:
                 bot.send_message(226566335, f"{yellow_circle} {name_mech}")
-
+                print("--->", name_mech, data)
 
 
 
