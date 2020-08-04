@@ -1,13 +1,15 @@
 import requests
 from requests.exceptions import HTTPError
-from psw import post_pass
+from psw import post_pass, debug
 import time
 from datetime import datetime
 
 class Mechanism:
     # ip ='http://18.139.162.128'
-    ip ='http://127.0.0.1:5000'
-    # ip = 'http://94.154.76.136'
+    if debug:
+        ip ='http://127.0.0.1:5000'
+    else:
+        ip = 'http://94.154.76.136'
     def __init__(self, mechanism_id, value,value2, value3, count, latitude, longitude):
         self.mechanism_id= mechanism_id
         self.password=post_pass

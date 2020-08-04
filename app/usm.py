@@ -60,9 +60,9 @@ def time_for_shift_usm(date_shift, shift):
         time_by_minuts[key] = {}
         time_by_minuts[key]['name'] = data_per_shift[key]['mechanism'].name
         # translate hours into minutes and round
-        time_by_minuts[key]['time_coal'] = round(data_per_shift[key]['time_coal'] / 60, 2)
-        time_by_minuts[key]['total_time'] = round(data_per_shift[key]['total_time'] / 60, 2)
-        time_by_minuts[key]['work_time'] = round(data_per_shift[key]['work_time'] / 60, 2)
+        time_by_minuts[key]['time_coal'] = round(data_per_shift[key]['time_coal'] / 60, 1)
+        time_by_minuts[key]['total_time'] = round(data_per_shift[key]['total_time'] / 60, 1)
+        time_by_minuts[key]['work_time'] = round(data_per_shift[key]['work_time'] / 60, 1)
         time_by_minuts[key]['data'] = {}
         delta_minutes = start
         for i in range(1, 60 * 12 + 1):
