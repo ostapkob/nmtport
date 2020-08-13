@@ -82,14 +82,20 @@ def time_for_shift_usm(date_shift, shift):
 
 def usm_periods(mechanisms_data):
     for mech, data_mech in mechanisms_data.items():
+        pprint(data_mech)
         values_period = -1
         new_data ={}
         step = 0
         pre_time = '' #data_mech['data'][1]['time']
         counter = 1
-        value_min =-1
         for number, value_number in data_mech['data'].items():
-            value_min = 1 if value_number['value']>0 else value_number['value']
+            if value_number['value']>=0 and value_number['value']<0.1:
+                value_min = 0 # yellow
+            elif value_number['value'] >= 0.1:
+                value_min = 1 # blue
+            else:
+                value_min = -1 # red
+
             if value_min !=values_period:
                 if values_period>0:
                     values_period=1

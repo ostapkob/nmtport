@@ -101,11 +101,12 @@ if __name__ == "__main__":
     [print(x) for x in mechanisms]
     kran13.chenge_value(1)
     kran12.chenge_value(2)
-
+    n = 0
     while True:
         if time.time() - last_sent >= 60.0:
             last_sent = time.time()
-
+            n += 0.01
+            [x.chenge_value(n) for x in usms[::2]]
             [m.chenge_position(lat, lng) for m in mechanisms]
             [m.send_get_request() for m in mechanisms]
             if flag:
