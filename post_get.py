@@ -99,8 +99,9 @@ if __name__ == "__main__":
     [x.chenge_value3(50) for x in usms]
 
     [print(x) for x in mechanisms]
-    kran13.chenge_value(1)
-    kran12.chenge_value(2)
+    kran13.chenge_value(2)
+    kran12.chenge_value(1)
+    kran4.chenge_value(1)
     n = 0
     while True:
         if time.time() - last_sent >= 60.0:

@@ -7,7 +7,7 @@ from app.form import AddMechanism
 from datetime import datetime, timedelta
 from app.functions import today_shift_date, all_mechanisms_id
 from app.usm import time_for_shift_usm, usm_periods
-from app.kran import time_for_shift_kran
+from app.kran import time_for_shift_kran, kran_periods
 from app.functions import image_mechanism, all_mechanisms_type
 from sqlalchemy import func
 from pprint import pprint
@@ -63,6 +63,18 @@ def get_data_period(type_mechanism, date_shift, shift):
 
     if type_mechanism=='kran':
         data = time_for_shift_kran(date, shift)
+
+    return jsonify(data)
+
+@app.route("/api/v1.0/get_data_now/<type_mechanism>", methods=['GET', 'POST'])
+def get_data_now(type_mechanism):
+    '''get data shift for by type of mechanism with work NOW'''
+    print('----------------', today_shift_date())
+    if type_mechanism=='usm':
+        data = usm_periods(time_for_shift_usm(*today_shift_date()))
+
+    if type_mechanism=='kran':
+        data = kran_periods(time_for_shift_kran(*today_shift_date()))
 
     return jsonify(data)
 
@@ -153,7 +165,7 @@ def add_get_usm():
         longitude = 0
     items = mechanism_id, password, latitude, longitude
     test_items = any([item==None for item in items])
-    print(items, datetime.now(), not test_items)
+    # print(items, datetime.now(), not test_items)
     if test_items:
         return 'Bad request'
     if password != post_pass:
@@ -184,7 +196,7 @@ def add_get_kran():
         longitude = 0
     items = mechanism_id, password, latitude, longitude,value, value3
     test_items = any([item==None for item in items])
-    print(items, datetime.now(), not test_items)
+    # print(items, datetime.now(), not test_items)
     if test_items:
         return 'Bad request'
     if password != post_pass:
@@ -232,7 +244,7 @@ def add_post():
             latitude = data_mech.latitude
             longitude = data_mech.longitude
     elif request.method=='GET':
-        print('==', request)
+        # print('==', request)
         text = request.args
         return 'Need POST methods'
     else:

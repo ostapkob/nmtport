@@ -96,3 +96,24 @@ def time_for_shift_kran(date_shift, shift):
     return time_by_minuts
 
 
+def kran_periods(mechanisms_data):
+    for mech, data_mech in mechanisms_data.items():
+        values_period = -1
+        new_data ={}
+        step = 0
+        pre_time = ''
+        counter = 1
+        for number, value_number in data_mech['data'].items():
+            value_min = value_number['value'] # yellow
+
+            if value_min !=values_period:
+                new_data[counter]={'time': pre_time, 'value': values_period, 'step':step}
+                step=1
+                values_period = value_min
+                pre_time = value_number['time']
+                counter +=1
+            else:
+                step +=1
+        new_data[counter]={'time': pre_time, 'value': values_period, 'step':step}
+        mechanisms_data[mech]['data'] = new_data
+    return mechanisms_data
