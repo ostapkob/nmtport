@@ -101,3 +101,32 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+
+
+
+class Work_1C_1(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    inv_num = db.Column(db.Integer, index=True)
+    greifer_num =db.Column(db.Integer, index=True)
+    greifer_vol =db.Column(db.Integer, index=True)
+    fio=db.Column(db.String(64), index=True)
+    data_nach = db.Column(db.DateTime, index=True)
+    data_kon = db.Column(db.DateTime, index=True)
+
+    def __init__(self, id, inv_num, greifer_num, greifer_vol, fio, data_nach, data_kon):
+        self.id = id
+        self.inv_num = inv_num
+        self.greifer_num =greifer_num
+        self.greifer_vol =greifer_vol
+        self.fio=fio
+        self.data_nach =data_nach
+        self.data_kon =data_kon
+
+    def __repr__(self):
+        # return f'{self.inv_num}, {self.greifer_num}, {self.greifer_vol}, {self.fio}, {self.data_nach}, {self.data_kon}'
+        return [self.inv_num, self.greifer_num, self.greifer_vol, self.fio, self.data_nach, self.data_kon]
+
+    def get(self):
+        return [self.inv_num, self.greifer_num, self.greifer_vol, self.fio, self.data_nach, self.data_kon]
+

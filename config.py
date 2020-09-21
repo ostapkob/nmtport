@@ -3,6 +3,8 @@ from sys import platform
 from psw import form_pass, debug
 # import pyodbc
 import urllib.parse
+import mysql.connector
+
 
 class Configuration(object):
     basedir = os.path.abspath(os.path.dirname(__file__))
@@ -17,10 +19,19 @@ class Configuration(object):
                                      "DATABASE=nmtport;"
                                      "UID=ubuntu;"
                                      "PWD=Port2020")
-   
+    params_win = urllib.parse.quote_plus("DRIVER={SQL Server};"
+                                     "SERVER=192.168.99.106;"
+                                     "PORT=1433;"
+                                     "DATABASE=nmtport;"
+                                     "UID=ubuntu;"
+                                     "PWD=Port2020")
+    # cnx = mysql.connector.connect(
+    #     host="192.168.99.106",
+    #     port=1433,
+    #     user="ubuntu",
+    #     password="Port2020")
     # SQLALCHEMY_DATABASE_URI='mysql+mysqlconnector://ostap:1@localhost/test1'
     if DEBUG:
-        SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/nmtp-mechanisms.db'
         if platform == 'win32':
             SQLALCHEMY_DATABASE_URI = 'sqlite:///' + \
                 os.path.join(basedir, 'nmtp-mechanisms.db')
@@ -28,4 +39,7 @@ class Configuration(object):
             SQLALCHEMY_DATABASE_URI = 'sqlite:////' + \
                 os.path.join(basedir, 'nmtp-mechanisms.db')
     else:
-        SQLALCHEMY_DATABASE_URI = "mssql+pyodbc:///?odbc_connect=%s" % params
+        if platform == 'win32':
+            SQLALCHEMY_DATABASE_URI = "mssql+pyodbc:///?odbc_connect=%s" % params_win
+        else:
+            SQLALCHEMY_DATABASE_URI = "mssql+pyodbc:///?odbc_connect=%s" % params

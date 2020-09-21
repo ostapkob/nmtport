@@ -5,7 +5,7 @@ from app import db, app
 from app.model import Mechanism, Post
 from app.form import AddMechanism
 from datetime import datetime, timedelta
-from app.functions import today_shift_date, all_mechanisms_id
+from app.functions import today_shift_date, all_mechanisms_id, add_fio
 from app.usm import time_for_shift_usm, usm_periods
 from app.kran import time_for_shift_kran, kran_periods
 from app.functions import image_mechanism, all_mechanisms_type
@@ -60,16 +60,44 @@ def get_data_period(type_mechanism, date_shift, shift):
         return make_response(jsonify({'error': 'Bad format date'}), 400)
     if type_mechanism=='usm':
         data = usm_periods(time_for_shift_usm(date, shift))
-
     if type_mechanism=='kran':
         data = time_for_shift_kran(date, shift)
-
     return jsonify(data)
+
+@app.route("/api/v2.0/get_data_period/<type_mechanism>/<date_shift>/<int:shift>", methods=['GET', 'POST'])
+def get_data_period2(type_mechanism, date_shift, shift):
+    '''get data shift for by type of mechanism and id'''
+    try:
+        date = datetime.strptime(date_shift, '%d.%m.%Y').date()
+    except ValueError:
+        return make_response(jsonify({'error': 'Bad format date'}), 400)
+    if type_mechanism=='usm':
+        data = usm_periods(time_for_shift_usm(date, shift))
+
+    if type_mechanism=='kran':
+        data = kran_periods(time_for_shift_kran(date, shift))
+    return jsonify(data)
+
+@app.route("/api/v1.0/get_data_period_with_fio/<type_mechanism>/<date_shift>/<int:shift>", methods=['GET', 'POST'])
+def get_data_period_with_fio(type_mechanism, date_shift, shift):
+    '''get data shift for by type of mechanism'''
+    print('====')
+    try:
+        date = datetime.strptime(date_shift, '%d.%m.%Y').date()
+    except ValueError:
+        return make_response(jsonify({'error': 'Bad format date'}), 400)
+    if type_mechanism=='usm':
+        data = usm_periods(time_for_shift_usm(date, shift))
+        data_with_fio = data
+    if type_mechanism=='kran':
+        data = kran_periods(time_for_shift_kran(date, shift))
+        data_with_fio = add_fio(data, date, shift)
+    return jsonify(data_with_fio)
+
 
 @app.route("/api/v1.0/get_data_now/<type_mechanism>", methods=['GET', 'POST'])
 def get_data_now(type_mechanism):
     '''get data shift for by type of mechanism with work NOW'''
-    print('----------------', today_shift_date())
     if type_mechanism=='usm':
         data = usm_periods(time_for_shift_usm(*today_shift_date()))
 

@@ -49,12 +49,14 @@ def time_for_shift_kran(date_shift, shift):
     if data_per_shift == {}:
         return None
     # create dict with all minutes to now if value is not return (-1) because 0 may exist
+    # time_by_minuts = {'date_shift': date_shift, 'shift': shift}
     time_by_minuts = {}
     for key, value in data_per_shift.items():
         flag_start=True
         flag_finish = True
         time_by_minuts[key] = {}
         time_by_minuts[key]['name'] = data_per_shift[key]['mechanism'].name
+        time_by_minuts[key]['id'] = data_per_shift[key]['mechanism'].id
         # translate hours into minutes and round
         time_by_minuts[key]['total_180'] = round(data_per_shift[key]['total_180'], 2)
         time_by_minuts[key]['total_90'] = round(data_per_shift[key]['total_90'], 2)
@@ -67,11 +69,7 @@ def time_for_shift_kran(date_shift, shift):
                 # pre_value =  data_per_shift[key]['data'][delta_minutes][1]
             except KeyError:
                 val_minute = -1
-
-
             time_by_minuts[key]['data'][i] = {'time': date_t, 'value': val_minute}
-
-
             delta_minutes += timedelta(minutes=1)
             today_date, today_shift = today_shift_date()
             if val_minute>0 and flag_start:
@@ -93,10 +91,13 @@ def time_for_shift_kran(date_shift, shift):
                 work_count =0
             pre_items = data['value']
 
+
     return time_by_minuts
 
 
 def kran_periods(mechanisms_data):
+    if not mechanisms_data:
+        return None
     for mech, data_mech in mechanisms_data.items():
         values_period = -1
         new_data ={}

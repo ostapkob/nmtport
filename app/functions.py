@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from flask import render_template, flash
-from app.model import Post, Mechanism
+from app.model import Post, Mechanism, Work_1C_1
 from app import db
 from pprint import pprint
 HOURS = 10 #your timezone
@@ -140,19 +140,54 @@ def handle_date(date):
         flash('Enter correct shift')
         return datetime.now().date()
 
-def add_post(post):
-    # new_post = Post(value, latitude, longitude, mechanism_id)
-    print(post)
-    # print(post.value, post.latitude)
-    # db.session.add(new_post)
-    # db.session.commit()
+def data_from_1c(date_shift, shift):
+    time_from = datetime.combine(date_shift, datetime.min.time())
+    if shift==1:
+        time_from += timedelta(hours=8)
+    else:
+        time_from += timedelta(hours=20)
+    time_to = time_from + timedelta(hours=12)
+    cursor = db.session.query(Work_1C_1).filter(Work_1C_1.data_nach>=time_from, Work_1C_1.data_nach<=time_to).all()
+    data_1C = [x.get() for x in cursor]
+    return data_1C
 
+def data_from_1c_by_id(date_shift, shift, id_mech):
+    time_from = datetime.combine(date_shift, datetime.min.time())
+    if shift==1:
+        time_from += timedelta(hours=8)
+    else:
+        time_from += timedelta(hours=20)
+    time_to = time_from + timedelta(hours=12)
+    cursor = db.session.query(Work_1C_1).filter(Work_1C_1.data_nach>=time_from, Work_1C_1.data_nach<time_to, Work_1C_1.inv_num==id_mech).all()
+    data_1C = [x.get() for x in cursor]
+    return data_1C
 
-# date_shift, shift = today_shift_date()
-# print(date_shift, shift)
-# dd = time_for_shift('usm', date_shift, shift)
-# pprint(dd)
+def fio_to_fi(item):
+    fio = item[3].split()
+    if not fio:
+        return None
+    return f'{fio[0].capitalize()} {fio[1][0]}.'
 
+def add_fio(data_kran_period, date_shift, shift):
+    ''' add fio and grab if it exec'''
+    if not data_kran_period:
+        return None
+    for key, value in data_kran_period.items():
+        id_mech = data_kran_period[key]['id']
+        data_by_id_mech = data_from_1c_by_id(date_shift, shift, id_mech)
+        if len(data_by_id_mech)<1:
+            data_kran_period[key]['fio'] = None
+            data_kran_period[key]['grab'] = None
+        elif len(data_by_id_mech)==1:
+            data_kran_period[key]['fio'] = fio_to_fi(data_by_id_mech[0])
+            if data_by_id_mech[0][2] == 0:
+                data_kran_period[key]['grab'] = None
+            else:
+                data_kran_period[key]['grab'] = data_by_id_mech[0][2]
+        else:
+            for operator in data_by_id_mech:
+                data_kran_period[key]['fio'] = 'Two operators'
+    return data_kran_period
 
 
 

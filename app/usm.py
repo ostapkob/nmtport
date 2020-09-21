@@ -59,6 +59,7 @@ def time_for_shift_usm(date_shift, shift):
         flag_finish = True
         time_by_minuts[key] = {}
         time_by_minuts[key]['name'] = data_per_shift[key]['mechanism'].name
+        time_by_minuts[key]['id'] = data_per_shift[key]['mechanism'].id
         # translate hours into minutes and round
         time_by_minuts[key]['time_coal'] = round(data_per_shift[key]['time_coal'] / 60, 1)
         time_by_minuts[key]['total_time'] = round(data_per_shift[key]['total_time'] / 60, 1)
@@ -81,6 +82,8 @@ def time_for_shift_usm(date_shift, shift):
     return time_by_minuts
 
 def usm_periods(mechanisms_data):
+    if not mechanisms_data:
+        return None
     for mech, data_mech in mechanisms_data.items():
         # pprint(data_mech)
         values_period = -1
