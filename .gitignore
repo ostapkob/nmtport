@@ -5,3 +5,4 @@ node_modules/
 psw.py
 nmtp-mechanisms.db
 post.txt
+*.pyc 

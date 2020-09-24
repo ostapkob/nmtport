@@ -104,11 +104,27 @@ def kran_periods(mechanisms_data):
         step = 0
         pre_time = ''
         counter = 1
+        total_step = 0
+        total_90_1 = 0 # 1
+        total_180 = 0 # 2
+        total_90_2 = 0 # 1
         for number, value_number in data_mech['data'].items():
             value_min = value_number['value'] # yellow
-
             if value_min !=values_period:
-                new_data[counter]={'time': pre_time, 'value': values_period, 'step':step}
+                # this part by accumulated total
+                if values_period==1:
+                    total_90_1+= step
+                    total_step=total_90_1
+                elif values_period == 2:
+                    total_180 += step
+                    total_step = total_180
+                elif values_period == 3:
+                    total_90_2 += step
+                    total_step = total_90_2
+                else:
+                    total_step
+
+                new_data[counter]={'time': pre_time, 'value': values_period, 'step':step, 'total': total_step}
                 step=1
                 values_period = value_min
                 pre_time = value_number['time']

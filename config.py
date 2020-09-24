@@ -3,7 +3,6 @@ from sys import platform
 from psw import form_pass, debug
 # import pyodbc
 import urllib.parse
-import mysql.connector
 
 
 class Configuration(object):

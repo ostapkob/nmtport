@@ -99,23 +99,23 @@ if __name__ == "__main__":
     [x.chenge_value3(50) for x in usms]
 
     [print(x) for x in mechanisms]
-    kran13.chenge_value(2)
-    kran12.chenge_value(1)
-    kran4.chenge_value(1)
+    kran13.chenge_value(1)
+    kran12.chenge_value(2)
+    kran4.chenge_value(3)
     n = 0
     while True:
-        if time.time() - last_sent >= 60.0:
+        if time.time() - last_sent >= 100.0:
             last_sent = time.time()
             n += 0.01
             [x.chenge_value(n) for x in usms[::2]]
             [m.chenge_position(lat, lng) for m in mechanisms]
             [m.send_get_request() for m in mechanisms]
             if flag:
-                lat= 0.0001
-                lng=-0.0001
+                lat= 0.0009
+                lng=-0.0005
                 flag=False
             else:
-                lat=-0.0001
-                lng= 0.0001
+                lat=-0.0000
+                lng= 0.0004
                 flag=True
 
