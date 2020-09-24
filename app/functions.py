@@ -3,6 +3,8 @@ from flask import render_template, flash
 from app.model import Post, Mechanism, Work_1C_1
 from app import db
 from pprint import pprint
+from random import choice
+
 HOURS = 10 #your timezone
 
 
@@ -189,5 +191,7 @@ def add_fio(data_kran_period, date_shift, shift):
                 data_kran_period[key]['fio'] = 'Two operators'
     return data_kran_period
 
-
+def get_state():
+    state = ['work', 'stay', 'no_power']
+    return choice(state)
 

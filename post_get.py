@@ -111,7 +111,7 @@ if __name__ == "__main__":
             [m.chenge_position(lat, lng) for m in mechanisms]
             [m.send_get_request() for m in mechanisms]
             if flag:
-                lat= 0.0009
+                lat= 0.0002
                 lng=-0.0005
                 flag=False
             else:

@@ -5,7 +5,7 @@ from app import db, app
 from app.model import Mechanism, Post
 from app.form import AddMechanism
 from datetime import datetime, timedelta
-from app.functions import today_shift_date, all_mechanisms_id, add_fio
+from app.functions import today_shift_date, all_mechanisms_id, add_fio, get_state
 from app.usm import time_for_shift_usm, usm_periods
 from app.kran import time_for_shift_kran, kran_periods
 from app.functions import image_mechanism, all_mechanisms_type
@@ -138,6 +138,23 @@ def all_last_data_by_type(mech_type):
                                                  'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
     return jsonify(data)
 
+
+@app.route("/api/v1.0/all_last_data_state", methods=["GET"])
+def all_last_data_state():
+    '''get all data mechanism and mechanism state'''
+    last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
+        Post.timestamp.desc()).first() for x in all_mechanisms_id()]
+    last_data_mech = filter(lambda x: x!=None, last_data_mech)
+    data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
+                                                 'name': el.mech.name,
+                                                 'type': el.mech.type,
+                                                 'number': el.mech.number,
+                                                 'value': round(el.value,2),
+                                                 'latitude': el.latitude,
+                                                 'longitude': el.longitude,
+                                                 'state': get_state(),
+                                                 'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
+    return jsonify(data)
 
 @app.route("/api/v1.0/all_last_data_ico", methods=["GET"])
 def all_last_data_ico():
