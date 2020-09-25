@@ -192,6 +192,6 @@ def add_fio(data_kran_period, date_shift, shift):
     return data_kran_period
 
 def get_state():
-    state = ['work', 'stay', 'no_power']
+    state = ['work', 'stay', 'no_power', 'long_not_work']
     return choice(state)
 
