@@ -14,8 +14,14 @@
         </div>
         <div class="progress">
             <div v-for="minute in el.data" class="progress-bar text-left time-progress" role="progressbar"
-                :style="{width: minute.step*0.1388+'%'}"   :class="{ 'bg-warning text-dark':minute.value==0, 'bg-danger progress-bar-striped':minute.value==-1}">{{ '{{minute.time}}'}}</div>
+                :style="{width: minute.step*0.1388+'%'}"   
+                :class="{ 'bg-warning text-dark'
+                        :minute.value==0,
+                        'bg-danger progress-bar-striped'
+                        :minute.value==-1}">  
+                        <span v-if='minute.step>15' >{{ '{{minute.time}}'}}  </span>
             </div>
+        </div>
         <div class="line-mech">
             <span class="time-mech" v-for="hour in hs"> {{ '{{ hour }} '}} </span>
         </div>
