@@ -80,7 +80,7 @@ class Post(db.Model):
             f.write(d)
 
     def __repr__(self):
-        return f'{self.value}'
+        return f'{self.timestamp} {self.value} '
 
     def add_post(self):
         print(super().get_tables_for_bind())
