@@ -46,13 +46,17 @@
         if (type_mechanism=='usm' ) {
           for (var id in list) {
             n=list[id].value;
+            if (list[id].step>15){
+            minute =list[id].time
+            }
+            else {minute=''}
             width = list[id].step*0.139; 
             if (n==-1){
-              document.write('<div class="progress-bar progress-bar-striped bg-danger time-progress text-left" role="progressbar"  style="width:' + width + '%" >' + list[id].time + '</div>'); }
+              document.write('<div class="progress-bar progress-bar-striped bg-danger time-progress text-left" role="progressbar"  style="width:' + width + '%" >' + minute + '</div>'); }
               else if (n==0){
-                document.write('<div class="progress-bar bg-warning text-left time-progress text-dark"  role="progressbar" style="width:' + width +'%">' + list[id].time + '</div>'); }
+                document.write('<div class="progress-bar bg-warning text-left time-progress text-dark"  role="progressbar" style="width:' + width +'%">' + minute + '</div>'); }
                 else {
-                  document.write('<div class="progress-bar time-progress text-left"  role="progressbar" style="width:' + width + '%">' + list[id].time + '</div>') ; }
+                  document.write('<div class="progress-bar time-progress text-left"  role="progressbar" style="width:' + width + '%">' + minute + '</div>') ; }
                 }
         }
 
