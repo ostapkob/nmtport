@@ -41,6 +41,11 @@ def all_number(type, number):
     return [m.id for m in Mechanism.query.all()]
 
 
+def name_by_id(id):
+    '''Need to do then'''
+    return Mechanism.query.filter(Mechanism.id == id).first().name
+
+
 def multiple_5(date):  # not use
     '''Return time multiple 5 minutes and remite microseconds'''
     global HOURS
@@ -220,26 +225,66 @@ def get_state():
     return 'work'
 
 
-def state_mech(args):
-    values = list(x.value == -1 for x in args.values())
-    result = all(values[1:])
-    print(values, result)
-    if result:
+# def state_mech(args):
+#     values = list(x.value == -1 for x in args.values())
+#     result = all(values[1:])
+#     print(values, result)
+#     if result:
+#         return 'no_power'
+
+#     values = list(x.value <= .1 for x in args.values())
+#     result = all(values[1:])
+#     if result:
+#         return 'stay'
+
+#     return 'work'
+
+
+def state_mech(value, last_time):
+    dt = datetime.now() - last_time
+    dt = dt.total_seconds() / 60
+    if dt > 120.0:
+        return 'long_work'
+    if dt >= 3.0:
         return 'no_power'
-
-    values = list(x.value <= .1 for x in args.values())
-    result = all(values[1:])
-    if result:
+    if value < 0.1:
         return 'stay'
+    else:
+        return 'work'
 
-    return 'work'
 
-
-def alarm_mech(args):
-    """state = ['work', 'stay', 'no_power', 'long_not_work', 'bad_work']"""
-    # for x in args.values():
-    #     print(x.value, x.timestamp)
-    values = list(x.value for x in args.values())
-    if sum(values) <= 1:
+def is_alarm(args):
+    """if last 10 minuts not values > 1 but 15 minutes ago mechanism worked"""
+    values_14_10 = []
+    values_9_0 = []
+    dt = datetime.now()
+    for el in args:
+        dt = datetime.now() - (el.timestamp + timedelta(hours=HOURS))
+        dt = dt.total_seconds() / 60
+        if dt > 10 and dt <= 15:
+            values_14_10.append(el.value)
+        elif dt <= 10:
+            values_9_0.append(el.value)
+        else:
+            pass
+    # print(dt,  values_14_10, values_9_0)
+    if sum(values_9_0) >= 1:
         return False
+
+    if sum(values_14_10) <= 1:
+        return False
+
     return True
+
+
+def get_status_alarm(mech_id):
+    last = db.session.query(Post).filter(
+        Post.mechanism_id == mech_id).order_by(
+        Post.timestamp.desc()).limit(15)
+
+    # print(mech_id, name_by_id(mech_id), is_alarm(last))
+    return is_alarm(last)
+
+
+for i in all_mechanisms_id():
+    get_status_alarm(i)

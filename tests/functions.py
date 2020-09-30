@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import unittest
-from app import db
-from app.functions import alarm_mech
+# from app import db
+from app.functions import is_alarm
 from datetime import datetime, timedelta
-from app.model import Post
+# from app.model import Post
 from tests.kran_data import value_minutes
 
 
@@ -28,10 +28,9 @@ class GetState(unittest.TestCase):
 
     def get_data_kran(self, arg, delta=0):
         data = {}
-        time = datetime.now() - timedelta(minutes=15)
         for e, (v, m) in enumerate(arg):
-            data[e] = Data(time, v)
             time = datetime.now() - timedelta(minutes=m)
+            data[e] = Data(time, v)
             # print(e, v, m, time)
         return data
 
@@ -42,7 +41,7 @@ class GetState(unittest.TestCase):
             dt -= m
             time = datetime.now() - timedelta(minutes=dt)
             data[e] = Data(time, v)
-            print(e, v, m, time)
+            # print(e, v, m, time)
         return data
 
 #     def test_11111111111(self):
@@ -86,20 +85,19 @@ class GetState(unittest.TestCase):
 #         self.assertEqual(result, 'stay')
 
     def test_kran(self):
-        for i in value_minutes:
+        for en, i in enumerate(value_minutes, 1):
             values = i[0]
-            minutes = i[1][::-1]
+            minutes = i[1]
             result_1 = i[2]
-            # print(values, minutes, result_1)
             with self.subTest(True):
                 data = self.get_data_kran(list(zip(values, minutes)))
-                result_2 = alarm_mech(data)
-                self.assertEqual(result_1, result_2)
+                result_2 = is_alarm(data)
+                self.assertEqual(result_1, result_2, [en, i])
 
 
 if __name__ == '__main__':
-    last = db.session.query(Post).filter(Post.mechanism_id == 32711).order_by(
-        Post.timestamp.desc()).limit(11)
+    # last = db.session.query(Post).filter(Post.mechanism_id == 32711).order_by(
+    #     Post.timestamp.desc()).limit(11)
     # for i in last:
     #     print('->', i.timestamp, i.value)
     unittest.main()
