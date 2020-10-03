@@ -106,10 +106,11 @@ if __name__ == "__main__":
                   count=0, latitude=42.8099, longitude=132.8884)
     kran22 = Kran(mechanism_id=5908,  value=0, value2=0, value3=0,
                   count=0, latitude=42.8088, longitude=132.8877)
-    usms = Pt1, Pt2,  E4, S5,  S6,  S7  # ,  S8, U9,  U10, E11
+    usms = Pt1, Pt2,  E4, S5,  S6,  S7,  S8, U9,  U10, E11
+    usms = Pt1, Pt2,  E4,  S6,  S7  # ,  S8, U9,  U10, E11
     # usms= E3,  E4, S5,  S6,  S7,  S8, U9,  U10, E11
     # usms=Pt1, Pt2, S5,  S6,  S7,  S8, U9,  U10, E11
-    krans = kran4, kran12, kran13, kran22
+    krans = kran4, kran12, # kran13, kran22
     mechanisms = usms+krans
 
     flag = True

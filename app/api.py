@@ -11,6 +11,7 @@ from app.kran import time_for_shift_kran, kran_periods
 from app.functions import image_mechanism  # , all_mechanisms_type
 # from sqlalchemy import func
 # from pprint import pprint
+from random import choice
 from psw import post_pass
 
 from app.functions import HOURS
@@ -165,8 +166,10 @@ def all_last_data_state():
                                                  'value': round(el.value, 2),
                                                  'latitude': el.latitude,
                                                  'longitude': el.longitude,
-                                                 'state': state_mech(el.value, el.timestamp + timedelta(hours=HOURS)),
+                                                 'state': state_mech(el.mech.type, el.value, el.timestamp + timedelta(hours=HOURS)),
                                                  'alarm': get_status_alarm(el.mech.id),
+                                                 # 'alarm': True,
+                                                 # 'alarm': False,
                                                  'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
     return jsonify(data)
 

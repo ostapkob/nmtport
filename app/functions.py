@@ -240,17 +240,36 @@ def get_state():
 #     return 'work'
 
 
-def state_mech(value, last_time):
+def state_mech(type_mechanism, value, last_time):
     dt = datetime.now() - last_time
     dt = dt.total_seconds() / 60
-    if dt > 120.0:
-        return 'long_work'
-    if dt >= 3.0:
-        return 'no_power'
-    if value < 0.1:
-        return 'stay'
-    else:
-        return 'work'
+    if type_mechanism == 'kran':
+        if dt > 120.0:
+            return 'long_no_power'
+        if dt >= 6.0:
+            return 'no_power'
+        if value == 0:  # 123
+            return 'stay'
+        if value == 2:
+            return '180'
+        if value == 1:
+            return '90_1'
+        if value == 3:
+            return '90_2'
+        else:
+            return 'err'
+
+    if type_mechanism == 'usm':
+        if dt > 120.0:
+            return 'long_no_power'
+        if dt >= 3.0:
+            return 'no_power'
+        if value < 0.1:
+            return 'stay'
+        if value >= 0.1:
+            return 'work'
+        else:
+            return 'err'
 
 
 def is_alarm(args):
