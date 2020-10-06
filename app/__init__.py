@@ -7,14 +7,14 @@ from flask_bootstrap import Bootstrap
 from flask_cors import CORS
 from flask_login import LoginManager
 
-app=Flask(__name__)
+app = Flask(__name__)
 app.config.from_object(Configuration)
-db=SQLAlchemy(app)
+db = SQLAlchemy(app)
 login = LoginManager(app)
 migrate = Migrate(app, db)
 moment = Moment(app)
 bootstrap = Bootstrap(app)
 CORS(app)
 
-
 from app import views, api,  model
+db.create_all()

@@ -11,8 +11,11 @@ def time_for_shift_kran(date_shift, shift):
     # get data from db
     shift = int(shift)
     all_mechs = all_mechanisms_id('kran')
-    cursor = db.session.query(Post).filter(Post.date_shift == date_shift, Post.shift ==
-                                           shift, Post.mechanism_id.in_(all_mechs)).order_by(Post.mechanism_id).all()
+    try:
+        cursor = db.session.query(Post).filter(Post.date_shift == date_shift, Post.shift ==
+                                               shift, Post.mechanism_id.in_(all_mechs)).order_by(Post.mechanism_id).all()
+    except:
+        None
     # create dict all works mechanism in shift
     data_per_shift = {}
     for el in cursor:

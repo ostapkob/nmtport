@@ -25,9 +25,15 @@ def today_shift_date():
 def all_mechanisms_id(type=None):
     '''Find all mechanisms id'''
     if type is None:
-        return [m.id for m in db.session.query(Mechanism).all()]
-    return [m.id for m in db.session.query(Mechanism).filter(
-        Mechanism.type == type).all()]
+        try:
+            return [m.id for m in db.session.query(Mechanism).all()]
+        except:
+            return []
+    try:
+        return [m.id for m in db.session.query(Mechanism).filter(
+            Mechanism.type == type).all()]
+    except:
+        return []
 
 
 def all_mechanisms_type():
