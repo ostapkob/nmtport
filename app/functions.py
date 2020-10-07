@@ -184,15 +184,17 @@ def data_from_1c(date_shift, shift):
 
 
 def data_from_1c_by_id(date_shift, shift, id_mech):
-    time_from = datetime.combine(date_shift, datetime.min.time())
-    if shift == 1:
-        time_from += timedelta(hours=8)
-    else:
-        time_from += timedelta(hours=20)
-    time_to = time_from + timedelta(hours=12)
+    # time_from = datetime.combine(date_shift, datetime.min.time())
+    # if shift == 1:
+    #     time_from += timedelta(hours=8)
+    # else:
+    #     time_from += timedelta(hours=20)
+    # time_to = time_from + timedelta(hours=12)
     cursor = db.session.query(Work_1C_1).filter(
-        Work_1C_1.data_nach >= time_from,
-        Work_1C_1.data_nach < time_to,
+        # Work_1C_1. >= time_from,
+        # Work_1C_1.data_nach < time_to,
+        Work_1C_1.data_smen==date_shift,
+        Work_1C_1.smena == shift,
         Work_1C_1.inv_num == id_mech).all()
     data_1C = [x.get() for x in cursor]
     return data_1C
