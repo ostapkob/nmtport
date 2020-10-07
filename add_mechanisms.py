@@ -31,6 +31,16 @@ for id, username, password in users:
 # for p in User.query.all():
 #     db.session.delete(p)
 
+work_1c = [(2, 33287, 111, 5, 'Петров Ф. А.'),
+      (1, 5908, 112, 8, 'Иванов Ф. А.')]
+
+for id, inv_num, greifer_num, greifer_vol, fio  in work_1c:
+    start = datetime.now() - timedelta(hours=5)
+    finish = datetime.now() + timedelta(hours=5)
+    db.session.add(Work_1C_1(id, inv_num, greifer_num, greifer_vol, fio, start, finish))
+
+
+
 db.session.commit()
 
 # m = Mechanism(32777, company='nmtp', type='sennebogen', model='860', number=1, name='Sennebogen-1')

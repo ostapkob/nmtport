@@ -217,15 +217,18 @@ def add_fio(data_kran_period, date_shift, shift):
         if len(data_by_id_mech) < 1:
             data_kran_period[key]['fio'] = None
             data_kran_period[key]['grab'] = None
+            data_kran_period[key]['contract'] = None
         elif len(data_by_id_mech) == 1:
             data_kran_period[key]['fio'] = fio_to_fi(data_by_id_mech[0])
+            data_kran_period[key]['contract'] = data_by_id_mech[0][8]
             if data_by_id_mech[0][2] == 0:
                 data_kran_period[key]['grab'] = None
             else:
                 data_kran_period[key]['grab'] = data_by_id_mech[0][2]
         else:
             for operator in data_by_id_mech:
-                data_kran_period[key]['fio'] = 'Two operators'
+                data_kran_period[key]['fio'] = 'Два оператора'
+                data_kran_period[key]['contract'] = 1
     return data_kran_period
 
 

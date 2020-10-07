@@ -113,8 +113,12 @@ class Work_1C_1(db.Model):
     fio=db.Column(db.String(64), index=True)
     data_nach = db.Column(db.DateTime, index=True)
     data_kon = db.Column(db.DateTime, index=True)
+    data_smen = db.Column(db.DateTime, index=True)
+    data_smen = db.Column(db.DateTime, index=True)
+    smena =db.Column(db.Integer, index=True)
+    port =db.Column(db.Integer, index=True)
 
-    def __init__(self, id, inv_num, greifer_num, greifer_vol, fio, data_nach, data_kon):
+    def __init__(self, id, inv_num, greifer_num, greifer_vol, fio, data_nach, data_kon, data_smen, smena):
         self.id = id
         self.inv_num = inv_num
         self.greifer_num =greifer_num
@@ -122,11 +126,14 @@ class Work_1C_1(db.Model):
         self.fio=fio
         self.data_nach =data_nach
         self.data_kon =data_kon
+        self.data_smen =data_smen
+        self.smena =smena
+        self.port =port
 
     def __repr__(self):
         # return f'{self.inv_num}, {self.greifer_num}, {self.greifer_vol}, {self.fio}, {self.data_nach}, {self.data_kon}'
-        return [self.inv_num, self.greifer_num, self.greifer_vol, self.fio, self.data_nach, self.data_kon]
+        return [self.inv_num, self.greifer_num, self.greifer_vol, self.fio, self.data_nach, self.data_kon, self.data_smen, self.smena, self.port]
 
     def get(self):
-        return [self.inv_num, self.greifer_num, self.greifer_vol, self.fio, self.data_nach, self.data_kon]
+        return [self.inv_num, self.greifer_num, self.greifer_vol, self.fio, self.data_nach, self.data_kon, self.data_smen, self.smena, self.port]
 
