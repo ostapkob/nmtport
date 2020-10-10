@@ -58,6 +58,7 @@ def time_for_shift_kran(date_shift, shift):
         flag_finish = True
         time_by_minuts[key] = {}
         time_by_minuts[key]['name'] = data_per_shift[key]['mechanism'].name
+        time_by_minuts[key]['number'] = data_per_shift[key]['mechanism'].number
         time_by_minuts[key]['id'] = data_per_shift[key]['mechanism'].id
         # translate hours into minutes and round
         time_by_minuts[key]['total_180'] = round(

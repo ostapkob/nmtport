@@ -1,7 +1,9 @@
 from app import db
-from app.model import Mechanism, User, generate_password_hash
+from app.model import Mechanism, User, generate_password_hash, Work_1C_1
+from app.functions import today_shift_date
 from psw import users
 db.create_all()
+from datetime import datetime, timedelta
 
 mech = [(32046, 'nmtp', 'usm', 'PowerTrack', 1, 'PowerTrack-1'),
         (32047, 'nmtp', 'usm', 'PowerTrack', 2, 'PowerTrack-2'),
@@ -34,10 +36,11 @@ for id, username, password in users:
 work_1c = [(2, 33287, 111, 5, 'Петров Ф. А.'),
       (1, 5908, 112, 8, 'Иванов Ф. А.')]
 
-for id, inv_num, greifer_num, greifer_vol, fio  in work_1c:
-    start = datetime.now() - timedelta(hours=5)
-    finish = datetime.now() + timedelta(hours=5)
-    db.session.add(Work_1C_1(id, inv_num, greifer_num, greifer_vol, fio, start, finish))
+# for id, inv_num, greifer_num, greifer_vol, fio  in work_1c:
+#     start = datetime.now() - timedelta(hours=5)
+#     finish = datetime.now() + timedelta(hours=5)
+#     date_shift, shift =  today_shift_date()
+#     db.session.add(Work_1C_1(id, inv_num, greifer_num, greifer_vol, fio, start, finish, date_shift, shift))
 
 
 
