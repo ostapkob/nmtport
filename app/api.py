@@ -120,8 +120,8 @@ def get_data_period_with_fio_now(type_mechanism):
     return jsonify(data_with_fio)
 
 
-@app.route("/api/v1.0/all_last_data", methods=["GET"])
-def all_last_data():
+@app.route("/api/v1.0/get_all_last_data", methods=["GET"])
+def get_all_last_data():
     '''get all data mechanism'''
     last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
         Post.timestamp.desc()).first() for x in all_mechanisms_id()]
@@ -138,8 +138,8 @@ def all_last_data():
     return jsonify(data)
 
 
-@app.route("/api/v1.0/all_last_data_by_type_ico/<mech_type>", methods=["GET"])
-def all_last_data_by_type(mech_type):
+@app.route("/api/v1.0/get_all_last_data_by_type_ico/<mech_type>", methods=["GET"])
+def get_all_last_data_by_type(mech_type):
     '''get all data mechanism'''
     last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
         Post.timestamp.desc()).first() for x in all_mechanisms_id(mech_type)]
@@ -153,8 +153,8 @@ def all_last_data_by_type(mech_type):
     return jsonify(data)
 
 
-@app.route("/api/v1.0/all_last_data_state", methods=["GET"])
-def all_last_data_state():
+@app.route("/api/v1.0/get_all_last_data_state", methods=["GET"])
+def get_all_last_data_state():
     '''get all data mechanism and mechanism state'''
     last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
         Post.timestamp.desc()).first() for x in all_mechanisms_id()]
@@ -174,8 +174,8 @@ def all_last_data_state():
     return jsonify(data)
 
 
-@app.route("/api/v1.0/all_last_data_ico", methods=["GET"])
-def all_last_data_ico():
+@app.route("/api/v1.0/get_all_last_data_ico", methods=["GET"])
+def get_all_last_data_ico():
     '''get all data mechanism and mechanism state'''
     last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
         Post.timestamp.desc()).first() for x in all_mechanisms_id()]

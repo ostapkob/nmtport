@@ -9,8 +9,8 @@ class Mechanism:
     # ip ='http://18.139.162.128'
     if debug:
         ip = 'http://127.0.0.1:5000'
-    # else:
-    #     ip = 'http://94.154.76.136'
+    else:
+        ip = 'https://m1.nmtport.ru'
 
     def __init__(self, mechanism_id, value, value2,
                  value3, count, latitude, longitude):
