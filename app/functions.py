@@ -251,7 +251,7 @@ def get_state():
 #     return 'work'
 
 
-def state_mech(type_mechanism, value, last_time):
+def state_mech(type_mechanism, value, value3, last_time):
     dt = datetime.now() - last_time
     dt = dt.total_seconds() / 60
     if type_mechanism == 'kran':
@@ -275,7 +275,7 @@ def state_mech(type_mechanism, value, last_time):
             return 'long_no_power'
         if dt >= 3.0:
             return 'no_power'
-        if value < 0.1:
+        if value < 0.1 or not value3:
             return 'stay'
         if value >= 0.1:
             return 'work'

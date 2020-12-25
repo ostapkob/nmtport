@@ -131,7 +131,7 @@ def get_all_last_data():
                                                  'name': el.mech.name,
                                                  'value': el.value,
                                                  'value2': el.value2,
-                                                 'value3': el.value3,
+                                                 'value3': el.value3, 
                                                  'latitude': el.latitude,
                                                  'longitude': el.longitude,
                                                  'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
@@ -163,10 +163,12 @@ def get_all_last_data_state():
                                                  'name': el.mech.name,
                                                  'type': el.mech.type,
                                                  'number': el.mech.number,
-                                                 'value': round(el.value, 2),
+                                                 'value': round(el.value, 2) if not el.value3 else 0, # if roller not work
+                                                 'value2': el.value2,
+                                                 'value3': el.value3, 
                                                  'latitude': el.latitude,
                                                  'longitude': el.longitude,
-                                                 'state': state_mech(el.mech.type, el.value, el.timestamp + timedelta(hours=HOURS)),
+                                                 'state': state_mech(el.mech.type, el.value, el.value3, el.timestamp + timedelta(hours=HOURS)),
                                                  'alarm': get_status_alarm(el.mech.id),
                                                  # 'alarm': True,
                                                  # 'alarm': False,
