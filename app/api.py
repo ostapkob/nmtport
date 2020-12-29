@@ -234,6 +234,8 @@ def add_get_usm():
     items = mechanism_id, password, latitude, longitude
     test_items = any([item is None for item in items])
     # print(items, datetime.now(), not test_items)
+    if int(value3) < 5: # if roller not circle
+        value = 0
     if test_items:
         return 'Bad request'
     if password != post_pass:
