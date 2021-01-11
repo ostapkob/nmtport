@@ -19,11 +19,11 @@ class Configuration(object):
                                      "UID=ubuntu;"
                                      "PWD=Port2020")
     params_win = urllib.parse.quote_plus("DRIVER={SQL Server};"
-                                     "SERVER=192.168.99.106;"
-                                     "PORT=1433;"
-                                     "DATABASE=nmtport;"
-                                     "UID=ubuntu;"
-                                     "PWD=Port2020")
+                                         "SERVER=192.168.99.106;"
+                                         "PORT=1433;"
+                                         "DATABASE=nmtport;"
+                                         "UID=ubuntu;"
+                                         "PWD=Port2020")
     # cnx = mysql.connector.connect(
     #     host="192.168.99.106",
     #     port=1433,
@@ -42,3 +42,7 @@ class Configuration(object):
             SQLALCHEMY_DATABASE_URI = "mssql+pyodbc:///?odbc_connect=%s" % params_win
         else:
             SQLALCHEMY_DATABASE_URI = "mssql+pyodbc:///?odbc_connect=%s" % params
+
+
+TIME_PERIODS = [1, 2], [4, 5], [7.5, 8], [12, 13], [
+    16, 17], [19.5, 20]  # then alarm not True

@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from flask import flash, redirect, url_for
 from app.model import Post, Mechanism, Work_1C_1
 from app import db
+from config import TIME_PERIODS
 
 
 HOURS = 10  # your timezone
@@ -193,7 +194,7 @@ def data_from_1c_by_id(date_shift, shift, id_mech):
     cursor = db.session.query(Work_1C_1).filter(
         # Work_1C_1. >= time_from,
         # Work_1C_1.data_nach < time_to,
-        Work_1C_1.data_smen==date_shift,
+        Work_1C_1.data_smen == date_shift,
         Work_1C_1.smena == shift,
         Work_1C_1.inv_num == id_mech).all()
     data_1C = [x.get() for x in cursor]
@@ -311,8 +312,10 @@ def get_status_alarm(mech_id):
     last = db.session.query(Post).filter(
         Post.mechanism_id == mech_id).order_by(
         Post.timestamp.desc()).limit(15)
-
-    # print(mech_id, name_by_id(mech_id), is_alarm(last))
+    now_hour = datetime.now().hour + datetime.now().minute/60
+    result = any(now_hour > t1 and now_hour < t2 for t1, t2 in TIME_PERIODS)
+    if result:
+        return False
     return is_alarm(last)
 
 
