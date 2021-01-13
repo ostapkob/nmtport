@@ -216,6 +216,77 @@ def add_fix_post(post):
     db.session.add(post)
     db.session.commit()
 
+@app.route('/api/v1.0/add_usm', methods=['GET'])
+def add_usm():
+    '''add post by GET request from arduino'''
+    mechanism_id = request.args.get('mechanism_id')
+    password = request.args.get('password')
+    value = request.args.get('value')
+    value2 = request.args.get('value2')
+    value3 = request.args.get('value3')
+    count = request.args.get('count')
+    latitude = request.args.get('latitude')
+    longitude = request.args.get('longitude')
+    if latitude == '':
+        latitude = 0
+        longitude = 0
+    items = mechanism_id, password, latitude, longitude
+    test_items = any([item is None for item in items])
+    # print(items, datetime.now(), not test_items)
+    if int(value3) < 5: # if roller not circle
+        value = 0
+    if test_items:
+        return 'Bad request'
+    # if password != post_pass:
+    if password not in  post_pass:
+        return 'Bad password'
+    if int(mechanism_id) not in all_mechanisms_id('usm'):
+        return 'Not this id'
+    if float(latitude) == 0 or float(longitude) == 0:
+        # mech = Mechanism.query.get(mechanism_id)
+        data_mech = db.session.query(Post).filter(
+            Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
+        latitude = data_mech.latitude
+        longitude = data_mech.longitude
+    new_post = Post(value=value, value2=value2, value3=value3, count=count,
+                    latitude=latitude, longitude=longitude, mechanism_id=mechanism_id)
+    add_fix_post(new_post)
+    return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
+
+
+@app.route('/api/v1.0/add_kran', methods=['GET'])
+def add_kran():
+    '''add post by GET request from arduino'''
+    mechanism_id = request.args.get('mechanism_id')
+    password = request.args.get('password')
+    value = request.args.get('value')
+    value3 = request.args.get('value3')
+    latitude = request.args.get('latitude')
+    longitude = request.args.get('longitude')
+    if latitude == '':
+        latitude = 0
+        longitude = 0
+    items = mechanism_id, password, latitude, longitude, value, value3
+    test_items = any([item is None for item in items])
+    # print(items, datetime.now(), not test_items)
+    if test_items:
+        return 'Bad request'
+    # if password != post_pass:
+    if password not in  post_pass:
+        return 'Bad password'
+    if int(mechanism_id) not in all_mechanisms_id('kran'):
+        return 'Not this id or not kran'
+    if float(latitude) == 0 or float(longitude) == 0:
+        # mech = Mechanism.query.get(mechanism_id)
+        data_mech = db.session.query(Post).filter(
+            Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
+        latitude = data_mech.latitude
+        longitude = data_mech.longitude
+    new_post = Post(value=value, value3=value3, latitude=latitude,
+                    longitude=longitude, mechanism_id=mechanism_id)
+    db.session.add(new_post)
+    db.session.commit()
+    return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
 
 @app.route('/api/v1.0/add_get_usm', methods=['GET'])
 def add_get_usm():
@@ -238,7 +309,8 @@ def add_get_usm():
         value = 0
     if test_items:
         return 'Bad request'
-    if password != post_pass:
+    # if password != post_pass:
+    if password not in  post_pass:
         return 'Bad password'
     if int(mechanism_id) not in all_mechanisms_id('usm'):
         return 'Not this id'
@@ -271,7 +343,8 @@ def add_get_kran():
     # print(items, datetime.now(), not test_items)
     if test_items:
         return 'Bad request'
-    if password != post_pass:
+    # if password != post_pass:
+    if password not in  post_pass:
         return 'Bad password'
     if int(mechanism_id) not in all_mechanisms_id('kran'):
         return 'Not this id or not kran'
@@ -300,7 +373,8 @@ def add_post():
         keys = [p for p in request_j.keys()]
         if not set(keys).issubset(need_keys):
             abort(400)
-        if request_j['password'] != post_pass:
+        # if request_j['password'] != post_pass:
+        if request_j['password'] not in  post_pass:
             abort(403)  # need use this password in Arduino
         if request_j['mechanism_id'] not in all_mechanisms_id():
             abort(405)

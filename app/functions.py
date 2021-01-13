@@ -299,10 +299,10 @@ def is_alarm(args):
         else:
             pass
     # print(dt,  values_14_10, values_9_0)
-    if sum(values_9_0) >= 1:
+    if sum(values_9_0) > 0:
         return False
 
-    if sum(values_14_10) <= 1:
+    if sum(values_14_10) <= 0:
         return False
 
     return True
