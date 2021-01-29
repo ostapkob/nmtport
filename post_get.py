@@ -62,14 +62,14 @@ class Mechanism:
 
 
 class USM(Mechanism):
-    api = '/api/v1.0/add_get_usm?'
+    api = '/api/v1.0/add_usm?'
 
     def __repr__(self):
         return f'u{self.mechanism_id, self.password, self.value, self.value2, self.value3, self.count, self.latitude, self.longitude}'
 
 
 class Kran(Mechanism):
-    api = '/api/v1.0/add_get_kran?'
+    api = '/api/v1.0/add_kran?'
 
     def __repr__(self):
         return f'k{self.mechanism_id, self.password, self.value,self.value2, self.value3, self.count, self.latitude, self.longitude}'
@@ -101,16 +101,23 @@ if __name__ == "__main__":
     kran4 = Kran(mechanism_id=30301, value=0, value2=0, value3=0,
                  count=0, latitude=42.8106, longitude=132.8880)
     kran12 = Kran(mechanism_id=13893, value=0, value2=0, value3=0,
-                  count=0, latitude=42.8099, longitude=132.8884)
+                  count=0, latitude=42.8114, longitude=132.8882)
     kran13 = Kran(mechanism_id=15125, value=0, value2=0, value3=0,
-                  count=0, latitude=42.8099, longitude=132.8884)
+                  count=0, latitude=42.8098, longitude=132.8884)
     kran22 = Kran(mechanism_id=5908,  value=0, value2=0, value3=0,
-                  count=0, latitude=42.8088, longitude=132.8877)
+                  count=0, latitude=42.8132, longitude=132.89)
+    kran14 = Kran(mechanism_id=15512,  value=3, value2=0, value3=0,
+                  count=0, latitude=42.8161, longitude=132.8928)
+    kran16 = Kran(mechanism_id=15510,  value=3, value2=0, value3=0,
+                  count=0, latitude=42.8142, longitude=132.8915)
+
+
+
     usms = Pt1, Pt2,  E4, S5,  S6,  S7,  S8, U9,  U10, E11
     usms = Pt1, Pt2,  E4,  S6,  S7  # ,  S8, U9,  U10, E11
-    # usms= E3,  E4, S5,  S6,  S7,  S8, U9,  U10, E11
-    # usms=Pt1, Pt2, S5,  S6,  S7,  S8, U9,  U10, E11
-    krans = kran4, kran12, # kran13, kran22
+    usms= E3,  E4, S5,  S6,  S7,  S8, U9,  U10, E11
+    usms=Pt1, Pt2, S5,  S6,  S7,  S8, U9,  U10, E11
+    krans = kran4, kran12,  kran13, kran22, kran14, kran16
     mechanisms = usms+krans
 
     flag = True
@@ -124,8 +131,9 @@ if __name__ == "__main__":
 
     [print(x) for x in mechanisms]
     kran13.chenge_value(1)
+    kran13.chenge_value(1)
     kran12.chenge_value(2)
-    kran4.chenge_value(3)
+    kran22.chenge_value(3)
     # Pt1.chenge_value(0)
     # Pt4.chenge_value(0)
     # n = 0

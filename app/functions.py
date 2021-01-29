@@ -3,8 +3,7 @@ from flask import flash, redirect, url_for
 from app.model import Post, Mechanism, Work_1C_1
 from app import db
 from config import TIME_PERIODS
-
-
+from config import  lines_krans
 HOURS = 10  # your timezone
 
 
@@ -318,6 +317,35 @@ def get_status_alarm(mech_id):
         return False
     return is_alarm(last)
 
+def straight_line_equation(x1, y1, x2, y2):
+    k = (y1 - y2) / (x1 - x2)
+    b = y2 - k * x2
+    return k, b
 
-for i in all_mechanisms_id():
-    get_status_alarm(i)
+def perpendicular_line_equation(k1, b1, mx, my):
+    k2 = -(1/k1) 
+    b2 = my - (k2*mx)
+    return k2, b2
+
+def intersection_point_of_lines(k1, b1, k2, b2):
+    nx = (b2 - b1) / (k1-k2)
+    ny = nx*k2 + b2 
+    return nx, ny
+
+def line_kran(number):
+    for el in lines_krans:
+        if number in el['numbers']:
+            return el['k1'], el['b1']
+
+if __name__ == "__main__":
+    x1, y1 = 42.80691726848499, 132.88660505374455
+    x2, y2 = 42.81408152044796, 132.89085539601604
+    
+    x1, y1 = 42.807735079133295, 132.88577535577383
+    x2, y2 = 42.81760201722565, 132.89163529190128
+
+    x1, y1 = 42.81381686151741, 132.89146624081198
+    x2, y2 = 42.81697813067333, 132.89335636137457
+
+    print(straight_line_equation(x1, y1, x2, y2))
+

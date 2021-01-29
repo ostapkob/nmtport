@@ -15,6 +15,7 @@ from random import choice
 from psw import post_pass
 
 from app.functions import HOURS
+from app.functions import perpendicular_line_equation, intersection_point_of_lines, line_kran
 
 
 @app.route("/api/v1.0/get_per_shift/<int:m_id>", methods=["GET"])
@@ -263,102 +264,104 @@ def add_kran():
     value3 = request.args.get('value3')
     latitude = request.args.get('latitude')
     longitude = request.args.get('longitude')
+    mech = Mechanism.query.get(mechanism_id)
     if latitude == '':
         latitude = 0
         longitude = 0
     items = mechanism_id, password, latitude, longitude, value, value3
     test_items = any([item is None for item in items])
-    # print(items, datetime.now(), not test_items)
     if test_items:
         return 'Bad request'
-    # if password != post_pass:
     if password not in  post_pass:
         return 'Bad password'
     if int(mechanism_id) not in all_mechanisms_id('kran'):
         return 'Not this id or not kran'
     if float(latitude) == 0 or float(longitude) == 0:
-        # mech = Mechanism.query.get(mechanism_id)
         data_mech = db.session.query(Post).filter(
             Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
         latitude = data_mech.latitude
         longitude = data_mech.longitude
+
+    k1, b1 = line_kran(mech.number)
+    k2, b2 = perpendicular_line_equation(k1, b1, float(latitude), float(longitude))
+    latitude, longitude = intersection_point_of_lines(k1, b1, k2, b2)
     new_post = Post(value=value, value3=value3, latitude=latitude,
                     longitude=longitude, mechanism_id=mechanism_id)
     db.session.add(new_post)
     db.session.commit()
-    return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
+    return f'Success, {str(mech.number)},  {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
 
-@app.route('/api/v1.0/add_get_usm', methods=['GET'])
-def add_get_usm():
-    '''add post by GET request from arduino'''
-    mechanism_id = request.args.get('mechanism_id')
-    password = request.args.get('password')
-    value = request.args.get('value')
-    value2 = request.args.get('value2')
-    value3 = request.args.get('value3')
-    count = request.args.get('count')
-    latitude = request.args.get('latitude')
-    longitude = request.args.get('longitude')
-    if latitude == '':
-        latitude = 0
-        longitude = 0
-    items = mechanism_id, password, latitude, longitude
-    test_items = any([item is None for item in items])
-    # print(items, datetime.now(), not test_items)
-    if int(value3) < 5: # if roller not circle
-        value = 0
-    if test_items:
-        return 'Bad request'
-    # if password != post_pass:
-    if password not in  post_pass:
-        return 'Bad password'
-    if int(mechanism_id) not in all_mechanisms_id('usm'):
-        return 'Not this id'
-    if float(latitude) == 0 or float(longitude) == 0:
-        # mech = Mechanism.query.get(mechanism_id)
-        data_mech = db.session.query(Post).filter(
-            Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
-        latitude = data_mech.latitude
-        longitude = data_mech.longitude
-    new_post = Post(value=value, value2=value2, value3=value3, count=count,
-                    latitude=latitude, longitude=longitude, mechanism_id=mechanism_id)
-    add_fix_post(new_post)
-    return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
+# @app.route('/api/v1.0/add_get_usm', methods=['GET'])
+# def add_get_usm():
+#     '''add post by GET request from arduino'''
+#     mechanism_id = request.args.get('mechanism_id')
+#     password = request.args.get('password')
+#     value = request.args.get('value')
+#     value2 = request.args.get('value2')
+#     value3 = request.args.get('value3')
+#     count = request.args.get('count')
+#     latitude = request.args.get('latitude')
+#     longitude = request.args.get('longitude')
+#     if latitude == '':
+#         latitude = 0
+#         longitude = 0
+#     items = mechanism_id, password, latitude, longitude
+#     test_items = any([item is None for item in items])
+#     # print(items, datetime.now(), not test_items)
+#     if int(value3) < 5: # if roller not circle
+#         value = 0
+#     if test_items:
+#         return 'Bad request'
+#     # if password != post_pass:
+#     if password not in  post_pass:
+#         return 'Bad password'
+#     if int(mechanism_id) not in all_mechanisms_id('usm'):
+#         return 'Not this id'
+#     if float(latitude) == 0 or float(longitude) == 0:
+#         # mech = Mechanism.query.get(mechanism_id)
+#         data_mech = db.session.query(Post).filter(
+#             Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
+#         latitude = data_mech.latitude
+#         longitude = data_mech.longitude
+#     new_post = Post(value=value, value2=value2, value3=value3, count=count,
+#                     latitude=latitude, longitude=longitude, mechanism_id=mechanism_id)
+#     add_fix_post(new_post)
+#     return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
 
 
-@app.route('/api/v1.0/add_get_kran', methods=['GET'])
-def add_get_kran():
-    '''add post by GET request from arduino'''
-    mechanism_id = request.args.get('mechanism_id')
-    password = request.args.get('password')
-    value = request.args.get('value')
-    value3 = request.args.get('value3')
-    latitude = request.args.get('latitude')
-    longitude = request.args.get('longitude')
-    if latitude == '':
-        latitude = 0
-        longitude = 0
-    items = mechanism_id, password, latitude, longitude, value, value3
-    test_items = any([item is None for item in items])
-    # print(items, datetime.now(), not test_items)
-    if test_items:
-        return 'Bad request'
-    # if password != post_pass:
-    if password not in  post_pass:
-        return 'Bad password'
-    if int(mechanism_id) not in all_mechanisms_id('kran'):
-        return 'Not this id or not kran'
-    if float(latitude) == 0 or float(longitude) == 0:
-        # mech = Mechanism.query.get(mechanism_id)
-        data_mech = db.session.query(Post).filter(
-            Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
-        latitude = data_mech.latitude
-        longitude = data_mech.longitude
-    new_post = Post(value=value, value3=value3, latitude=latitude,
-                    longitude=longitude, mechanism_id=mechanism_id)
-    db.session.add(new_post)
-    db.session.commit()
-    return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
+# @app.route('/api/v1.0/add_get_kran', methods=['GET'])
+# def add_get_kran():
+#     '''add post by GET request from arduino'''
+#     mechanism_id = request.args.get('mechanism_id')
+#     password = request.args.get('password')
+#     value = request.args.get('value')
+#     value3 = request.args.get('value3')
+#     latitude = request.args.get('latitude')
+#     longitude = request.args.get('longitude')
+#     if latitude == '':
+#         latitude = 0
+#         longitude = 0
+#     items = mechanism_id, password, latitude, longitude, value, value3
+#     test_items = any([item is None for item in items])
+#     # print(items, datetime.now(), not test_items)
+#     if test_items:
+#         return 'Bad request'
+#     # if password != post_pass:
+#     if password not in  post_pass:
+#         return 'Bad password'
+#     if int(mechanism_id) not in all_mechanisms_id('kran'):
+#         return 'Not this id or not kran'
+#     if float(latitude) == 0 or float(longitude) == 0:
+#         # mech = Mechanism.query.get(mechanism_id)
+#         data_mech = db.session.query(Post).filter(
+#             Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
+#         latitude = data_mech.latitude
+#         longitude = data_mech.longitude
+#     new_post = Post(value=value, value3=value3, latitude=latitude,
+#                     longitude=longitude, mechanism_id=mechanism_id)
+#     db.session.add(new_post)
+#     db.session.commit()
+#     return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
 
 
 @app.route('/api/v1.0/add_post', methods=['GET', 'POST'])
