@@ -11,11 +11,13 @@ from app.kran import time_for_shift_kran, kran_periods
 from app.functions import image_mechanism  # , all_mechanisms_type
 # from sqlalchemy import func
 # from pprint import pprint
-from random import choice
+# from random import choice
 from psw import post_pass
 
 from app.functions import HOURS
 from app.functions import perpendicular_line_equation, intersection_point_of_lines, line_kran
+from config import krans_if_3_then_2
+
 
 
 @app.route("/api/v1.0/get_per_shift/<int:m_id>", methods=["GET"])
@@ -132,7 +134,7 @@ def get_all_last_data():
                                                  'name': el.mech.name,
                                                  'value': el.value,
                                                  'value2': el.value2,
-                                                 'value3': el.value3, 
+                                                 'value3': el.value3,
                                                  'latitude': el.latitude,
                                                  'longitude': el.longitude,
                                                  'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
@@ -164,9 +166,10 @@ def get_all_last_data_state():
                                                  'name': el.mech.name,
                                                  'type': el.mech.type,
                                                  'number': el.mech.number,
-                                                 'value': round(el.value, 2) if not el.value3 else 0, # if roller not work
+                                                 # if roller not work
+                                                 'value': round(el.value, 2) if not el.value3 else 0,
                                                  'value2': el.value2,
-                                                 'value3': el.value3, 
+                                                 'value3': el.value3,
                                                  'latitude': el.latitude,
                                                  'longitude': el.longitude,
                                                  'state': state_mech(el.mech.type, el.value, el.value3, el.timestamp + timedelta(hours=HOURS)),
@@ -217,6 +220,7 @@ def add_fix_post(post):
     db.session.add(post)
     db.session.commit()
 
+
 @app.route('/api/v1.0/add_usm', methods=['GET'])
 def add_usm():
     '''add post by GET request from arduino'''
@@ -234,12 +238,12 @@ def add_usm():
     items = mechanism_id, password, latitude, longitude
     test_items = any([item is None for item in items])
     # print(items, datetime.now(), not test_items)
-    if int(value3) < 5: # if roller not circle
+    if int(value3) < 5:  # if roller not circle
         value = 0
     if test_items:
         return 'Bad request'
     # if password != post_pass:
-    if password not in  post_pass:
+    if password not in post_pass:
         return 'Bad password'
     if int(mechanism_id) not in all_mechanisms_id('usm'):
         return 'Not this id'
@@ -272,7 +276,7 @@ def add_kran():
     test_items = any([item is None for item in items])
     if test_items:
         return 'Bad request'
-    if password not in  post_pass:
+    if password not in post_pass:
         return 'Bad password'
     if int(mechanism_id) not in all_mechanisms_id('kran'):
         return 'Not this id or not kran'
@@ -281,9 +285,11 @@ def add_kran():
             Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
         latitude = data_mech.latitude
         longitude = data_mech.longitude
-
+    if mech.number in krans_if_3_then_2 and value=='3':
+        value=2
     k1, b1 = line_kran(mech.number)
-    k2, b2 = perpendicular_line_equation(k1, b1, float(latitude), float(longitude))
+    k2, b2 = perpendicular_line_equation(
+        k1, b1, float(latitude), float(longitude))
     latitude, longitude = intersection_point_of_lines(k1, b1, k2, b2)
     new_post = Post(value=value, value3=value3, latitude=latitude,
                     longitude=longitude, mechanism_id=mechanism_id)
@@ -377,7 +383,7 @@ def add_post():
         if not set(keys).issubset(need_keys):
             abort(400)
         # if request_j['password'] != post_pass:
-        if request_j['password'] not in  post_pass:
+        if request_j['password'] not in post_pass:
             abort(403)  # need use this password in Arduino
         if request_j['mechanism_id'] not in all_mechanisms_id():
             abort(405)

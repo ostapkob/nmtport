@@ -111,12 +111,10 @@ if __name__ == "__main__":
     kran16 = Kran(mechanism_id=15510,  value=3, value2=0, value3=0,
                   count=0, latitude=42.8142, longitude=132.8915)
 
-
-
     usms = Pt1, Pt2,  E4, S5,  S6,  S7,  S8, U9,  U10, E11
     usms = Pt1, Pt2,  E4,  S6,  S7  # ,  S8, U9,  U10, E11
-    usms= E3,  E4, S5,  S6,  S7,  S8, U9,  U10, E11
-    usms=Pt1, Pt2, S5,  S6,  S7,  S8, U9,  U10, E11
+    usms = E3,  E4, S5,  S6,  S7,  S8, U9,  U10, E11
+    usms = Pt1, Pt2, S5,  S6,  S7,  S8, U9,  U10, E11
     krans = kran4, kran12,  kran13, kran22, kran14, kran16
     mechanisms = usms+krans
 
@@ -126,17 +124,13 @@ if __name__ == "__main__":
     last_sent = time.time() - 61
     [x.chenge_value(0) for x in usms[1::2]]
     [x.chenge_value(0.8) for x in usms[::2]]
-    # Pt1.chenge_value(0.7)
     [x.chenge_value3(20) for x in usms]
 
     [print(x) for x in mechanisms]
-    kran13.chenge_value(1)
-    kran13.chenge_value(1)
-    kran12.chenge_value(2)
+    kran4.chenge_value(3)
+    kran13.chenge_value(3)
+    kran12.chenge_value(3)
     kran22.chenge_value(3)
-    # Pt1.chenge_value(0)
-    # Pt4.chenge_value(0)
-    # n = 0
     while True:
         if time.time() - last_sent >= 70.0:
             last_sent = time.time()
