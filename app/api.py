@@ -177,6 +177,7 @@ def get_all_last_data_state():
                                                  'alarm': get_status_alarm(el.mech.id),
                                                  # 'alarm': True,
                                                  # 'alarm': False,
+                                                 'terminal': el.terminal,
                                                  'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
     return jsonify(data)
 
@@ -430,35 +431,36 @@ def wrong_password(error):
     return make_response(jsonify({'error': 'Wrong password'}), 403)
 
 
-@app.route('/api/v1.0/add_mechanism', methods=['POST'])
-def add_mechanism():
-    # all_mech_id = [mech.id for mech in Mechanism.query.all()]
-    request_f = request.form
-    id = request_f['id']
-    company = request_f['company']
-    type = request_f['type']
-    model = request_f['model']
-    number = request_f['number']
-    name = request_f['name']
-    new_mech = Mechanism(id, company, type, model, number, name)
-    # data = request.data
-    db.session.add(new_mech)
-    db.session.commit()
-    return redirect("http://localhost:5000/show_all_mechanisms", code=301)
-    # return data
+
+# @app.route('/api/v1.0/add_mechanism', methods=['POST'])
+# def add_mechanism():
+#     # all_mech_id = [mech.id for mech in Mechanism.query.all()]
+#     request_f = request.form
+#     id = request_f['id']
+#     company = request_f['company']
+#     type = request_f['type']
+#     model = request_f['model']
+#     number = request_f['number']
+#     name = request_f['name']
+#     new_mech = Mechanism(id, company, type, model, number, name)
+#     # data = request.data
+#     db.session.add(new_mech)
+#     db.session.commit()
+#     return redirect("http://localhost:5000/show_all_mechanisms", code=301)
+#     # return data
 
 
-@app.route('/api/v1.0/add_mech_json', methods=['POST'])
-# may be not use
-def add_mechanism_json():
-    id = request.json['id']
-    company = request.json['company']
-    type = request.json['type']
-    model = request.json['model']
-    number = request.json['number']
-    name = request.json['name']
-    new_mech = Mechanism(id, company, type, model, number, name)
-    data = request.data
-    db.session.add(new_mech)
-    db.session.commit()
-    return data
+# @app.route('/api/v1.0/add_mech_json', methods=['POST'])
+# # may be not use
+# def add_mechanism_json():
+#     id = request.json['id']
+#     company = request.json['company']
+#     type = request.json['type']
+#     model = request.json['model']
+#     number = request.json['number']
+#     name = request.json['name']
+#     new_mech = Mechanism(id, company, type, model, number, name)
+#     data = request.data
+#     db.session.add(new_mech)
+#     db.session.commit()
+#     return data
