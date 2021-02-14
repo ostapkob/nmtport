@@ -141,3 +141,7 @@ def kran_periods(mechanisms_data):
                              'value': values_period, 'step': step}
         mechanisms_data[mech]['data'] = new_data
     return mechanisms_data
+
+# if __name__ == "__main__":
+#     from pprint import pprint
+#     pprint(time_for_shift_kran(*today_shift_date()))

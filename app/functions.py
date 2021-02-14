@@ -4,6 +4,7 @@ from app.model import Post, Mechanism, Work_1C_1
 from app import db
 from config import TIME_PERIODS
 from config import lines_krans, names_terminals
+
 HOURS = 10  # your timezone
 
 
@@ -208,7 +209,7 @@ def fio_to_fi(item):
 
 
 def add_fio(data_kran_period, date_shift, shift):
-    ''' add fio and grab if it exec'''
+    ''' add fio and grab if it exec '''
     if not data_kran_period:
         return None
     for key, value in data_kran_period.items():
@@ -354,6 +355,23 @@ def which_terminal(latitude, longitude):
     return name_terminal
 
 
+def add_to_mongo(data, date, shift):
+    if data is not None:
+        today_date, today_shift = today_shift_date()
+        # convert int key to str
+        mongo_data = {str(key): value for key, value in data.items()}
+    for key, value in data.items():
+        mongo_data[str(key)]['data'] = {
+            str(k): v for k, v in value['data'].items()}
+    if today_date == date and today_shift == shift:
+        print('No')
+        pass
+    else:
+        mongo_data['_id'] = f'{date_shift}|{shift}'
+        posts = db[type_mechanism]
+        posts.insert_one(mongo_data)
+
+
 if __name__ == "__main__":
     x1, y1 = 42.80691726848499, 132.88660505374455
     x2, y2 = 42.81408152044796, 132.89085539601604
@@ -362,4 +380,3 @@ if __name__ == "__main__":
     # x1, y1 = 42.81381686151741, 132.89146624081198
     # x2, y2 = 42.81697813067333, 132.89335636137457
     # print(straight_line_equation(x1, y1, x2, y2))
-

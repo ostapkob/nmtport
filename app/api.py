@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import request, jsonify, abort, make_response
-from flask import render_template,  redirect
+from flask import render_template  # ,redirect
 from app import db, app
 from app.model import Mechanism, Post
 # from app.form import AddMechanism
@@ -19,6 +19,41 @@ from app.functions import perpendicular_line_equation, intersection_point_of_lin
 from app.functions import which_terminal
 from config import krans_if_3_then_2
 
+# from app.functions import add_to_mongo
+from pymongo import MongoClient
+from pprint import pprint
+
+mongoHashShift = MongoClient('mongodb://localhost:27017')['HashShift']
+
+# it here becouse circular otherwise import
+
+
+def mech_periods(type_mechanism, date, shift):
+    if type_mechanism == 'usm':
+        data = usm_periods(time_for_shift_usm(date, shift))
+    elif type_mechanism == 'kran':
+        data = kran_periods(time_for_shift_kran(date, shift))
+    else:
+        data = None
+    return data
+
+
+def add_fix_post(post):
+    ''' I use it fix because arduino sometimes accumulates an extra minute '''
+    last = db.session.query(Post).filter(
+        Post.mechanism_id == post.mechanism_id).order_by(Post.timestamp.desc()).first()
+    if last:  # if not exist item in db not use function
+        dt_seconds = (post.timestamp - last.timestamp).seconds
+    else:
+        dt_seconds = 201
+    if dt_seconds < 200:  # whatever the difference is not big
+        last_minute = last.timestamp.minute
+        post_minute = post.timestamp.minute
+        dt_minutes = post_minute - last_minute
+        if dt_minutes == 2 or dt_minutes == -58:
+            post.timestamp -= timedelta(seconds=30)
+    db.session.add(post)
+    db.session.commit()
 
 
 @app.route("/api/v1.0/get_per_shift/<int:m_id>", methods=["GET"])
@@ -76,13 +111,35 @@ def get_data_period2(type_mechanism, date_shift, shift):
     '''get data shift for by type of mechanism and id'''
     try:
         date = datetime.strptime(date_shift, '%d.%m.%Y').date()
+        # convert 1.1.2020 to 01.01.2020
+        date_shift = date.strftime("%d.%m.%Y")
     except ValueError:
         return make_response(jsonify({'error': 'Bad format date'}), 400)
-    if type_mechanism == 'usm':
-        data = usm_periods(time_for_shift_usm(date, shift))
 
-    if type_mechanism == 'kran':
-        data = kran_periods(time_for_shift_kran(date, shift))
+    mongo_request = mongoHashShift[type_mechanism].find_one(  # request
+        {"_id": f"{date_shift}|{shift}"})
+    if mongo_request is not None:  # if item alredy exist
+        del mongo_request["_id"]
+        return jsonify(mongo_request)
+
+    data = mech_periods(type_mechanism, date, shift)
+
+    # add_to_mongo(data, date, shift)
+    if data is not None:
+        today_date, today_shift = today_shift_date()
+        # convert int key to str
+        mongo_data = {str(key): value for key, value in data.items()}
+        for key, value in data.items():
+            mongo_data[str(key)]['data'] = {
+                str(k): v for k, v in value['data'].items()}
+        if today_date == date and today_shift == shift:
+            print('No')
+            pass
+        else:
+            mongo_data['_id'] = f'{date_shift}|{shift}'
+            posts = db[type_mechanism]
+            posts.insert_one(mongo_data)
+
     return jsonify(data)
 
 
@@ -99,6 +156,44 @@ def get_data_period_with_fio(type_mechanism, date_shift, shift):
         data = kran_periods(time_for_shift_kran(date, shift))
     data_with_fio = add_fio(data, date, shift)
     return jsonify(data_with_fio)
+
+
+@app.route("/api/v2.0/get_data_period_with_fio/<type_mechanism>/<date_shift>/<int:shift>", methods=['GET', 'POST'])
+def get_data_period_with_fio2(type_mechanism, date_shift, shift):
+    '''get data shift for by type of mechanism'''
+    try:
+        date = datetime.strptime(date_shift, '%d.%m.%Y').date()
+        # convert 1.1.2020 to 01.01.2020
+        date_shift = date.strftime("%d.%m.%Y")
+    except ValueError:
+        return make_response(jsonify({'error': 'Bad format date'}), 400)
+
+    mongo_request = mongoHashShift[type_mechanism].find_one(  # request
+        {"_id": f"{date_shift}|{shift}"})
+    if mongo_request is not None:  # if item alredy exist
+        del mongo_request["_id"]
+        return jsonify(mongo_request)
+
+    data = mech_periods(type_mechanism, date, shift)
+    data = add_fio(data, date, shift)
+
+    # add_to_mongo(data, date, shift)
+    if data is not None:
+        today_date, today_shift = today_shift_date()
+        # convert int key to str
+        mongo_data = {str(key): value for key, value in data.items()}
+        for key, value in data.items():
+            mongo_data[str(key)]['data'] = {
+                str(k): v for k, v in value['data'].items()}
+        if today_date == date and today_shift == shift:
+            print('No')
+            pass
+        else:
+            mongo_data['_id'] = f'{date_shift}|{shift}'
+            posts = db[type_mechanism]
+            posts.insert_one(mongo_data)
+
+    return jsonify(data)
 
 
 @app.route("/api/v1.0/get_data_now/<type_mechanism>", methods=['GET', 'POST'])
@@ -120,6 +215,14 @@ def get_data_period_with_fio_now(type_mechanism):
         data = usm_periods(time_for_shift_usm(*today_shift_date()))
     if type_mechanism == 'kran':
         data = kran_periods(time_for_shift_kran(*today_shift_date()))
+    data_with_fio = add_fio(data, *today_shift_date())
+    return jsonify(data_with_fio)
+
+
+@app.route("/api/v2.0/get_data_period_with_fio_now/<type_mechanism>", methods=['GET', 'POST'])
+def get_data_period_with_fio_now2(type_mechanism):
+    '''get data shift for by type of mechanism with work NOW'''
+    data = mech_periods(type_mechanism, *today_shift_date())
     data_with_fio = add_fio(data, *today_shift_date())
     return jsonify(data_with_fio)
 
@@ -205,26 +308,91 @@ def get_mech(m_id):
     return f'{mech.name}'
 
 
-def add_fix_post(post):
-    ''' I use it fix because arduino sometimes accumulates an extra minute '''
-    last = db.session.query(Post).filter(
-        Post.mechanism_id == post.mechanism_id).order_by(Post.timestamp.desc()).first()
-    if last:  # if not exist item in db not use function
-        dt_seconds = (post.timestamp - last.timestamp).seconds
-    else:
-        dt_seconds = 201
-    if dt_seconds < 200:  # whatever the difference is not big
-        last_minute = last.timestamp.minute
-        post_minute = post.timestamp.minute
-        dt_minutes = post_minute - last_minute
-        if dt_minutes == 2 or dt_minutes == -58:
-            post.timestamp -= timedelta(seconds=30)
-    db.session.add(post)
-    db.session.commit()
-
-
 @app.route('/api/v1.0/add_usm', methods=['GET'])
 def add_usm():
+    '''add post by GET request from arduino'''
+    mechanism_id = request.args.get('mechanism_id')
+    password = request.args.get('password')
+    value = request.args.get('value')
+    value2 = request.args.get('value2')
+    value3 = request.args.get('value3')
+    count = request.args.get('count')
+    latitude = request.args.get('latitude')
+    longitude = request.args.get('longitude')
+    if latitude == '':
+        latitude = 0
+        longitude = 0
+    items = mechanism_id, password, latitude, longitude
+    test_items = any([item is None for item in items])
+    if int(value3) < 5:  # if roller not circle
+        value = 0
+    if test_items:
+        return 'Bad request'
+    # if password != post_pass:
+    if password not in post_pass:
+        return 'Bad password'
+    if int(mechanism_id) not in all_mechanisms_id('usm'):
+        return 'Not this id'
+    if float(latitude) == 0 or float(longitude) == 0:
+        # mech = Mechanism.query.get(mechanism_id)
+        data_mech = db.session.query(Post).filter(
+            Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
+        latitude = data_mech.latitude
+        longitude = data_mech.longitude
+    terminal = which_terminal(latitude, longitude)
+    new_post = Post(value=value, value2=value2, value3=value3, count=count,
+                    latitude=latitude, longitude=longitude, mechanism_id=mechanism_id,
+                    terminal=terminal)
+    add_fix_post(new_post)
+    return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
+
+
+@app.route('/api/v1.0/add_kran', methods=['GET'])
+def add_kran():
+    '''add post by GET request from arduino'''
+    mechanism_id = request.args.get('mechanism_id')
+    password = request.args.get('password')
+    value = request.args.get('value')
+    value3 = request.args.get('value3')
+    latitude = request.args.get('latitude')
+    longitude = request.args.get('longitude')
+    mech = Mechanism.query.get(mechanism_id)
+    if latitude == '':
+        latitude = 0
+        longitude = 0
+
+    # if mechanism_id == '4934' and value == '1':
+    # value = '2'
+
+    items = mechanism_id, password, latitude, longitude, value, value3
+    test_items = any([item is None for item in items])
+    if test_items:
+        return 'Bad request'
+    if password not in post_pass:
+        return 'Bad password'
+    if int(mechanism_id) not in all_mechanisms_id('kran'):
+        return 'Not this id or not kran'
+    if float(latitude) == 0 or float(longitude) == 0:
+        data_mech = db.session.query(Post).filter(
+            Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
+        latitude = data_mech.latitude
+        longitude = data_mech.longitude
+    if mech.number in krans_if_3_then_2 and value == '3':
+        value = 2
+    k1, b1 = line_kran(mech.number)
+    k2, b2 = perpendicular_line_equation(
+        k1, float(latitude), float(longitude))
+    latitude, longitude = intersection_point_of_lines(k1, b1, k2, b2)
+    terminal = which_terminal(latitude, longitude)
+    new_post = Post(value=value, value3=value3, latitude=latitude,
+                    longitude=longitude, mechanism_id=mechanism_id, terminal=terminal)
+    db.session.add(new_post)
+    db.session.commit()
+    return f'Success, {str(mech.number)},  {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
+
+
+@app.route('/api/v1.0/add_get_usm', methods=['GET'])
+def add_get_usm():
     '''add post by GET request from arduino'''
     mechanism_id = request.args.get('mechanism_id')
     password = request.args.get('password')
@@ -255,88 +423,9 @@ def add_usm():
             Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
         latitude = data_mech.latitude
         longitude = data_mech.longitude
-    terminal=which_terminal(latitude, longitude)
+    terminal = which_terminal(latitude, longitude)
     new_post = Post(value=value, value2=value2, value3=value3, count=count,
-                    latitude=latitude, longitude=longitude, mechanism_id=mechanism_id, 
-                    terminal=terminal)
-    add_fix_post(new_post)
-    return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
-
-
-@app.route('/api/v1.0/add_kran', methods=['GET'])
-def add_kran():
-    '''add post by GET request from arduino'''
-    mechanism_id = request.args.get('mechanism_id')
-    password = request.args.get('password')
-    value = request.args.get('value')
-    value3 = request.args.get('value3')
-    latitude = request.args.get('latitude')
-    longitude = request.args.get('longitude')
-    mech = Mechanism.query.get(mechanism_id)
-    if latitude == '':
-        latitude = 0
-        longitude = 0
-    items = mechanism_id, password, latitude, longitude, value, value3
-    test_items = any([item is None for item in items])
-    if test_items:
-        return 'Bad request'
-    if password not in post_pass:
-        return 'Bad password'
-    if int(mechanism_id) not in all_mechanisms_id('kran'):
-        return 'Not this id or not kran'
-    if float(latitude) == 0 or float(longitude) == 0:
-        data_mech = db.session.query(Post).filter(
-            Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
-        latitude = data_mech.latitude
-        longitude = data_mech.longitude
-    if mech.number in krans_if_3_then_2 and value=='3':
-        value=2
-    k1, b1 = line_kran(mech.number)
-    k2, b2 = perpendicular_line_equation(
-        k1, float(latitude), float(longitude))
-    latitude, longitude = intersection_point_of_lines(k1, b1, k2, b2)
-    terminal=which_terminal(latitude, longitude)
-    new_post = Post(value=value, value3=value3, latitude=latitude,
-                    longitude=longitude, mechanism_id=mechanism_id, terminal=terminal)
-    db.session.add(new_post)
-    db.session.commit()
-    return f'Success, {str(mech.number)},  {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
-
-@app.route('/api/v1.0/add_get_usm', methods=['GET'])
-def add_get_usm():
-    '''add post by GET request from arduino'''
-    mechanism_id = request.args.get('mechanism_id')
-    password = request.args.get('password')
-    value = request.args.get('value')
-    value2 = request.args.get('value2')
-    value3 = request.args.get('value3')
-    count = request.args.get('count')
-    latitude = request.args.get('latitude')
-    longitude = request.args.get('longitude')
-    if latitude == '':
-        latitude = 0
-        longitude = 0
-    items = mechanism_id, password, latitude, longitude
-    test_items = any([item is None for item in items])
-    # print(items, datetime.now(), not test_items)
-    if int(value3) < 5: # if roller not circle
-        value = 0
-    if test_items:
-        return 'Bad request'
-    # if password != post_pass:
-    if password not in  post_pass:
-        return 'Bad password'
-    if int(mechanism_id) not in all_mechanisms_id('usm'):
-        return 'Not this id'
-    if float(latitude) == 0 or float(longitude) == 0:
-        # mech = Mechanism.query.get(mechanism_id)
-        data_mech = db.session.query(Post).filter(
-            Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
-        latitude = data_mech.latitude
-        longitude = data_mech.longitude
-    terminal=which_terminal(latitude, longitude)
-    new_post = Post(value=value, value2=value2, value3=value3, count=count,
-                    latitude=latitude, longitude=longitude, mechanism_id=mechanism_id, 
+                    latitude=latitude, longitude=longitude, mechanism_id=mechanism_id,
                     terminal=terminal)
     add_fix_post(new_post)
     return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
@@ -429,7 +518,6 @@ def not_found(error):
 @app.errorhandler(403)
 def wrong_password(error):
     return make_response(jsonify({'error': 'Wrong password'}), 403)
-
 
 
 # @app.route('/api/v1.0/add_mechanism', methods=['POST'])
