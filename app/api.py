@@ -23,8 +23,8 @@ from config import krans_if_3_then_2
 from pymongo import MongoClient
 from pprint import pprint
 
-mongoHashShift = MongoClient('mongodb://localhost:27017')['HashShift']
-
+client = MongoClient('mongodb://localhost:27017')
+mongodb = client['HashShift']
 # it here becouse circular otherwise import
 
 
@@ -116,7 +116,7 @@ def get_data_period2(type_mechanism, date_shift, shift):
     except ValueError:
         return make_response(jsonify({'error': 'Bad format date'}), 400)
 
-    mongo_request = mongoHashShift[type_mechanism].find_one(  # request
+    mongo_request = mongodbHashShift[type_mechanism].find_one(  # request
         {"_id": f"{date_shift}|{shift}"})
     if mongo_request is not None:  # if item alredy exist
         del mongo_request["_id"]
@@ -137,9 +137,8 @@ def get_data_period2(type_mechanism, date_shift, shift):
             pass
         else:
             mongo_data['_id'] = f'{date_shift}|{shift}'
-            posts = db[type_mechanism]
+            posts = mongodb[type_mechanism]
             posts.insert_one(mongo_data)
-
     return jsonify(data)
 
 
@@ -168,7 +167,7 @@ def get_data_period_with_fio2(type_mechanism, date_shift, shift):
     except ValueError:
         return make_response(jsonify({'error': 'Bad format date'}), 400)
 
-    mongo_request = mongoHashShift[type_mechanism].find_one(  # request
+    mongo_request = mongodb[type_mechanism].find_one(  # request
         {"_id": f"{date_shift}|{shift}"})
     if mongo_request is not None:  # if item alredy exist
         del mongo_request["_id"]
@@ -190,7 +189,7 @@ def get_data_period_with_fio2(type_mechanism, date_shift, shift):
             pass
         else:
             mongo_data['_id'] = f'{date_shift}|{shift}'
-            posts = db[type_mechanism]
+            posts = mongodb[type_mechanism]
             posts.insert_one(mongo_data)
 
     return jsonify(data)
