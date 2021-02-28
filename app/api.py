@@ -17,7 +17,7 @@ from psw import post_pass
 from app.functions import HOURS
 from app.functions import perpendicular_line_equation, intersection_point_of_lines, line_kran
 from app.functions import which_terminal
-from config import krans_if_3_then_2
+from config import krans_if_3_then_2, krans_if_1_then_2
 
 # from app.functions import add_to_mongo
 from pymongo import MongoClient
@@ -377,6 +377,8 @@ def add_kran():
         latitude = data_mech.latitude
         longitude = data_mech.longitude
     if mech.number in krans_if_3_then_2 and value == '3':
+        value = 2
+    if mech.number in krans_if_1_then_2 and value == '3':
         value = 2
     k1, b1 = line_kran(mech.number)
     k2, b2 = perpendicular_line_equation(

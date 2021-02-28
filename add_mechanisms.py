@@ -6,11 +6,11 @@ db.create_all()
 from datetime import datetime, timedelta
 
 mech = [
-        (22272, 'nmtp', 'kran', 'sokol', 36, 'кран-36'),
-        (22152, 'nmtp', 'kran', 'sokol', 40, 'кран-40'),
-        (13969, 'nmtp', 'kran', 'sokol', 32, 'кран-32'),
-        (6573,  'nmtp', 'kran', 'albatross', 25, 'кран-25'),
-        (14194, 'nmtp', 'kran', 'sokol', 11, 'кран-11'),
+        # (22272, 'nmtp', 'kran', 'sokol', 36, 'кран-36'),
+        # (22152, 'nmtp', 'kran', 'sokol', 40, 'кран-40'),
+        # (13969, 'nmtp', 'kran', 'sokol', 32, 'кран-32'),
+        # (6573,  'nmtp', 'kran', 'albatross', 25, 'кран-25'),
+        # (14194, 'nmtp', 'kran', 'sokol', 11, 'кран-11'),
         # (15512, 'nmtp', 'kran', 'sokol', 14, 'кран-14'),
         # (15510, 'nmtp', 'kran', 'sokol', 16, 'кран-16'),
         # (15511, 'nmtp', 'kran', 'sokol', 33, 'кран-33'),
@@ -33,6 +33,8 @@ mech = [
         # (32941, 'nmtp', 'usm', 'Electric', 9, 'Electric-9'),
         # (32942, 'nmtp', 'usm', 'Electric', 10, 'Electric-10'),
         # (33287, 'nmtp', 'usm', 'Edge', 11, 'Edge-11'),
+        (34213, 'nmtp', 'usm', 'Edge', 12, 'Edge-12'),
+        (34214, 'nmtp', 'usm', 'Edge', 13, 'Edge-13'),
         # (32777, 'nmtp', 'sennebogen', '860', 1, 'Sennebogen-1'),
         ]
 
