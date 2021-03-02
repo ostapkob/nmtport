@@ -298,25 +298,72 @@ def is_alarm(args):
             values_9_0.append(el.value)
         else:
             pass
-    # print(dt,  values_14_10, values_9_0)
     if sum(values_9_0) > 0:
         return False
-
     if sum(values_14_10) <= 0:
         return False
-
     return True
 
 
-def get_status_alarm(mech_id):
+def is_alarm_kran(args):
+    """if last 15 minuts not work """
+    values_19_15 = []
+    values_14_0 = []
+    dt = datetime.now()
+    for el in args:
+        dt = datetime.now() - (el.timestamp + timedelta(hours=HOURS))
+        dt = dt.total_seconds() / 60
+        if dt > 15 and dt <= 20:
+            values_19_15.append(el.value)
+        elif dt <= 15:
+            values_14_0.append(el.value)
+        else:
+            pass
+    if sum(values_14_0) > 0:
+        return False
+    if sum(values_19_15) <= 0:
+        return False
+    return any(x == 2 for x in values_19_15)  # if work 180 degress
+
+
+def is_alarm_usm(args):
+    """if last 15 minuts not work """
+    values_19_15 = []
+    values_14_0 = []
+    dt = datetime.now()
+    for el in args:
+        dt = datetime.now() - (el.timestamp + timedelta(hours=HOURS))
+        dt = dt.total_seconds() / 60
+        if dt > 15 and dt <= 20:
+            values_19_15.append(el.value)
+        elif dt <= 15:
+            values_14_0.append(el.value)
+        else:
+            pass
+    print('>>>', dt,  values_19_15, values_14_0)
+    print(any(x == 2 for x in values_19_15))  # if work 180 degress
+    if sum(values_14_0) > 0:
+        return False
+    if sum(values_19_15) <= 0:
+        return False
+    return True
+
+
+def get_status_alarm(mech_id, mech_type):
     last = db.session.query(Post).filter(
         Post.mechanism_id == mech_id).order_by(
-        Post.timestamp.desc()).limit(15)
+        Post.timestamp.desc()).limit(20)
     now_hour = datetime.now().hour + datetime.now().minute/60
-    result = any(now_hour > t1 and now_hour < t2 for t1, t2 in TIME_PERIODS)
-    if result:
+    cofe_time = any(now_hour > t1 and now_hour < t2 for t1, t2 in TIME_PERIODS)
+    print(mech_type)
+    if cofe_time:
         return False
-    return is_alarm(last)
+    if mech_type == 'kran':
+        return is_alarm_kran(last)
+    elif mech_type == 'usm':
+        return is_alarm_usm(last)
+    else:
+        return False
 
 
 def straight_line_equation(x1, y1, x2, y2):
@@ -355,21 +402,22 @@ def which_terminal(latitude, longitude):
     return name_terminal
 
 
-def add_to_mongo(data, date, shift):
-    if data is not None:
-        today_date, today_shift = today_shift_date()
-        # convert int key to str
-        mongo_data = {str(key): value for key, value in data.items()}
-    for key, value in data.items():
-        mongo_data[str(key)]['data'] = {
-            str(k): v for k, v in value['data'].items()}
-    if today_date == date and today_shift == shift:
-        print('No')
-        pass
-    else:
-        mongo_data['_id'] = f'{date_shift}|{shift}'
-        posts = db[type_mechanism]
-        posts.insert_one(mongo_data)
+# not to use
+# def add_to_mongo(data, date, shift):
+#     if data is not None:
+#         today_date, today_shift = today_shift_date()
+#         # convert int key to str
+#         mongo_data = {str(key): value for key, value in data.items()}
+#     for key, value in data.items():
+#         mongo_data[str(key)]['data'] = {
+#             str(k): v for k, v in value['data'].items()}
+#     if today_date == date and today_shift == shift:
+#         print('No')
+#         pass
+#     else:
+#         mongo_data['_id'] = f'{date_shift}|{shift}'
+#         posts = db[type_mechanism]
+#         posts.insert_one(mongo_data)
 
 
 if __name__ == "__main__":

@@ -185,7 +185,7 @@ def get_data_period_with_fio2(type_mechanism, date_shift, shift):
             mongo_data[str(key)]['data'] = {
                 str(k): v for k, v in value['data'].items()}
         if today_date == date and today_shift == shift:
-            print('No')
+            print('Now')
             pass
         else:
             mongo_data['_id'] = f'{date_shift}|{shift}'
@@ -276,7 +276,7 @@ def get_all_last_data_state():
                                                  'latitude': el.latitude,
                                                  'longitude': el.longitude,
                                                  'state': state_mech(el.mech.type, el.value, el.value3, el.timestamp + timedelta(hours=HOURS)),
-                                                 'alarm': get_status_alarm(el.mech.id),
+                                                 'alarm': get_status_alarm(el.mech.id, el.mech.type),
                                                  # 'alarm': True,
                                                  # 'alarm': False,
                                                  'terminal': el.terminal,

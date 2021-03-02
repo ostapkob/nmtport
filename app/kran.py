@@ -1,9 +1,8 @@
 from app.functions import all_mechanisms_id, today_shift_date
 from app.functions import HOURS
-from app.model import Post, Mechanism
+from app.model import Post
 from app import db
 from datetime import datetime, timedelta
-from collections import UserDict
 
 
 def time_for_shift_kran(date_shift, shift):
@@ -55,7 +54,6 @@ def time_for_shift_kran(date_shift, shift):
     time_by_minuts = {}
     for key, value in data_per_shift.items():
         flag_start = True
-        flag_finish = True
         time_by_minuts[key] = {}
         time_by_minuts[key]['name'] = data_per_shift[key]['mechanism'].name
         time_by_minuts[key]['number'] = data_per_shift[key]['mechanism'].number
@@ -130,15 +128,22 @@ def kran_periods(mechanisms_data):
                     total_step
 
                 new_data[counter] = {
-                    'time': pre_time, 'value': values_period, 'step': step, 'total': total_step}
+                                    'time': pre_time,
+                                    'value': values_period,
+                                    'step': step,
+                                    'total': total_step
+                                    }
                 step = 1
                 values_period = value_min
                 pre_time = value_number['time']
                 counter += 1
             else:
                 step += 1
-        new_data[counter] = {'time': pre_time,
-                             'value': values_period, 'step': step}
+        new_data[counter] = {
+                            'time': pre_time,
+                            'value': values_period,
+                            'step': step
+                            }
         mechanisms_data[mech]['data'] = new_data
     return mechanisms_data
 
