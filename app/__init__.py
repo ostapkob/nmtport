@@ -6,6 +6,10 @@ from flask_moment import Moment
 from flask_bootstrap import Bootstrap
 from flask_cors import CORS
 from flask_login import LoginManager
+from loguru import logger
+import threading
+import time
+
 
 app = Flask(__name__)
 app.config.from_object(Configuration)
@@ -15,6 +19,20 @@ migrate = Migrate(app, db)
 moment = Moment(app)
 bootstrap = Bootstrap(app)
 CORS(app)
+logger.add("debug.log", format="{time} {level} {message}", level="DEBUG")
 
-from app import views, api,  model
+from app import views, api,  model, functions
+hash_last_data = functions.hash_all_last_data_state
+
 db.create_all()
+
+def loop():
+    while True:
+        print('loop')
+        hash_last_data()
+        time.sleep(60)
+
+thread = threading.Thread(target=loop, daemon=True)
+thread.start()
+
+

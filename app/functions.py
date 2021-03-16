@@ -4,6 +4,8 @@ from app.model import Post, Mechanism, Work_1C_1
 from app import db
 from config import TIME_PERIODS
 from config import lines_krans, names_terminals
+from app  import logger
+from pymongo import MongoClient
 
 HOURS = 10  # your timezone
 
@@ -222,14 +224,18 @@ def add_fio(data_kran_period, date_shift, shift):
         elif len(data_by_id_mech) == 1:
             data_kran_period[key]['fio'] = fio_to_fi(data_by_id_mech[0])
             data_kran_period[key]['contract'] = data_by_id_mech[0][8]
-            if data_by_id_mech[0][2] == 0:
-                data_kran_period[key]['grab'] = None
+            if data_by_id_mech[0][2]:
+                data_kran_period[key]['grab'] = float(data_by_id_mech[0][2])
             else:
-                data_kran_period[key]['grab'] = data_by_id_mech[0][2]
+                data_kran_period[key]['grab'] = None
         else:
             for operator in data_by_id_mech:
                 data_kran_period[key]['fio'] = 'Два оператора'
                 data_kran_period[key]['contract'] = 1
+            if data_by_id_mech[0][2]: # dublicate
+                data_kran_period[key]['grab'] = float(data_by_id_mech[0][2])
+            else:
+                data_kran_period[key]['grab'] = None
     return data_kran_period
 
 
@@ -340,8 +346,8 @@ def is_alarm_usm(args):
             values_14_0.append(el.value)
         else:
             pass
-    print('>>>', dt,  values_19_15, values_14_0)
-    print(any(x == 2 for x in values_19_15))  # if work 180 degress
+    # logger.info(dt,  values_19_15, values_14_0)
+    # logger.info(any(x == 2 for x in values_19_15))  # if work 180 degress
     if sum(values_14_0) > 0:
         return False
     if sum(values_19_15) <= 0:
@@ -355,7 +361,7 @@ def get_status_alarm(mech_id, mech_type):
         Post.timestamp.desc()).limit(20)
     now_hour = datetime.now().hour + datetime.now().minute/60
     cofe_time = any(now_hour > t1 and now_hour < t2 for t1, t2 in TIME_PERIODS)
-    print(mech_type)
+    # logger.inf o(mech_type)
     if cofe_time:
         return False
     if mech_type == 'kran':
@@ -418,6 +424,70 @@ def which_terminal(latitude, longitude):
 #         mongo_data['_id'] = f'{date_shift}|{shift}'
 #         posts = db[type_mechanism]
 #         posts.insert_one(mongo_data)
+
+def hash_all_last_data_state():
+    start = datetime.now()
+    last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
+        Post.timestamp.desc()).first() for x in all_mechanisms_id()]
+    last_data_mech = filter(lambda x: x is not None, last_data_mech)
+    data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
+                                                 'name': el.mech.name,
+                                                 'type': el.mech.type,
+                                                 'number': el.mech.number,
+                                                 # if roller not work
+                                                 'value': round(el.value, 2) if not el.value3 else 0,
+                                                 'value2': el.value2,
+                                                 'value3': el.value3,
+                                                 'latitude': el.latitude,
+                                                 'longitude': el.longitude,
+                                                 'state': state_mech(el.mech.type, el.value, el.value3, el.timestamp + timedelta(hours=HOURS)),
+                                                 'alarm': get_status_alarm(el.mech.id, el.mech.type),
+                                                 # 'alarm': True,
+                                                 # 'alarm': False,
+                                                 'terminal': el.terminal,
+                                                 'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
+    client = MongoClient('mongodb://localhost:27017')
+    mongodb = client['HashShift']
+    posts = mongodb['hash']
+    logger.debug(data)
+    if data is not None:
+        data['_id'] = 'last_data'
+        posts.delete_one({"_id":"last_data"})
+        posts.insert_one(data)
+    logger.debug(datetime.now() - start)
+
+
+def hash_now():
+    start = datetime.now()
+    last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
+        Post.timestamp.desc()).first() for x in all_mechanisms_id()]
+    last_data_mech = filter(lambda x: x is not None, last_data_mech)
+    data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
+                                                 'name': el.mech.name,
+                                                 'type': el.mech.type,
+                                                 'number': el.mech.number,
+                                                 # if roller not work
+                                                 'value': round(el.value, 2) if not el.value3 else 0,
+                                                 'value2': el.value2,
+                                                 'value3': el.value3,
+                                                 'latitude': el.latitude,
+                                                 'longitude': el.longitude,
+                                                 'state': state_mech(el.mech.type, el.value, el.value3, el.timestamp + timedelta(hours=HOURS)),
+                                                 'alarm': get_status_alarm(el.mech.id, el.mech.type),
+                                                 # 'alarm': True,
+                                                 # 'alarm': False,
+                                                 'terminal': el.terminal,
+                                                 'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
+    client = MongoClient('mongodb://localhost:27017')
+    mongodb = client['HashShift']
+    posts = mongodb['hash']
+    logger.debug(data)
+    if data is not None:
+        data['_id'] = 'last_data'
+        posts.delete_one({"_id":"last_data"})
+        posts.insert_one(data)
+    logger.debug(datetime.now() - start)
+
 
 
 if __name__ == "__main__":
