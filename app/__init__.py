@@ -19,10 +19,11 @@ migrate = Migrate(app, db)
 moment = Moment(app)
 bootstrap = Bootstrap(app)
 CORS(app)
-logger.add("debug.log", format="{time} {level} {message}", level="DEBUG")
+logger.add("debug.log", format="{time} {level} {message}", level="DEBUG", rotation="1 day", compression="zip")
 
 from app import views, api,  model, functions
 hash_last_data = functions.hash_all_last_data_state
+hash_now = functions.hash_now
 
 db.create_all()
 
@@ -30,8 +31,9 @@ def loop():
     while True:
         print('loop')
         hash_last_data()
+        hash_now('kran')
+        hash_now('usm')
         time.sleep(60)
-
 thread = threading.Thread(target=loop, daemon=True)
 thread.start()
 

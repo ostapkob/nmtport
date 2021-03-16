@@ -7,4 +7,5 @@ psw.py
 nmtp-mechanisms.db
 post.txt
 *.pyc 
+*.zip 
 debug.log

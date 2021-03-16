@@ -43,6 +43,7 @@ class Configuration(object):
         else:
             SQLALCHEMY_DATABASE_URI = "mssql+pyodbc:///?odbc_connect=%s" % params
 
+HOURS = 10  # your timezone
 
 TIME_PERIODS = [1, 2], [4, 5], [7.5, 8], [12, 13], [
     16, 17], [19.5, 20]  # then alarm not True

@@ -3,42 +3,26 @@ from flask import request, jsonify, abort, make_response
 from flask import render_template  # ,redirect
 from app import db, app
 from app.model import Mechanism, Post
-# from app.form import AddMechanism
 from datetime import datetime, timedelta
-from app.functions import today_shift_date, all_mechanisms_id, add_fio, state_mech,  get_status_alarm
+from app.functions import   add_fio, state_mech,  get_status_alarm
 from app.usm import time_for_shift_usm, usm_periods
 from app.kran import time_for_shift_kran, kran_periods
-from app.functions import image_mechanism  # , all_mechanisms_type
-# from sqlalchemy import func
-# from pprint import pprint
-# from random import choice
+from app.functions import image_mechanism 
+from app.functions_for_all import all_mechanisms_id, today_shift_date # all_mechanisms_type, all_number, name_by_id
 from psw import post_pass
 
-from app.functions import HOURS
+from config import HOURS
 from app.functions import perpendicular_line_equation, intersection_point_of_lines, line_kran
-from app.functions import which_terminal
+from app.functions import which_terminal, mech_periods
 from config import krans_if_3_then_2, krans_if_1_then_0
-
-# from app.functions import add_to_mongo
+from loguru import logger
 from pymongo import MongoClient
 from pprint import pprint
 
 client = MongoClient('mongodb://localhost:27017')
 mongodb = client['HashShift']
-# it here becouse circular otherwise import
 
-
-def mech_periods(type_mechanism, date, shift):
-    if type_mechanism == 'usm':
-        data = usm_periods(time_for_shift_usm(date, shift))
-    elif type_mechanism == 'kran':
-        data = kran_periods(time_for_shift_kran(date, shift))
-    else:
-        data = None
-    return data
-
-
-def add_fix_post(post):
+def add_fix_post(post):  # !move
     ''' I use it fix because arduino sometimes accumulates an extra minute '''
     last = db.session.query(Post).filter(
         Post.mechanism_id == post.mechanism_id).order_by(Post.timestamp.desc()).first()
@@ -160,7 +144,6 @@ def get_data_period_with_fio(type_mechanism, date_shift, shift):
 @app.route("/api/v2.0/get_data_period_with_fio/<type_mechanism>/<date_shift>/<int:shift>", methods=['GET', 'POST'])
 def get_data_period_with_fio2(type_mechanism, date_shift, shift):
     '''get data shift for by type of mechanism'''
-    start = datetime.now()
     try:
         date = datetime.strptime(date_shift, '%d.%m.%Y').date()
         # convert 1.1.2020 to 01.01.2020
@@ -186,13 +169,15 @@ def get_data_period_with_fio2(type_mechanism, date_shift, shift):
             mongo_data[str(key)]['data'] = {
                 str(k): v for k, v in value['data'].items()}
         if today_date == date and today_shift == shift:
-            print('Now')
-            pass
+            mongo_request = mongodb[type_mechanism].find_one(  # request
+                {"_id": "now"})
+            if mongo_request is not None:  # if item alredy exist
+                del mongo_request["_id"]
+                return jsonify(mongo_request)
         else:
             mongo_data['_id'] = f'{date_shift}|{shift}'
             posts = mongodb[type_mechanism]
             posts.insert_one(mongo_data)
-    print('time kran:', datetime.now() - start)
     return jsonify(data)
 
 
@@ -266,9 +251,7 @@ def get_all_last_data_state():
     start = datetime.now()
     last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
         Post.timestamp.desc()).first() for x in all_mechanisms_id()]
-    print('1 time last:', datetime.now() - start)
     last_data_mech = filter(lambda x: x is not None, last_data_mech)
-    print('2 time last:', datetime.now() - start)
     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
                                                  'name': el.mech.name,
                                                  'type': el.mech.type,
@@ -285,7 +268,7 @@ def get_all_last_data_state():
                                                  'alarm': False,
                                                  'terminal': el.terminal,
                                                  'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
-    print('3 time last:', datetime.now() - start)
+    print('time last:', datetime.now() - start)
     return jsonify(data)
 
 

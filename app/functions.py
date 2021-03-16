@@ -6,54 +6,10 @@ from config import TIME_PERIODS
 from config import lines_krans, names_terminals
 from app  import logger
 from pymongo import MongoClient
-
-HOURS = 10  # your timezone
-
-
-def today_shift_date():
-    '''get date and shift'''
-    hour = datetime.now().hour
-    if hour >= 8 and hour < 20:
-        date_shift = datetime.now()
-        shift = 1
-    elif hour < 8:
-        date_shift = datetime.now() - timedelta(days=1)
-        shift = 2
-    else:
-        date_shift = datetime.now()
-        shift = 2
-    return date_shift.date(), shift
-
-
-def all_mechanisms_id(type=None):
-    '''Find all mechanisms id'''
-    if type is None:
-        try:
-            return [m.id for m in db.session.query(Mechanism).all()]
-        except:
-            return []
-    try:
-        return [m.id for m in db.session.query(Mechanism).filter(
-            Mechanism.type == type).all()]
-    except:
-        return []
-
-
-def all_mechanisms_type():
-    '''Find all mechanisms type'''
-    ls = [m.type for m in db.session.query(Mechanism).all()]
-    return set(ls)
-
-
-def all_number(type, number):
-    '''Need to do then'''
-    return [m.id for m in Mechanism.query.all()]
-
-
-def name_by_id(id):
-    '''Need to do then'''
-    return Mechanism.query.filter(Mechanism.id == id).first().name
-
+from app.kran import  kran_periods, time_for_shift_kran
+from app.usm import usm_periods, time_for_shift_usm
+from config import HOURS
+from app.functions_for_all import all_mechanisms_id, today_shift_date #  all_mechanisms_type, all_number, name_by_id
 
 def multiple_5(date):  # not use
     '''Return time multiple 5 minutes and remite microseconds'''
@@ -408,6 +364,16 @@ def which_terminal(latitude, longitude):
     return name_terminal
 
 
+def mech_periods(type_mechanism, date, shift):
+    if type_mechanism == 'usm':
+        data = usm_periods(time_for_shift_usm(date, shift))
+    elif type_mechanism == 'kran':
+        data = kran_periods(time_for_shift_kran(date, shift))
+        logger.info(data)
+    else:
+        data = None
+    return data
+
 # not to use
 # def add_to_mongo(data, date, shift):
 #     if data is not None:
@@ -457,37 +423,23 @@ def hash_all_last_data_state():
     logger.debug(datetime.now() - start)
 
 
-def hash_now():
-    start = datetime.now()
-    last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
-        Post.timestamp.desc()).first() for x in all_mechanisms_id()]
-    last_data_mech = filter(lambda x: x is not None, last_data_mech)
-    data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
-                                                 'name': el.mech.name,
-                                                 'type': el.mech.type,
-                                                 'number': el.mech.number,
-                                                 # if roller not work
-                                                 'value': round(el.value, 2) if not el.value3 else 0,
-                                                 'value2': el.value2,
-                                                 'value3': el.value3,
-                                                 'latitude': el.latitude,
-                                                 'longitude': el.longitude,
-                                                 'state': state_mech(el.mech.type, el.value, el.value3, el.timestamp + timedelta(hours=HOURS)),
-                                                 'alarm': get_status_alarm(el.mech.id, el.mech.type),
-                                                 # 'alarm': True,
-                                                 # 'alarm': False,
-                                                 'terminal': el.terminal,
-                                                 'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
+def hash_now(type_mechanism):
+    date, shift = today_shift_date()
+    data = mech_periods(type_mechanism, date, shift)
+    data = add_fio(data, date, shift)
     client = MongoClient('mongodb://localhost:27017')
     mongodb = client['HashShift']
-    posts = mongodb['hash']
+    posts = mongodb[type_mechanism]
     logger.debug(data)
     if data is not None:
-        data['_id'] = 'last_data'
-        posts.delete_one({"_id":"last_data"})
-        posts.insert_one(data)
-    logger.debug(datetime.now() - start)
-
+        # convert int key to str
+        mongo_data = {str(key): value for key, value in data.items()}
+        for key, value in data.items():
+            mongo_data[str(key)]['data'] = {
+                str(k): v for k, v in value['data'].items()}
+        mongo_data['_id'] = "now"
+        posts.delete_one({"_id": "now"})
+        posts.insert_one(mongo_data)
 
 
 if __name__ == "__main__":

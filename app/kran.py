@@ -1,5 +1,5 @@
-from app.functions import all_mechanisms_id, today_shift_date
-from app.functions import HOURS
+from app.functions_for_all import all_mechanisms_id, today_shift_date
+from config import HOURS
 from app.model import Post
 from app import db
 from datetime import datetime, timedelta
