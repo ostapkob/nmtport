@@ -420,7 +420,6 @@ def hash_all_last_data_state():
         data['_id'] = 'last_data'
         posts.delete_one({"_id":"last_data"})
         posts.insert_one(data)
-    logger.debug(datetime.now() - start)
 
 
 def hash_now(type_mechanism):
