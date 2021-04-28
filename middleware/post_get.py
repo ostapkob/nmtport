@@ -112,11 +112,9 @@ if __name__ == "__main__":
                   count=0, latitude=42.8142, longitude=132.8915)
 
     usms = Pt1, Pt2,  E4, S5,  S6,  S7,  S8, U9,  U10, E11
-    usms = Pt1, Pt2,  E4,  S6,  S7  # ,  S8, U9,  U10, E11
-    usms = E3,  E4, S5,  S6,  S7,  S8, U9,  U10, E11
-    usms = Pt1, Pt2, S5,  S6,  S7,  S8, U9,  U10, E11
-    krans = kran4, kran12,  kran13, kran22, kran14, kran16
-    mechanisms = usms+krans
+    usms = E3,  E4, #S5,  S6,  S7,  S8, U9,  U10, E11
+    krans = kran12,  kran13, kran22, kran14, kran16
+    mechanisms = usms #+krans
 
     flag = True
     lat = 0.0001

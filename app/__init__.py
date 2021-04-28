@@ -30,16 +30,10 @@ db.create_all()
 
 def loop():
     while True:
-        logger.info('------------------------------------------------------------------')
         hash_last_data()
         hash_now('kran')
         hash_now('usm')
-        dt = str(datetime.datetime.now())
-        print('>>>>>', dt)
-        with open('hash.log', 'w') as f:
-            f.write(dt)
         time.sleep(60)
-
 thread = threading.Thread(target=loop, daemon=True)
 thread.start()
 

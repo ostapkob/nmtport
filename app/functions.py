@@ -369,7 +369,7 @@ def mech_periods(type_mechanism, date, shift):
         data = usm_periods(time_for_shift_usm(date, shift))
     elif type_mechanism == 'kran':
         data = kran_periods(time_for_shift_kran(date, shift))
-        logger.info(data)
+        # logger.info(data)
     else:
         data = None
     return data
@@ -415,7 +415,7 @@ def hash_all_last_data_state():
     client = MongoClient('mongodb://localhost:27017')
     mongodb = client['HashShift']
     posts = mongodb['hash']
-    logger.debug(data)
+    # logger.debug(data)
     if data is not None:
         data['_id'] = 'last_data'
         posts.delete_one({"_id":"last_data"})
@@ -429,7 +429,7 @@ def hash_now(type_mechanism):
     client = MongoClient('mongodb://localhost:27017')
     mongodb = client['HashShift']
     posts = mongodb[type_mechanism]
-    logger.debug(data)
+    # logger.debug(data)
     if data is not None:
         # convert int key to str
         mongo_data = {str(key): value for key, value in data.items()}

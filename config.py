@@ -45,8 +45,8 @@ class Configuration(object):
 
 HOURS = 10  # your timezone
 
-TIME_PERIODS = [1, 2], [4, 5], [7.5, 8], [12, 13], [
-    16, 17], [19.5, 20]  # then alarm not True
+TIME_PERIODS = [1, 2], [4, 5], [7.33, 8], [12, 13], [
+    16, 17], [19.33, 20]  # then alarm not True
 
 lines_krans = [
     {'k1': 0.5938961076474917, 'b1': 107.46242811507157,
@@ -77,4 +77,7 @@ krans_if_1_then_0 = [
 ]
 krans_if_3_then_2 = [
     47, 54, 14, 16, 33, 20, 8, 22, 12, 13
+]
+usm_no_move = [
+  9, 10,  11, 12, 13   
 ]

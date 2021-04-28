@@ -14,7 +14,7 @@ from psw import post_pass
 from config import HOURS
 from app.functions import perpendicular_line_equation, intersection_point_of_lines, line_kran
 from app.functions import which_terminal, mech_periods
-from config import krans_if_3_then_2, krans_if_1_then_0
+from config import krans_if_3_then_2, krans_if_1_then_0, usm_no_move
 from loguru import logger
 from pymongo import MongoClient
 from pprint import pprint
@@ -317,7 +317,11 @@ def add_usm():
     count = request.args.get('count')
     latitude = request.args.get('latitude')
     longitude = request.args.get('longitude')
-    if latitude == '':
+    mech = Mechanism.query.get(mechanism_id)
+    if mech.number in usm_no_move:
+        latitude = 0
+        longitude = 0
+    if latitude == '': 
         latitude = 0
         longitude = 0
     items = mechanism_id, password, latitude, longitude
@@ -363,7 +367,7 @@ def add_kran():
     # value = '2'
 
     items = mechanism_id, password, latitude, longitude, value, value3
-    test_items = any([item is None for item in items])
+    test_items = any([item is None for item in items]) # if this id is exist
     if test_items:
         return 'Bad request'
     if password not in post_pass:
@@ -407,7 +411,7 @@ def add_get_usm():
         longitude = 0
     items = mechanism_id, password, latitude, longitude
     test_items = any([item is None for item in items])
-    # print(items, datetime.now(), not test_items)
+    # print(items, datetime.now(), not test_items) # if this in exist
     if int(value3) < 5:  # if roller not circle
         value = 0
     if test_items:
