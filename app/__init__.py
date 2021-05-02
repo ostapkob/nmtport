@@ -33,7 +33,7 @@ def loop():
         hash_last_data()
         hash_now('kran')
         hash_now('usm')
-        time.sleep(60)
+        time.sleep(30)
 thread = threading.Thread(target=loop, daemon=True)
 thread.start()
 

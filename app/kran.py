@@ -1,5 +1,5 @@
 from app.functions_for_all import all_mechanisms_id, today_shift_date
-from config import HOURS
+from config import HOURS, names_terminals
 from app.model import Post
 from app import db
 from datetime import datetime, timedelta
@@ -20,13 +20,13 @@ def time_for_shift_kran(date_shift, shift):
     for el in cursor:
         date_t = el.timestamp.replace(second=0, microsecond=0)
         date_t += timedelta(hours=HOURS)
-        if data_per_shift.get(el.mech.number):
-            data_per_shift[el.mech.number]['data'][date_t] = el.value, el.count
+        if data_per_shift.get(el.mech.number): # if exist
+            data_per_shift[el.mech.number]['data'][date_t] = el.value, el.count, el.terminal
             if el.value == 1 or el.value == 3:  # 123
                 data_per_shift[el.mech.number]['total_90'] += 1
             if el.value == 2:
                 data_per_shift[el.mech.number]['total_180'] += 1
-            # pre_value=el.count
+            # pre_value=el.count # if will be problem with GPRS
         else:
             data_per_shift[el.mech.number] = {}
             data_per_shift[el.mech.number]['mechanism'] = el.mech
@@ -37,7 +37,7 @@ def time_for_shift_kran(date_shift, shift):
             if el.value == 2:
                 data_per_shift[el.mech.number]['total_180'] = 1
             data_per_shift[el.mech.number]['data'] = {}
-            data_per_shift[el.mech.number]['data'][date_t] = el.value, el.count
+            data_per_shift[el.mech.number]['data'][date_t] = el.value, el.count, el.terminal
             # pre_value=el.count
 
     # get start time for this shift
@@ -49,8 +49,8 @@ def time_for_shift_kran(date_shift, shift):
 
     if data_per_shift == {}:
         return None
+    #---------------------------PART2------------------------------  i don't want 2 functions
     # create dict with all minutes to now if value is not return (-1) because 0 may exist
-    # time_by_minuts = {'date_shift': date_shift, 'shift': shift}
     time_by_minuts = {}
     for key, value in data_per_shift.items():
         flag_start = True
@@ -59,21 +59,26 @@ def time_for_shift_kran(date_shift, shift):
         time_by_minuts[key]['number'] = data_per_shift[key]['mechanism'].number
         time_by_minuts[key]['id'] = data_per_shift[key]['mechanism'].id
         # translate hours into minutes and round
-        time_by_minuts[key]['total_180'] = round(
-            data_per_shift[key]['total_180'], 2)
-        time_by_minuts[key]['total_90'] = round(
-            data_per_shift[key]['total_90'], 2)
+        time_by_minuts[key]['total_180'] = round(data_per_shift[key]['total_180'], 2)
+        time_by_minuts[key]['total_90'] = round(data_per_shift[key]['total_90'], 2)
         time_by_minuts[key]['data'] = {}
         delta_minutes = start
-        for i in range(1, 60 * 12 + 1):
+        last_find_item = db.session.query(Post).filter(Post.mechanism_id==data_per_shift[key]['mechanism'].id).order_by( Post.timestamp.desc()).first()
+        tmp_terminal = last_find_item.terminal
+        for i in range(1, 60 * 12 + 1): # 720 minutes in shift
             date_t = delta_minutes.strftime("%H:%M")
             try:
                 val_minute = data_per_shift[key]['data'][delta_minutes][0]
-                # pre_value =  data_per_shift[key]['data'][delta_minutes][1]
             except KeyError:
                 val_minute = -1
+            try:
+                terminal = data_per_shift[key]['data'][delta_minutes][2]
+                tmp_terminal = terminal
+            except KeyError: # if item not exist get last found value
+                terminal = tmp_terminal
+
             time_by_minuts[key]['data'][i] = {
-                'time': date_t, 'value': val_minute}
+                'time': date_t, 'value': val_minute, 'terminal': terminal}
             delta_minutes += timedelta(minutes=1)
             today_date, today_shift = today_shift_date()
             if val_minute > 0 and flag_start:
@@ -81,7 +86,7 @@ def time_for_shift_kran(date_shift, shift):
                 flag_start = False
             if val_minute > 0:
                 time_by_minuts[key]['finish'] = date_t
-            if delta_minutes >= datetime.now() and date_shift == today_date and today_shift == shift:
+            if delta_minutes >= datetime.now() and date_shift == today_date and today_shift == shift: # if now moment 
                 break
 
         # replace items from -1 to 0 if kran work
@@ -104,16 +109,18 @@ def kran_periods(mechanisms_data):
     for mech, data_mech in mechanisms_data.items():
         values_period = -1
         new_data = {}
-        step = 0
+        step = 0 # number of duplicate values
         pre_time = ''
-        counter = 1
+        counter = 1 #number items
         total_step = 0
-        total_90_1 = 0  # 1
-        total_180 = 0  # 2
-        total_90_2 = 0  # 1
+        total_90_1 = 0  # if value=1
+        total_180 = 0  # if value=2
+        total_90_2 = 0  # if value=3
+        terminal = None
         for number, value_number in data_mech['data'].items():
-            value_min = value_number['value']  # yellow
-            if value_min != values_period:
+            value_minute = value_number['value']  
+            terminal = value_number['terminal']
+            if value_minute != values_period: #if previous value != current value
                 # this part by accumulated total
                 if values_period == 1:
                     total_90_1 += step
@@ -127,24 +134,28 @@ def kran_periods(mechanisms_data):
                 else:
                     total_step
 
-                new_data[counter] = {
+                new_data[counter] = { 
                                     'time': pre_time,
                                     'value': values_period,
                                     'step': step,
-                                    'total': total_step
+                                    'total': total_step,
+                                    'terminal': terminal,
                                     }
                 step = 1
-                values_period = value_min
+                values_period = value_minute
                 pre_time = value_number['time']
                 counter += 1
             else:
-                step += 1
-        new_data[counter] = {
+                step += 1 # if previous value == current value
+        new_data[counter] = { # last value in data
                             'time': pre_time,
                             'value': values_period,
-                            'step': step
+                            'step': step,
+                            'total': total_step,
+                            'terminal': terminal,
                             }
         mechanisms_data[mech]['data'] = new_data
+        print(mechanisms_data[mech])
     return mechanisms_data
 
 # if __name__ == "__main__":
