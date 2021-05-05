@@ -65,6 +65,7 @@ def time_for_shift_kran(date_shift, shift):
         delta_minutes = start
         last_find_item = db.session.query(Post).filter(Post.mechanism_id==data_per_shift[key]['mechanism'].id).order_by( Post.timestamp.desc()).first()
         tmp_terminal = last_find_item.terminal
+        time_by_minuts[key]['total_terminals_180'] = {str(tmp_terminal): 0} # str becouse mongo need str key
         for i in range(1, 60 * 12 + 1): # 720 minutes in shift
             date_t = delta_minutes.strftime("%H:%M")
             try:
@@ -76,11 +77,15 @@ def time_for_shift_kran(date_shift, shift):
                 tmp_terminal = terminal
             except KeyError: # if item not exist get last found value
                 terminal = tmp_terminal
-
             time_by_minuts[key]['data'][i] = {
                 'time': date_t, 'value': val_minute, 'terminal': terminal}
             delta_minutes += timedelta(minutes=1)
             today_date, today_shift = today_shift_date()
+            if val_minute==2:
+                try:
+                    time_by_minuts[key]['total_terminals_180'][str(terminal)] +=1
+                except KeyError:
+                    time_by_minuts[key]['total_terminals_180'][str(terminal)] = 0
             if val_minute > 0 and flag_start:
                 time_by_minuts[key]['start'] = date_t
                 flag_start = False
@@ -107,7 +112,7 @@ def kran_periods(mechanisms_data):
     if not mechanisms_data:
         return None
     for mech, data_mech in mechanisms_data.items():
-        values_period = -1
+        period_value = -1
         new_data = {}
         step = 0 # number of duplicate values
         pre_time = ''
@@ -120,15 +125,15 @@ def kran_periods(mechanisms_data):
         for number, value_number in data_mech['data'].items():
             value_minute = value_number['value']  
             terminal = value_number['terminal']
-            if value_minute != values_period: #if previous value != current value
+            if value_minute != period_value: #if previous value != current value
                 # this part by accumulated total
-                if values_period == 1:
+                if period_value == 1:
                     total_90_1 += step
                     total_step = total_90_1
-                elif values_period == 2:
+                elif period_value == 2:
                     total_180 += step
                     total_step = total_180
-                elif values_period == 3:
+                elif period_value == 3:
                     total_90_2 += step
                     total_step = total_90_2
                 else:
@@ -136,26 +141,25 @@ def kran_periods(mechanisms_data):
 
                 new_data[counter] = { 
                                     'time': pre_time,
-                                    'value': values_period,
+                                    'value': period_value,
                                     'step': step,
                                     'total': total_step,
                                     'terminal': terminal,
                                     }
                 step = 1
-                values_period = value_minute
+                period_value = value_minute
                 pre_time = value_number['time']
                 counter += 1
             else:
                 step += 1 # if previous value == current value
         new_data[counter] = { # last value in data
                             'time': pre_time,
-                            'value': values_period,
+                            'value': period_value,
                             'step': step,
                             'total': total_step,
                             'terminal': terminal,
                             }
         mechanisms_data[mech]['data'] = new_data
-        print(mechanisms_data[mech])
     return mechanisms_data
 
 # if __name__ == "__main__":

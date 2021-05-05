@@ -318,6 +318,10 @@ def add_usm():
     latitude = request.args.get('latitude')
     longitude = request.args.get('longitude')
     mech = Mechanism.query.get(mechanism_id)
+
+    if mechanism_id == '34213' and value3 == '0': # FIX
+        value3 = '15'
+
     if mech.number in usm_no_move:
         latitude = 0
         longitude = 0
@@ -363,8 +367,8 @@ def add_kran():
         latitude = 0
         longitude = 0
 
-    # if mechanism_id == '4934' and value == '1':
-    # value = '2'
+    if mechanism_id == '15510' and value == '1':
+        value = '2'
 
     items = mechanism_id, password, latitude, longitude, value, value3
     test_items = any([item is None for item in items]) # if this id is exist
@@ -382,7 +386,7 @@ def add_kran():
     if mech.number in krans_if_3_then_2 and value == '3':
         value = 2
     if mech.number in krans_if_1_then_0 and value == '1':
-        value = 0
+        value = 4
     k1, b1 = line_kran(mech.number)
     k2, b2 = perpendicular_line_equation(
         k1, float(latitude), float(longitude))
