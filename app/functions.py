@@ -154,7 +154,8 @@ def data_from_1c_by_id(date_shift, shift, id_mech):
         # Work_1C_1.data_nach < time_to,
         Work_1C_1.data_smen == date_shift,
         Work_1C_1.smena == shift,
-        Work_1C_1.inv_num == id_mech).all()
+        Work_1C_1.inv_num == id_mech
+        ).all()
     data_1C = [x.get() for x in cursor]
     return data_1C
 
@@ -173,6 +174,7 @@ def add_fio(data_kran_period, date_shift, shift):
     for key, value in data_kran_period.items():
         id_mech = data_kran_period[key]['id']
         data_by_id_mech = data_from_1c_by_id(date_shift, shift, id_mech)
+        # last_find_item = db.session.query(Work_1C_1).filter(Work_1C_1.inv_num==id_mech, Work_1C_1.greifer_vol>0 ).first()
         if len(data_by_id_mech) < 1:
             data_kran_period[key]['fio'] = None
             data_kran_period[key]['grab'] = None
@@ -191,6 +193,14 @@ def add_fio(data_kran_period, date_shift, shift):
             if data_by_id_mech[0][2]: # dublicate
                 data_kran_period[key]['grab'] = float(data_by_id_mech[0][2])
             else:
+                data_kran_period[key]['grab'] = None
+
+        # if grab not write then find last item
+        if data_kran_period[key]['grab'] == None and id_mech in all_mechanisms_id('kran'):
+            try:
+                last_find_item = db.session.query(Work_1C_1).filter(Work_1C_1.inv_num==id_mech, Work_1C_1.greifer_vol> 0 ).order_by(Work_1C_1.data_nach.desc()).first()
+                data_kran_period[key]['grab'] = float(last_find_item.greifer_vol)
+            except AttributeError:
                 data_kran_period[key]['grab'] = None
     return data_kran_period
 

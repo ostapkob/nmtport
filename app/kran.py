@@ -3,7 +3,7 @@ from config import HOURS, names_terminals
 from app.model import Post
 from app import db
 from datetime import datetime, timedelta
-
+from app  import logger
 
 def time_for_shift_kran(date_shift, shift):
     '''get dict with all minute's values for the period, name and total'''
@@ -21,21 +21,27 @@ def time_for_shift_kran(date_shift, shift):
         date_t = el.timestamp.replace(second=0, microsecond=0)
         date_t += timedelta(hours=HOURS)
         if data_per_shift.get(el.mech.number): # if exist
-            data_per_shift[el.mech.number]['data'][date_t] = el.value, el.count, el.terminal
             if el.value == 1 or el.value == 3:  # 123
                 data_per_shift[el.mech.number]['total_90'] += 1
             if el.value == 2:
                 data_per_shift[el.mech.number]['total_180'] += 1
+                try:
+                    data_per_shift[el.mech.number]['total_terminals_180'][str(el.terminal)] +=1
+                except KeyError:
+                    data_per_shift[el.mech.number]['total_terminals_180'][str(el.terminal)] = 1
+            data_per_shift[el.mech.number]['data'][date_t] = el.value, el.count, el.terminal
             # pre_value=el.count # if will be problem with GPRS
         else:
             data_per_shift[el.mech.number] = {}
             data_per_shift[el.mech.number]['mechanism'] = el.mech
             data_per_shift[el.mech.number]['total_90'] = 0
             data_per_shift[el.mech.number]['total_180'] = 0
+            data_per_shift[el.mech.number]['total_terminals_180'] = {}
             if el.value == 1:
                 data_per_shift[el.mech.number]['total_90'] = 1
             if el.value == 2:
                 data_per_shift[el.mech.number]['total_180'] = 1
+                data_per_shift[el.mech.number]['total_terminals_180'][str(el.terminal)] = 1
             data_per_shift[el.mech.number]['data'] = {}
             data_per_shift[el.mech.number]['data'][date_t] = el.value, el.count, el.terminal
             # pre_value=el.count
@@ -58,6 +64,7 @@ def time_for_shift_kran(date_shift, shift):
         time_by_minuts[key]['name'] = data_per_shift[key]['mechanism'].name
         time_by_minuts[key]['number'] = data_per_shift[key]['mechanism'].number
         time_by_minuts[key]['id'] = data_per_shift[key]['mechanism'].id
+        time_by_minuts[key]['total_terminals_180'] = data_per_shift[key]['total_terminals_180']
         # translate hours into minutes and round
         time_by_minuts[key]['total_180'] = round(data_per_shift[key]['total_180'], 2)
         time_by_minuts[key]['total_90'] = round(data_per_shift[key]['total_90'], 2)
@@ -65,7 +72,7 @@ def time_for_shift_kran(date_shift, shift):
         delta_minutes = start
         last_find_item = db.session.query(Post).filter(Post.mechanism_id==data_per_shift[key]['mechanism'].id).order_by( Post.timestamp.desc()).first()
         tmp_terminal = last_find_item.terminal
-        time_by_minuts[key]['total_terminals_180'] = {str(tmp_terminal): 0} # str becouse mongo need str key
+        # time_by_minuts[key]['total_terminals_180'] = {str(tmp_terminal): 0} # str becouse mongo need str key
         for i in range(1, 60 * 12 + 1): # 720 minutes in shift
             date_t = delta_minutes.strftime("%H:%M")
             try:
@@ -81,11 +88,6 @@ def time_for_shift_kran(date_shift, shift):
                 'time': date_t, 'value': val_minute, 'terminal': terminal}
             delta_minutes += timedelta(minutes=1)
             today_date, today_shift = today_shift_date()
-            if val_minute==2:
-                try:
-                    time_by_minuts[key]['total_terminals_180'][str(terminal)] +=1
-                except KeyError:
-                    time_by_minuts[key]['total_terminals_180'][str(terminal)] = 0
             if val_minute > 0 and flag_start:
                 time_by_minuts[key]['start'] = date_t
                 flag_start = False
