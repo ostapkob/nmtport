@@ -86,7 +86,7 @@ def time_for_shift_usm(date_shift, shift):
                                               'value': val_minute[0],
                                               'speed': val_minute[1],
                                               'time_coal': round(time_coal, 2),
-                                              'work_time': '-'}
+                                              }
             delta_minutes += timedelta(minutes=1)
             today_date, today_shift = today_shift_date()
             if val_minute[0] > 0 and flag_start:
@@ -136,5 +136,6 @@ def usm_periods(mechanisms_data):
         mechanisms_data[mech]['data'] = new_data
     return mechanisms_data
 
-
-time_for_shift_usm(*today_shift_date())
+from pprint import pprint
+# pprint(time_for_shift_usm(*today_shift_date()))
+pprint(usm_periods(time_for_shift_usm(*today_shift_date())))

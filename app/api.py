@@ -100,7 +100,7 @@ def get_data_period2(type_mechanism, date_shift, shift):
     except ValueError:
         return make_response(jsonify({'error': 'Bad format date'}), 400)
 
-    mongo_request = mongodbHashShift[type_mechanism].find_one(  # request
+    mongo_request = mongodb[type_mechanism].find_one(  # request
         {"_id": f"{date_shift}|{shift}"})
     if mongo_request is not None:  # if item alredy exist
         del mongo_request["_id"]
@@ -117,8 +117,11 @@ def get_data_period2(type_mechanism, date_shift, shift):
             mongo_data[str(key)]['data'] = {
                 str(k): v for k, v in value['data'].items()}
         if today_date == date and today_shift == shift:
-            print('No')
-            pass
+            mongo_request = mongodb[type_mechanism].find_one(  # request
+                {"_id": "now"})
+            if mongo_request is not None:  # if item alredy exist
+                del mongo_request["_id"]
+                return jsonify(mongo_request)
         else:
             mongo_data['_id'] = f'{date_shift}|{shift}'
             posts = mongodb[type_mechanism]
@@ -399,6 +402,7 @@ def add_kran():
 @app.route('/api/v1.0/add_sennebogen', methods=['GET'])
 def add_sennebogen():
     '''add post by GET request from arduino'''
+    type_mechanism = 'sennebogen'
     number = request.args.get('number')
     password = request.args.get('password')
     x = request.args.get('x')
@@ -406,16 +410,17 @@ def add_sennebogen():
     count = request.args.get('count')
     latitude = request.args.get('latitude')
     longitude = request.args.get('longitude')
+    mechanism_id = id_by_number(type_mechanism, number)  
     mech = Mechanism.query.get(mechanism_id)
-    mechanism_id = id_by_number(type_mechanism, number)  # TODO
 
     items = mechanism_id, password, latitude, longitude, x, y
     test_items = any([item is None for item in items])
+
     if test_items:
         return 'Bad request'
     if password not in post_pass:
         return 'Bad password'
-    if int(mechanism_id) not in all_mechanisms_id('sennebogen'):
+    if int(mechanism_id) not in all_mechanisms_id(type_mechanism):
         return 'Not this id'
     if latitude == '': 
         latitude = 0
@@ -426,7 +431,7 @@ def add_sennebogen():
         latitude = data_mech.latitude
         longitude = data_mech.longitude
     terminal = which_terminal(latitude, longitude) # exist 9, 11, 13, 15
-    new_post = Post(value=value, value2=value2, value3=value3, count=count,
+    new_post = Post(value=x, value2=y, count=count,
                     latitude=latitude, longitude=longitude, mechanism_id=mechanism_id,
                     terminal=terminal)
     add_fix_post(new_post)
