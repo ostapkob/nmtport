@@ -33,9 +33,17 @@ mech = [
         # (32941, 'nmtp', 'usm', 'Electric', 9, 'Electric-9'),
         # (32942, 'nmtp', 'usm', 'Electric', 10, 'Electric-10'),
         # (33287, 'nmtp', 'usm', 'Edge', 11, 'Edge-11'),
-        (34213, 'nmtp', 'usm', 'Edge', 12, 'Edge-12'),
-        (34214, 'nmtp', 'usm', 'Edge', 13, 'Edge-13'),
+        # (34213, 'nmtp', 'usm', 'Edge', 12, 'Edge-12'),
+        # (34214, 'nmtp', 'usm', 'Edge', 13, 'Edge-13'),
         # (32777, 'nmtp', 'sennebogen', '860', 1, 'Sennebogen-1'),
+        (32778, 'nmtp', 'sennebogen', '860', 2, 'Sennebogen-2'),
+        (33297, 'nmtp', 'sennebogen', '860', 3, 'Sennebogen-3'),
+        (33428, 'nmtp', 'sennebogen', '860', 4, 'Sennebogen-4'),
+        (33429, 'nmtp', 'sennebogen', '860', 5, 'Sennebogen-5'),
+        (33522, 'nmtp', 'sennebogen', '860', 6, 'Sennebogen-6'),
+        (33611, 'nmtp', 'sennebogen', '860', 7, 'Sennebogen-7'),
+        (33609, 'nmtp', 'sennebogen', '860', 8, 'Sennebogen-8'),
+        (33610, 'nmtp', 'sennebogen', '860', 9, 'Sennebogen-9'),
         ]
 
 for id, company, type, model, number, name in mech:
@@ -64,7 +72,7 @@ db.session.commit()
 # m = Mechanism(32777, company='nmtp', type='sennebogen', model='860', number=1, name='Sennebogen-1')
 a = [mech.id for mech in Mechanism.query.all()]
 print(a)
-b = [(user.username, user.password_hash) for user in User.query.all()]
-print('---------------')
-print(b)
+# b = [(user.username, user.password_hash) for user in User.query.all()]
+# print('---------------')
+# print(b)
 

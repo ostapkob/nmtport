@@ -11,4 +11,5 @@ post.txt
 debug.json
 hash.log
 get.log
+get.json
 /middleware/get.json

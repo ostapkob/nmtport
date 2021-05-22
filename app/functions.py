@@ -8,6 +8,7 @@ from app  import logger
 from pymongo import MongoClient
 from app.kran import  kran_periods, time_for_shift_kran
 from app.usm import usm_periods, time_for_shift_usm
+from app.sennebogen import sennebogen_periods, time_for_shift_sennebogen
 from config import HOURS
 from app.functions_for_all import all_mechanisms_id, today_shift_date #  all_mechanisms_type, all_number, name_by_id
 
@@ -55,6 +56,19 @@ def image_mechanism(value, type_mechanism, number, last_time):
             return './static/numbers/'+str(
                 type_mechanism)+'/yellow/'+str(number)+'.png'
 
+    if type_mechanism == "sennebogen":
+        if dt > 120.0:
+            return './static/numbers/'+str(
+                type_mechanism)+'/gray/'+str(number)+'.png'
+        if dt >= 3.0:
+            return './static/numbers/'+str(
+                type_mechanism)+'/red/'+str(number)+'.png'
+        if value < 0.1:
+            return './static/numbers/'+str(
+                type_mechanism)+'/yellow/'+str(number)+'.png'
+        else:
+            return './static/numbers/'+str(
+                type_mechanism)+'/green/'+str(number)+'.png'
 
 def time_for_shift_list(date_shift, shift):  # not use
     '''get dict with all minute's values for the period'''
@@ -255,6 +269,17 @@ def state_mech(type_mechanism, value, value3, last_time):
         else:
             return 'err'
 
+    if type_mechanism == "sennebogen":
+        if dt > 120.0:
+            return 'long_no_power'
+        if dt >= 3.0:
+            return 'no_power'
+        if value == 0:
+            return 'stay'
+        if value == 1:
+            return 'work'
+        else:
+            return 'err'
 
 def is_alarm(args):
     """if last 10 minuts not values > 1 but 15 minutes ago mechanism worked"""
@@ -320,6 +345,11 @@ def is_alarm_usm(args):
         return False
     return True
 
+def is_alarm_sennebogen(args):
+    """if last 15 minuts not work """
+    return False
+
+
 
 def get_status_alarm(mech_id, mech_type):
     last = db.session.query(Post).filter(
@@ -334,6 +364,8 @@ def get_status_alarm(mech_id, mech_type):
         return is_alarm_kran(last)
     elif mech_type == 'usm':
         return is_alarm_usm(last)
+    elif mech_type == 'sennebogen':
+        return is_alarm_sennebogen(last)
     else:
         return False
 
@@ -379,6 +411,8 @@ def mech_periods(type_mechanism, date, shift):
         data = usm_periods(time_for_shift_usm(date, shift))
     elif type_mechanism == 'kran':
         data = kran_periods(time_for_shift_kran(date, shift))
+    elif type_mechanism == 'sennebogen':
+        data = sennebogen_periods(time_for_shift_sennebogen(date, shift))
         # logger.info(data)
     else:
         data = None

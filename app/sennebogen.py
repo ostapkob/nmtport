@@ -5,13 +5,13 @@ from app import db
 from datetime import datetime, timedelta
 
 
-def time_for_shift_usm(date_shift, shift):
+def time_for_shift_sennebogen(date_shift, shift):
     '''get dict with all minute's values for the period, name and total
     value is lever, value3 is speed roler,
     '''
     # get data from db
     shift = int(shift)
-    all_mechs = all_mechanisms_id('usm')
+    all_mechs = all_mechanisms_id('sennebogen')
     try:
         cursor = db.session.query(Post).filter(Post.date_shift == date_shift, Post.shift ==
                                                shift, Post.mechanism_id.in_(all_mechs)).order_by(Post.mechanism_id).all()
@@ -23,27 +23,25 @@ def time_for_shift_usm(date_shift, shift):
         date_t = el.timestamp.replace(second=0, microsecond=0)
         date_t += timedelta(hours=HOURS)
         # date_t = date_t.strftime("%H:%M")
-        el.value = -1 if el.value is None else el.value
-        el.value3 = 0 if el.value3 is None else el.value3
-        val_min = 0 if el.value < 0.1 else el.value
-        el.value = 0 if el.value3 < 5 else el.value  # maybe more, value3 is speed rool
-        val_min = 0 if el.value3 < 5 else el.value
+        x = -1 if el.value is None else el.value
+        y = -1 if el.value2 is None else el.value2
+        if x< 1000 or y < 1000:
+            value_minute = 0
+        else:
+            value_minute = 1
 
         if data_per_shift.get(el.mech.number):
-            # bad
-            data_per_shift[el.mech.number]['data'][date_t] = val_min, el.value3, el.value
-            data_per_shift[el.mech.number]['time_coal'] += el.value
+            data_per_shift[el.mech.number]['data'][date_t] = value_minute, x, y # ? x, y
             data_per_shift[el.mech.number]['total_time'] += 1
 
         else:
             data_per_shift[el.mech.number] = {}
             data_per_shift[el.mech.number]['mechanism'] = el.mech
-            data_per_shift[el.mech.number]['time_coal'] = el.value
             data_per_shift[el.mech.number]['total_time'] = 1
             data_per_shift[el.mech.number]['data'] = {}
-            data_per_shift[el.mech.number]['data'][date_t] = val_min, el.value3, el.value
+            data_per_shift[el.mech.number]['data'][date_t] = value_minute, x, y
         data_per_shift[el.mech.number].setdefault('work_time', 0)
-        if el.value > 0:
+        if value_minute != 0:
             data_per_shift[el.mech.number]['work_time'] += 1
     # get start time for this shift
     start = datetime.combine(date_shift, datetime.min.time())
@@ -56,6 +54,7 @@ def time_for_shift_usm(date_shift, shift):
         return None
     # create dict with all minutes to now if value is not return (-1) because
     # 0 may exist
+    #---------------------------PART2------------------------------  i don't want 2 functions
     time_by_minuts = {}
     # pprint(data_per_shift)
     for key in data_per_shift.keys():
@@ -66,26 +65,24 @@ def time_for_shift_usm(date_shift, shift):
         time_by_minuts[key]['id'] = data_per_shift[key]['mechanism'].id
         time_by_minuts[key]['number'] = data_per_shift[key]['mechanism'].number
         # translate hours into minutes and round
-        time_by_minuts[key]['time_coal'] = round(
-            data_per_shift[key]['time_coal'] / 60, 2)
         time_by_minuts[key]['total_time'] = round(
             data_per_shift[key]['total_time'] / 60, 1)
         time_by_minuts[key]['work_time'] = round(
             data_per_shift[key]['work_time'] / 60, 1)
         time_by_minuts[key]['data'] = {}
         delta_minutes = start
-        time_coal = 0
+        time_move = 0
         for i in range(1, 60 * 12 + 1):
             date_t = delta_minutes.strftime("%H:%M")
             val_minute = data_per_shift[key]['data'].setdefault(
-                delta_minutes, (-1, -1, 0))
-            if len(val_minute) < 3:
-                print(val_minute)
-            time_coal += val_minute[2] / 60
+                delta_minutes, (-1, 0, 0))
+            if val_minute[0] != -1:
+                time_move +=val_minute[0] / 60
             time_by_minuts[key]['data'][i] = {'time': date_t,
                                               'value': val_minute[0],
-                                              'speed': val_minute[1],
-                                              'time_coal': round(time_coal, 2),
+                                              'x': val_minute[1],
+                                              'y': val_minute[2],
+                                              'time_move': round(time_move, 2),
                                               }
             delta_minutes += timedelta(minutes=1)
             today_date, today_shift = today_shift_date()
@@ -99,11 +96,10 @@ def time_for_shift_usm(date_shift, shift):
     return time_by_minuts
 
 
-def usm_periods(mechanisms_data):
+def sennebogen_periods(mechanisms_data):
     if not mechanisms_data:
         return None
     for mech, data_mech in mechanisms_data.items():
-        # pprint(data_mech)
         values_period = -1
         new_data = {}
         step = 0
@@ -111,9 +107,9 @@ def usm_periods(mechanisms_data):
         counter = 1
 
         for number, value_number in data_mech['data'].items():
-            if value_number['value'] >= 0 and value_number['value'] < 0.1:
+            if value_number['value'] == 0:
                 value_min = 0  # yellow
-            elif value_number['value'] >= 0.1:
+            elif value_number['value'] == 1:
                 value_min = 1  # blue
             else:
                 value_min = -1  # red
@@ -124,7 +120,7 @@ def usm_periods(mechanisms_data):
                 new_data[counter] = {'time': pre_time,
                                      'value': values_period,
                                      'step': step,
-                                     'time_coal': value_number['time_coal']}
+                                     'time_move': value_number['time_move']}
                 step = 1
                 values_period = value_min
                 pre_time = value_number['time']
@@ -137,5 +133,6 @@ def usm_periods(mechanisms_data):
     return mechanisms_data
 
 # from pprint import pprint
-# pprint(time_for_shift_usm(*today_shift_date()))
-# pprint(usm_periods(time_for_shift_usm(*today_shift_date())))
+
+# pprint(time_for_shift_sennebogen(*today_shift_date()))
+# pprint(sennebogen_periods(time_for_shift_sennebogen(*today_shift_date())))

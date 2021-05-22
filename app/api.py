@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from app.functions import   add_fio, state_mech,  get_status_alarm
 from app.usm import time_for_shift_usm, usm_periods
 from app.kran import time_for_shift_kran, kran_periods
+from app.sennebogen import time_for_shift_sennebogen, sennebogen_periods
 from app.functions import image_mechanism 
 from app.functions_for_all import all_mechanisms_id, today_shift_date, id_by_number # all_mechanisms_type, all_number, name_by_id
 from psw import post_pass
@@ -140,6 +141,8 @@ def get_data_period_with_fio(type_mechanism, date_shift, shift):
         data = usm_periods(time_for_shift_usm(date, shift))
     if type_mechanism == 'kran':
         data = kran_periods(time_for_shift_kran(date, shift))
+    if type_mechanism == 'sennebogen':
+        data = sennebogen_periods(time_for_shift_sennebogen(date, shift))
     data_with_fio = add_fio(data, date, shift)
     return jsonify(data_with_fio)
 
@@ -193,6 +196,8 @@ def get_data_now(type_mechanism):
     if type_mechanism == 'kran':
         data = kran_periods(time_for_shift_kran(*today_shift_date()))
 
+    if type_mechanism == 'sennebogen':
+        data = sennebogen_periods(time_for_shift_sennebogen(*today_shift_date()))
     return jsonify(data)
 
 
@@ -203,6 +208,8 @@ def get_data_period_with_fio_now(type_mechanism):
         data = usm_periods(time_for_shift_usm(*today_shift_date()))
     if type_mechanism == 'kran':
         data = kran_periods(time_for_shift_kran(*today_shift_date()))
+    if type_mechanism == 'sennebogen':
+        data = sennebogen_periods(time_for_shift_sennebogen(*today_shift_date()))
     data_with_fio = add_fio(data, *today_shift_date())
     return jsonify(data_with_fio)
 
