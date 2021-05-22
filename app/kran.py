@@ -84,6 +84,8 @@ def time_for_shift_kran(date_shift, shift):
                 tmp_terminal = terminal
             except KeyError: # if item not exist get last found value
                 terminal = tmp_terminal
+            if val_minute == 4: # show 4 how 0 look get api
+                val_minute =0
             time_by_minuts[key]['data'][i] = {
                 'time': date_t, 'value': val_minute, 'terminal': terminal}
             delta_minutes += timedelta(minutes=1)
@@ -93,7 +95,7 @@ def time_for_shift_kran(date_shift, shift):
                 flag_start = False
             if val_minute > 0:
                 time_by_minuts[key]['finish'] = date_t
-            if delta_minutes >= datetime.now() and date_shift == today_date and today_shift == shift: # if now moment 
+            if delta_minutes >= datetime.now() and date_shift == today_date and today_shift == shift: # if now moment
                 break
 
         # replace items from -1 to 0 if kran work
@@ -125,7 +127,7 @@ def kran_periods(mechanisms_data):
         total_90_2 = 0  # if value=3
         terminal = None
         for number, value_number in data_mech['data'].items():
-            value_minute = value_number['value']  
+            value_minute = value_number['value']
             terminal = value_number['terminal']
             if value_minute != period_value: #if previous value != current value
                 # this part by accumulated total
@@ -141,7 +143,7 @@ def kran_periods(mechanisms_data):
                 else:
                     total_step
 
-                new_data[counter] = { 
+                new_data[counter] = {
                                     'time': pre_time,
                                     'value': period_value,
                                     'step': step,
