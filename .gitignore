@@ -10,3 +10,5 @@ post.txt
 *.zip 
 debug.json
 hash.log
+get.log
+/middleware/get.json

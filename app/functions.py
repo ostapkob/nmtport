@@ -232,7 +232,7 @@ def state_mech(type_mechanism, value, value3, last_time):
             return 'long_no_power'
         if dt >= 6.0:
             return 'no_power'
-        if value == 0:  # 123
+        if value == 0 or value == 4:  # 123 4
             return 'stay'
         if value == 2:
             return '180'

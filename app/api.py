@@ -8,7 +8,7 @@ from app.functions import   add_fio, state_mech,  get_status_alarm
 from app.usm import time_for_shift_usm, usm_periods
 from app.kran import time_for_shift_kran, kran_periods
 from app.functions import image_mechanism 
-from app.functions_for_all import all_mechanisms_id, today_shift_date # all_mechanisms_type, all_number, name_by_id
+from app.functions_for_all import all_mechanisms_id, today_shift_date, id_by_number # all_mechanisms_type, all_number, name_by_id
 from psw import post_pass
 
 from config import HOURS
@@ -319,8 +319,8 @@ def add_usm():
     longitude = request.args.get('longitude')
     mech = Mechanism.query.get(mechanism_id)
 
-    if mechanism_id == '34213' and value3 == '0': # FIX
-        value3 = '15'
+    # if mechanism_id == '34213' and value3 == '0': # FIX
+    #     value3 = '15'
 
     if mech.number in usm_no_move:
         latitude = 0
@@ -334,13 +334,11 @@ def add_usm():
         value = 0
     if test_items:
         return 'Bad request'
-    # if password != post_pass:
     if password not in post_pass:
         return 'Bad password'
     if int(mechanism_id) not in all_mechanisms_id('usm'):
         return 'Not this id'
     if float(latitude) == 0 or float(longitude) == 0:
-        # mech = Mechanism.query.get(mechanism_id)
         data_mech = db.session.query(Post).filter(
             Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
         latitude = data_mech.latitude
@@ -398,20 +396,53 @@ def add_kran():
     db.session.commit()
     return f'Success, {str(mech.number)},  {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
 
+@app.route('/api/v1.0/add_sennebogen', methods=['GET'])
+def add_sennebogen():
+    '''add post by GET request from arduino'''
+    number = request.args.get('number')
+    password = request.args.get('password')
+    x = request.args.get('x')
+    y = request.args.get('y')
+    count = request.args.get('count')
+    latitude = request.args.get('latitude')
+    longitude = request.args.get('longitude')
+    mech = Mechanism.query.get(mechanism_id)
+    mechanism_id = id_by_number(type_mechanism, number)  # TODO
+
+    items = mechanism_id, password, latitude, longitude, x, y
+    test_items = any([item is None for item in items])
+    if test_items:
+        return 'Bad request'
+    if password not in post_pass:
+        return 'Bad password'
+    if int(mechanism_id) not in all_mechanisms_id('sennebogen'):
+        return 'Not this id'
+    if latitude == '': 
+        latitude = 0
+        longitude = 0
+    if float(latitude) == 0 or float(longitude) == 0: # get last find value
+        data_mech = db.session.query(Post).filter(
+            Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
+        latitude = data_mech.latitude
+        longitude = data_mech.longitude
+    terminal = which_terminal(latitude, longitude) # exist 9, 11, 13, 15
+    new_post = Post(value=value, value2=value2, value3=value3, count=count,
+                    latitude=latitude, longitude=longitude, mechanism_id=mechanism_id,
+                    terminal=terminal)
+    add_fix_post(new_post)
+    return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
 
 @app.route('/api/v1.0/add_post', methods=['GET', 'POST'])
 def add_post():
     '''add post by POST request from arduino'''
     need_keys = 'password', 'value', 'latitude', 'longitude', 'mechanism_id'
     request_j = request.json
-    # print(request_j, datetime.now().strftime("%d.%m.%Y %H:%M:%S"))
     if request.method == 'POST':
         if not request_j:
             abort(400)
         keys = [p for p in request_j.keys()]
         if not set(keys).issubset(need_keys):
             abort(400)
-        # if request_j['password'] != post_pass:
         if request_j['password'] not in post_pass:
             abort(403)  # need use this password in Arduino
         if request_j['mechanism_id'] not in all_mechanisms_id():
@@ -421,14 +452,11 @@ def add_post():
         longitude = request_j['longitude']
         mechanism_id = request_j['mechanism_id']
         if float(latitude) == 0 or float(longitude) == 0:
-            # mech = Mechanism.query.get(mechanism_id)
             data_mech = db.session.query(Post).filter(
                 Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
             latitude = data_mech.latitude
             longitude = data_mech.longitude
     elif request.method == 'GET':
-        # print('==', request)
-        # text = request.args
         return 'Need POST methods'
     else:
         abort(400)
@@ -437,8 +465,6 @@ def add_post():
     data = request.data
     db.session.add(new_post)
     db.session.commit()
-    # import sys
-    # print('******', sys.getsizeof(request_j))
     return data, 201
 
 
@@ -453,35 +479,3 @@ def wrong_password(error):
     return make_response(jsonify({'error': 'Wrong password'}), 403)
 
 
-# @app.route('/api/v1.0/add_mechanism', methods=['POST'])
-# def add_mechanism():
-#     # all_mech_id = [mech.id for mech in Mechanism.query.all()]
-#     request_f = request.form
-#     id = request_f['id']
-#     company = request_f['company']
-#     type = request_f['type']
-#     model = request_f['model']
-#     number = request_f['number']
-#     name = request_f['name']
-#     new_mech = Mechanism(id, company, type, model, number, name)
-#     # data = request.data
-#     db.session.add(new_mech)
-#     db.session.commit()
-#     return redirect("http://localhost:5000/show_all_mechanisms", code=301)
-#     # return data
-
-
-# @app.route('/api/v1.0/add_mech_json', methods=['POST'])
-# # may be not use
-# def add_mechanism_json():
-#     id = request.json['id']
-#     company = request.json['company']
-#     type = request.json['type']
-#     model = request.json['model']
-#     number = request.json['number']
-#     name = request.json['name']
-#     new_mech = Mechanism(id, company, type, model, number, name)
-#     data = request.data
-#     db.session.add(new_mech)
-#     db.session.commit()
-#     return data
