@@ -272,7 +272,7 @@ def get_all_last_data_state():
                                                  'value3': el.value3,
                                                  'latitude': el.latitude,
                                                  'longitude': el.longitude,
-                                                 'state': state_mech(el.mech.type, el.value, el.value3, el.timestamp + timedelta(hours=HOURS)),
+                                                 'state': state_mech(el.mech.type, el.value, el.value2, el.value3, el.timestamp + timedelta(hours=HOURS)),
                                                  # 'alarm': get_status_alarm(el.mech.id, el.mech.type),
                                                  # 'alarm': True,
                                                  'alarm': False,

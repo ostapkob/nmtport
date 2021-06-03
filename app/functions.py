@@ -238,7 +238,7 @@ def get_state():
 #     return 'work'
 
 
-def state_mech(type_mechanism, value, value3, last_time):
+def state_mech(type_mechanism, value, value2,  value3, last_time):
     dt = datetime.now() - last_time
     dt = dt.total_seconds() / 60
     if type_mechanism == 'kran':
@@ -257,7 +257,7 @@ def state_mech(type_mechanism, value, value3, last_time):
         else:
             return 'err'
 
-    if type_mechanism == 'usm':
+    if type_mechanism == 'usm': # value - lever, value3 - roller
         if dt > 120.0:
             return 'long_no_power'
         if dt >= 3.0:
@@ -269,17 +269,18 @@ def state_mech(type_mechanism, value, value3, last_time):
         else:
             return 'err'
 
-    if type_mechanism == "sennebogen":
+    if type_mechanism == "sennebogen": # value - x, value2 - y
         if dt > 120.0:
             return 'long_no_power'
         if dt >= 3.0:
             return 'no_power'
-        if value == 0:
-            return 'stay'
-        if value == 1:
+        if value >= 1000 or value2>=1000:
             return 'work'
+        if value < 1000  and value2<1000:
+            return 'stay'
         else:
             return 'err'
+    return None
 
 def is_alarm(args):
     """if last 10 minuts not values > 1 but 15 minutes ago mechanism worked"""
@@ -450,7 +451,7 @@ def hash_all_last_data_state():
                                                  'value3': el.value3,
                                                  'latitude': el.latitude,
                                                  'longitude': el.longitude,
-                                                 'state': state_mech(el.mech.type, el.value, el.value3, el.timestamp + timedelta(hours=HOURS)),
+                                                 'state': state_mech(el.mech.type, el.value, el.value2, el.value3, el.timestamp + timedelta(hours=HOURS)),
                                                  'alarm': get_status_alarm(el.mech.id, el.mech.type),
                                                  # 'alarm': True,
                                                  # 'alarm': False,

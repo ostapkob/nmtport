@@ -25,7 +25,7 @@ def time_for_shift_sennebogen(date_shift, shift):
         # date_t = date_t.strftime("%H:%M")
         x = -1 if el.value is None else el.value
         y = -1 if el.value2 is None else el.value2
-        if x< 1000 or y < 1000:
+        if x< 750 and y < 750: # and change state_mech in function
             value_minute = 0
         else:
             value_minute = 1
