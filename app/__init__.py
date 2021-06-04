@@ -1,5 +1,5 @@
 from flask import Flask
-from config import Configuration
+from config import Configuration, mechanisms_type
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_moment import Moment
@@ -25,15 +25,13 @@ logger.add("debug.json", format="{time} {level} {message}", level="DEBUG", rotat
 from app import views, api,  model, functions
 hash_last_data = functions.hash_all_last_data_state
 hash_now = functions.hash_now
-
 db.create_all()
 
 def loop():
     while True:
         hash_last_data()
-        hash_now('kran')
-        hash_now('usm')
-        hash_now('sennebogen')
+        for mech_type in mechanisms_type:
+            hash_now(mech_type)
         time.sleep(30)
 thread = threading.Thread(target=loop, daemon=True)
 thread.start()

@@ -81,3 +81,4 @@ krans_if_3_then_2 = [
 usm_no_move = [
   9, 10,  11, 12, 13   
 ]
+mechanisms_type =  'kran', 'usm', 'sennebogen'

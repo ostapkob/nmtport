@@ -3,7 +3,7 @@ from flask import flash, redirect, url_for
 from app.model import Post, Mechanism, Work_1C_1
 from app import db
 from config import TIME_PERIODS
-from config import lines_krans, names_terminals
+from config import lines_krans, names_terminals, mechanisms_type
 from app  import logger
 from pymongo import MongoClient
 from app.kran import  kran_periods, time_for_shift_kran
@@ -485,6 +485,11 @@ def hash_now(type_mechanism):
         posts.delete_one({"_id": "now"})
         posts.insert_one(mongo_data)
 
+def get_dict_mechanisms():
+    dict_mechanisms = {mech_type:{} for mech_type in mechanisms_type}
+    for mech_type in mechanisms_type:
+        dict_mechanisms[mech_type] = {m.number:m.id for m in db.session.query(Mechanism).filter(Mechanism.type==mech_type).all()}
+    return dict_mechanisms
 
 if __name__ == "__main__":
     x1, y1 = 42.80691726848499, 132.88660505374455

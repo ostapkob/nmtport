@@ -4,7 +4,7 @@ from flask import render_template  # ,redirect
 from app import db, app
 from app.model import Mechanism, Post
 from datetime import datetime, timedelta
-from app.functions import   add_fio, state_mech,  get_status_alarm
+from app.functions import   add_fio, state_mech,  get_status_alarm, get_dict_mechanisms
 from app.usm import time_for_shift_usm, usm_periods
 from app.kran import time_for_shift_kran, kran_periods
 from app.sennebogen import time_for_shift_sennebogen, sennebogen_periods
@@ -22,6 +22,7 @@ from pprint import pprint
 
 client = MongoClient('mongodb://localhost:27017')
 mongodb = client['HashShift']
+dict_mechanisms = get_dict_mechanisms()
 
 def add_fix_post(post):  # !move
     ''' I use it fix because arduino sometimes accumulates an extra minute '''
@@ -401,6 +402,49 @@ def add_kran():
     latitude, longitude = intersection_point_of_lines(k1, b1, k2, b2)
     terminal = which_terminal(latitude, longitude)
     new_post = Post(value=value, value3=value3, latitude=latitude,
+                    longitude=longitude, mechanism_id=mechanism_id, terminal=terminal)
+    db.session.add(new_post)
+    db.session.commit()
+    return f'Success, {str(mech.number)},  {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
+
+@app.route('/api/v2.0/add_kran', methods=['GET'])
+def add_kran2():
+    '''add post by GET request from arduino'''
+    number = request.args.get('number')
+    password = request.args.get('passw')
+    value = request.args.get('value')
+    count = request.args.get('count')
+    latitude = request.args.get('lat')
+    longitude = request.args.get('lon')
+    try:
+        mechanism_id = dict_mechanisms['kran'][int(number)]
+    except KeyError:
+        return 'Not this id or not kran'
+    mech = Mechanism.query.get(mechanism_id)
+    if latitude == '':
+        latitude = 0
+        longitude = 0
+    items = mechanism_id, password, latitude, longitude, value, count
+    test_items = any([item is None for item in items]) # if this id is exist
+    if test_items:
+        return 'Bad request'
+    if password not in post_pass:
+        return 'Bad password'
+    if float(latitude) == 0 or float(longitude) == 0: # get last values
+        data_mech = db.session.query(Post).filter(
+            Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
+        latitude = data_mech.latitude
+        longitude = data_mech.longitude
+    if mech.number in krans_if_3_then_2 and value == '3':
+        value = 2
+    if mech.number in krans_if_1_then_0 and value == '1':
+        value = 4
+    k1, b1 = line_kran(mech.number)
+    k2, b2 = perpendicular_line_equation(
+        k1, float(latitude), float(longitude))
+    latitude, longitude = intersection_point_of_lines(k1, b1, k2, b2)
+    terminal = which_terminal(latitude, longitude)
+    new_post = Post(value=value, count=count, latitude=latitude,
                     longitude=longitude, mechanism_id=mechanism_id, terminal=terminal)
     db.session.add(new_post)
     db.session.commit()
