@@ -459,8 +459,8 @@ def add_sennebogen():
     x = request.args.get('x')
     y = request.args.get('y')
     count = request.args.get('count')
-    latitude = request.args.get('latitude')
-    longitude = request.args.get('longitude')
+    latitude = request.args.get('lat')
+    longitude = request.args.get('lon')
     mechanism_id = id_by_number(type_mechanism, number)  
     mech = Mechanism.query.get(mechanism_id)
 
