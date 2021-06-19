@@ -4,17 +4,17 @@ from app import db
 from app.model import Post
 from datetime import date
 
-date = date(2021, 5, 3)
+date = date(2021, 6, 13)
 shift = 1
-value = 2 
-mech =  15510 
+value = 0 
+mech =  4513 
 
 cursor = db.session.query(Post).filter(Post.mechanism_id == mech,
                                        Post.date_shift == date, Post.shift == shift, Post.value == value)
 
-# db.session.query(Post)\
-#     .filter(Post.mechanism_id == mech, Post.date_shift == date, Post.shift == shift, Post.value == value)\
-#     .update({"value": 2})
+db.session.query(Post)\
+    .filter(Post.mechanism_id == mech, Post.date_shift == date, Post.shift == shift, Post.value == value)\
+    .update({"value": 2})
 
 count = 0
 for i in cursor:

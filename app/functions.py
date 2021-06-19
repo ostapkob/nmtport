@@ -274,12 +274,12 @@ def state_mech(type_mechanism, value, value2,  value3, last_time):
             return 'long_no_power'
         if dt >= 3.0:
             return 'no_power'
-        if value >= 1000 or value2>=1000:
+        if value >= 500 or value2>=500:
+        # if  value2>=750:
             return 'work'
-        if value < 1000  and value2<1000:
-            return 'stay'
         else:
-            return 'err'
+            return 'stay'
+        return 'err'
     return None
 
 def is_alarm(args):

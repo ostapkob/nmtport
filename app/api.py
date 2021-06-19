@@ -463,7 +463,6 @@ def add_sennebogen():
     longitude = request.args.get('lon')
     mechanism_id = id_by_number(type_mechanism, number)  
     mech = Mechanism.query.get(mechanism_id)
-
     items = mechanism_id, password, latitude, longitude, x, y
     test_items = any([item is None for item in items])
 

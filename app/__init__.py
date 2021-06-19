@@ -32,7 +32,7 @@ def loop():
         hash_last_data()
         for mech_type in mechanisms_type:
             hash_now(mech_type)
-        time.sleep(30)
+        time.sleep(15)
 thread = threading.Thread(target=loop, daemon=True)
 thread.start()
 
