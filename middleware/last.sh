@@ -4,10 +4,10 @@ kran_name=(13 12 22 8 20 33 16 14 54 47)
 usm_id=(32711 32740 33287 34213 34214)
 usm_name=(3 4 11 12 13)
 
-for i in ${!kran_id[*]} 
+for i in ${!kran_name[*]} 
 do 
   echo ------------------kran${kran_name[$i]}-------------------
-  grep ${kran_id[$i]} /var/log/nginx/access.log | tail -1
+  grep number=${kran_name[$i]} /var/log/nginx/access.log | tail -1
 done
 echo =====================================
 for i in ${!usm_id[*]} 
