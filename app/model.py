@@ -75,7 +75,7 @@ class Post(db.Model):
         # d = str(date_shift) + ": " + str(latitude) +', ' + str(longitude) + ', '  + str(value) + ', ' + str(value2) + ', ' + str(value3)
         # d = date_shift + ": " + latitude +', ' + longitude + ', '  + value + ', ' + value2 + ', ' + value3
         d = f'{date_shift}: {self.mechanism_id} - {value}, {value2}, {value3}, {count}, {latitude}, {longitude}'
-        with open('post.txt', 'w') as f:
+        with open('logs/post.txt', 'w') as f:
             f.write(d)
 
     def __repr__(self):

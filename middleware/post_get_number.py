@@ -1,16 +1,23 @@
-import requests
-from requests.exceptions import HTTPError
-from psw import post_pass, debug
-import time
 from datetime import datetime
+import time
+from requests.exceptions import HTTPError
+import requests
+import os
+import sys
+import inspect
+current_dir = os.path.dirname(os.path.abspath(
+    inspect.getfile(inspect.currentframe())))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
+from psw import post_pass, debug
 
 
 class Mechanism:
     if debug:
         ip = 'http://127.0.0.1:5000'
     else:
-        # ip = 'http://127.0.0.1:5000'
-        ip = 'http://94.154.76.136'
+        ip = 'http://127.0.0.1:5000'
+        # ip = 'http://94.154.76.136'
 
     def __init__(self, number, x, y, count, latitude, longitude):
         self.number = number
@@ -61,16 +68,26 @@ class Sennebogen(Mechanism):
     def __repr__(self):
         return f's{self.number, self.password, self.x, self.y, self.count, self.latitude, self.longitude}'
 
+
 if __name__ == "__main__":
-    S1 = Sennebogen(number=1, x=5001, y=910, count=0, latitude=42.8089, longitude=132.8865)
-    S2 = Sennebogen(number=2, x=5002, y=10, count=0, latitude=42.8098, longitude=132.8841)
-    S3 = Sennebogen(number=3, x=5003, y=1110, count=0, latitude=42.8089, longitude=132.8872)
-    S4 = Sennebogen(number=4, x=5004, y=1110, count=0, latitude=42.8098, longitude=132.8865)
-    S5 = Sennebogen(number=5, x=5005, y=410, count=0, latitude=42.80441, longitude=132.8855)
-    S6 = Sennebogen(number=6, x=5006, y=1110, count=0, latitude=42.8078, longitude=132.8865)
-    S7 = Sennebogen(number=7, x=5007, y=1110, count=0, latitude=42.8101, longitude=132.8855)
-    S8 = Sennebogen(number=8, x=908, y=1110, count=0, latitude=42.8096, longitude=132.8859)
-    S9 = Sennebogen(number=9, x=5009, y=1110, count=0, latitude=42.8083, longitude=132.8871)
+    S1 = Sennebogen(number=1, x=5001, y=910, count=0,
+                    latitude=42.8089, longitude=132.8865)
+    S2 = Sennebogen(number=2, x=5002, y=10, count=0,
+                    latitude=42.8098, longitude=132.8841)
+    S3 = Sennebogen(number=3, x=5003, y=1110, count=0,
+                    latitude=42.8089, longitude=132.8872)
+    S4 = Sennebogen(number=4, x=5004, y=1110, count=0,
+                    latitude=42.8098, longitude=132.8865)
+    S5 = Sennebogen(number=5, x=5005, y=410, count=0,
+                    latitude=42.80441, longitude=132.8855)
+    S6 = Sennebogen(number=6, x=5006, y=1110, count=0,
+                    latitude=42.8078, longitude=132.8865)
+    S7 = Sennebogen(number=7, x=5007, y=1110, count=0,
+                    latitude=42.8101, longitude=132.8855)
+    S8 = Sennebogen(number=8, x=908, y=1110, count=0,
+                    latitude=42.8096, longitude=132.8859)
+    S9 = Sennebogen(number=9, x=5009, y=1110, count=0,
+                    latitude=42.8083, longitude=132.8871)
 
     flag = True
     lat = 0.0001

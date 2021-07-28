@@ -1,6 +1,3 @@
-print:
-	echo "Hi"
-
 last:
 	bash middleware/last.sh
 

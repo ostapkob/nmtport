@@ -20,12 +20,13 @@ migrate = Migrate(app, db)
 moment = Moment(app)
 bootstrap = Bootstrap(app)
 CORS(app)
-logger.add("debug.json", format="{time} {level} {message}", level="DEBUG", rotation="1 day", compression="zip", serialize=True)
+logger.add("logs/debug.json", format="{time} {level} {message}", level="DEBUG", rotation="1 day", compression="zip", serialize=True)
 
 from app import views, api,  model, functions
 hash_last_data = functions.hash_all_last_data_state
 hash_now = functions.hash_now
 db.create_all()
+
 
 def loop():
     while True:
@@ -33,6 +34,8 @@ def loop():
         for mech_type in mechanisms_type:
             hash_now(mech_type)
         time.sleep(15)
+
+
 thread = threading.Thread(target=loop, daemon=True)
 thread.start()
 

@@ -1,16 +1,24 @@
-import requests
-from requests.exceptions import HTTPError
-from psw import post_pass, debug
-import time
 from datetime import datetime
+import time
+from requests.exceptions import HTTPError
+import requests
+import os
+import sys
+import inspect
+current_dir = os.path.dirname(os.path.abspath(
+    inspect.getfile(inspect.currentframe())))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
 
+from psw import post_pass, debug
 
 class Mechanism:
     # ip ='http://18.139.162.128'
     if debug:
         ip = 'http://127.0.0.1:5000'
     else:
-        ip = 'https://m1.nmtport.ru'
+        ip = 'http://127.0.0.1:5000'
+        # ip = 'https://m1.nmtport.ru'
 
     def __init__(self, mechanism_id, value, value2,
                  value3, count, latitude, longitude):
@@ -112,9 +120,9 @@ if __name__ == "__main__":
                   count=0, latitude=42.8142, longitude=132.8915)
 
     usms = Pt1, Pt2,  E4, S5,  S6,  S7,  S8, U9,  U10, E11
-    usms = E3,  E4, #S5,  S6,  S7,  S8, U9,  U10, E11
+    usms = E3,  E4,  # S5,  S6,  S7,  S8, U9,  U10, E11
     krans = kran12,  kran13, kran22, kran14, kran16
-    mechanisms = usms #+krans
+    mechanisms = usms + krans
 
     flag = True
     lat = 0.0001
