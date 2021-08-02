@@ -412,10 +412,12 @@ def add_kran2():
     '''add post by GET request from arduino'''
     number = request.args.get('number')
     password = request.args.get('passw')
-    value = request.args.get('value')
+    value = int(request.args.get('value'))
     count = request.args.get('count')
     latitude = request.args.get('lat')
     longitude = request.args.get('lon')
+    x = int(request.args.get('x')) # accelerometr x-axis
+    y = int(request.args.get('y')) # accelerometr y-axis
     try:
         mechanism_id = dict_mechanisms['kran'][int(number)]
     except KeyError:
@@ -435,10 +437,14 @@ def add_kran2():
             Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
         latitude = data_mech.latitude
         longitude = data_mech.longitude
-    if mech.number in krans_if_3_then_2 and value == '3':
+    if mech.number in krans_if_3_then_2 and value == 3:
         value = 2
-    if mech.number in krans_if_1_then_0 and value == '1':
+    if mech.number in krans_if_1_then_0 and value == 1:
         value = 4
+    print(f'{value=}{x=}{y=}')
+    if value == 0 and (x > 2000 or y > 2000):
+        print(f'--> {x=}{y=}')
+        value = 5 # kran move
     k1, b1 = line_kran(mech.number)
     k2, b2 = perpendicular_line_equation(
         k1, float(latitude), float(longitude))

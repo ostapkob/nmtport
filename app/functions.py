@@ -254,6 +254,8 @@ def state_mech(type_mechanism, value, value2,  value3, last_time):
             return '90_1'
         if value == 3:
             return '90_2'
+        if value == 5:
+            return 'move'
         else:
             return 'err'
 

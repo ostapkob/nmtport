@@ -98,14 +98,18 @@ def time_for_shift_kran(date_shift, shift):
             if delta_minutes >= datetime.now() and date_shift == today_date and today_shift == shift: # if now moment
                 break
 
-        # replace items from -1 to 0 if kran work
+        # replace items from -1 to 0 if kran work, show + 4 minuts
         pre_items = -1
         work_count = 0
+        last_value = 0
         for number_item, data in time_by_minuts[key]['data'].items():
             if data['value'] == -1 and pre_items != -1 and work_count < 5:
-                time_by_minuts[key]['data'][number_item]['value'] = 0
+                time_by_minuts[key]['data'][number_item]['value'] = last_value
                 work_count += 1
             else:
+                last_value = 0
+                if data['value'] == 5: # if kran move
+                    last_value = 5
                 work_count = 0
             pre_items = data['value']
 
