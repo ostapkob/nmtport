@@ -48,6 +48,7 @@ def get_per_shift(m_id):
     date_shift, shift = today_shift_date()
     data_per_shift = db.session.query(Post).filter(
         Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).all()
+    # logger.debug(data)
     try:
         start = db.session.query(Post.timestamp).filter(
             Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).first()[0]
@@ -416,8 +417,8 @@ def add_kran2():
     count = request.args.get('count')
     latitude = request.args.get('lat')
     longitude = request.args.get('lon')
-    x = int(request.args.get('x')) # accelerometr x-axis
-    y = int(request.args.get('y')) # accelerometr y-axis
+    x = abs(int(request.args.get('x'))) # accelerometr x-axis
+    y = abs(int(request.args.get('y'))) # accelerometr y-axis
     try:
         mechanism_id = dict_mechanisms['kran'][int(number)]
     except KeyError:
@@ -440,10 +441,9 @@ def add_kran2():
     if mech.number in krans_if_3_then_2 and value == 3:
         value = 2
     if mech.number in krans_if_1_then_0 and value == 1:
-        value = 4
-    print(f'{value=}{x=}{y=}')
-    if value == 0 and (x > 2000 or y > 2000):
-        print(f'--> {x=}{y=}')
+        value = 4 # 4 work how 0
+    if value==0 and ((x>500 and y > 500) or x>850 or y>850) :
+    # if value == 0 and (x > 700 and y > 700):
         value = 5 # kran move
     k1, b1 = line_kran(mech.number)
     k2, b2 = perpendicular_line_equation(

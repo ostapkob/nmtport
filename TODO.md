@@ -1,9 +1,12 @@
 # Bot
   Alert when all mechanism not work in work time
+  Alert when not work AuthServer
 
 # Front
   Animation move in shift
   Numbers berths
+  Triangle css
+  update Invite
 
 # Power Bi
   work

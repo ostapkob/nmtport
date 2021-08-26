@@ -13,6 +13,7 @@ db.create_all()
 from psw import users
 
 mech = [
+    (34229, 'nmtp', 'kran', 'vitayaz', 82, 'кран-82'),
     # (22272, 'nmtp', 'kran', 'sokol', 36, 'кран-36'),
     # (22152, 'nmtp', 'kran', 'sokol', 40, 'кран-40'),
     # (13969, 'nmtp', 'kran', 'sokol', 32, 'кран-32'),

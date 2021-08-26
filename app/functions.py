@@ -73,9 +73,12 @@ def image_mechanism(value, type_mechanism, number, last_time):
 def time_for_shift_list(date_shift, shift):  # not use
     '''get dict with all minute's values for the period'''
     # get data from db
-    cursor = db.session.query(Post).filter(
-        Post.date_shift == date_shift,
-        Post.shift == shift).order_by(Post.mechanism_id).all()
+    try:
+        cursor = db.session.query(Post).filter(
+            Post.date_shift == date_shift,
+            Post.shift == shift).order_by(Post.mechanism_id).all()
+    except Exception as e:
+        logger.debug(e)
 
     # create dict all works mechanism in shift
     data_per_shift = {}

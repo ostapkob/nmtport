@@ -1,8 +1,8 @@
 last:
-	bash middleware/last.sh
+	bash nmtport/middleware/last.sh
 
 kran:
-	bash middleware/kran.sh
+	bash nmtport/middleware/kran.sh
 
 usm:
-	bash middleware/usm.sh
+	bash nmtport/middleware/usm.sh

@@ -8,7 +8,8 @@ from flask_cors import CORS
 from flask_login import LoginManager
 from loguru import logger
 import threading
-import datetime
+# import datetime
+from datetime import datetime
 import time
 
 
@@ -36,6 +37,7 @@ def loop():
         time.sleep(15)
 
 
+logger.debug(datetime.now())
 thread = threading.Thread(target=loop, daemon=True)
 thread.start()
 
