@@ -13,7 +13,8 @@ db.create_all()
 from psw import users
 
 mech = [
-    (34229, 'nmtp', 'kran', 'vitayaz', 82, 'кран-82'),
+
+    # (34229, 'nmtp', 'kran', 'vitayaz', 82, 'кран-82'),
     # (22272, 'nmtp', 'kran', 'sokol', 36, 'кран-36'),
     # (22152, 'nmtp', 'kran', 'sokol', 40, 'кран-40'),
     # (13969, 'nmtp', 'kran', 'sokol', 32, 'кран-32'),
@@ -52,6 +53,24 @@ mech = [
     # (33611, 'nmtp', 'sennebogen', '860', 7, 'Sennebogen-7'),
     # (33609, 'nmtp', 'sennebogen', '860', 8, 'Sennebogen-8'),
     # (33610, 'nmtp', 'sennebogen', '860', 9, 'Sennebogen-9'),
+    (25390	, 'nmtp', 'kran', 'sokol',	1,	'кран-1' ),
+    (4144	, 'nmtp', 'kran', 'albrecht',	10,	'кран-10'),
+    (29531	, 'nmtp', 'kran', 'kondor',	17,	'кран-17'),
+    (22909	, 'nmtp', 'kran', 'sokol',	18,	'кран-18'),
+    (31182	, 'nmtp', 'kran', 'sokol',	23,	'кран-23'),
+    (13809	, 'nmtp', 'kran', 'albatross',	28,	'кран-28'),
+    (29120	, 'nmtp', 'kran', 'kondor',	31,	'кран-31'),
+    (31186	, 'nmtp', 'kran', 'sokol',	35,	'кран-35'),
+    (31185	, 'nmtp', 'kran', 'kondor',	38,	'кран-38'),
+    (31183	, 'nmtp', 'kran', 'sokol',	39,	'кран-39'),
+    (31184	, 'nmtp', 'kran', 'sokol',	48,	'кран-48'),
+    (22081	, 'nmtp', 'kran', 'kondor',	49,	'кран-49'),
+    (28369	, 'nmtp', 'kran', 'kondor',	58,	'кран-58'),
+    (31388	, 'nmtp', 'kran', 'kondor',	60,	'кран-60'),
+    (5619	, 'nmtp', 'kran', 'albrecht',	65,	'кран-65'),
+    (5632	, 'nmtp', 'kran', 'albrecht',	72,	'кран-72'),
+    (6364	, 'nmtp', 'kran', 'albatross',	6,	'кран-6' ),
+    (6574	, 'nmtp', 'kran', 'albatross',	26,	'кран-26'),
 ]
 
 for id, company, type, model, number, name in mech:

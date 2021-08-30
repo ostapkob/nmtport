@@ -15,8 +15,8 @@ def time_for_shift_sennebogen(date_shift, shift):
     try:
         cursor = db.session.query(Post).filter(Post.date_shift == date_shift, Post.shift ==
                                                shift, Post.mechanism_id.in_(all_mechs)).order_by(Post.mechanism_id).all()
-    except:
-        return None
+    except Exception as e:
+        logger.debug(e)
     # create dict all works mechanism in shift
     data_per_shift = {}
     for el in cursor:

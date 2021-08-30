@@ -35,7 +35,11 @@ def today_shift_date():
 
 def all_mechanisms_type():
     '''Find all mechanisms type'''
-    ls = [m.type for m in db.session.query(Mechanism).all()]
+    ls = []
+    try:
+        ls = [m.type for m in db.session.query(Mechanism).all()]
+    except Exception as e:
+        logger.debug(e)
     return set(ls)
 
 

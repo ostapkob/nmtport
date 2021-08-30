@@ -13,8 +13,8 @@ def time_for_shift_kran(date_shift, shift):
     try:
         cursor = db.session.query(Post).filter(Post.date_shift == date_shift, Post.shift ==
                                                shift, Post.mechanism_id.in_(all_mechs)).order_by(Post.mechanism_id).all()
-    except:
-        None
+    except Exception as e:
+        logger.debug(e)
     # create dict all works mechanism in shift
     data_per_shift = {}
     for el in cursor:
@@ -70,7 +70,10 @@ def time_for_shift_kran(date_shift, shift):
         time_by_minuts[key]['total_90'] = round(data_per_shift[key]['total_90'], 2)
         time_by_minuts[key]['data'] = {}
         delta_minutes = start
-        last_find_item = db.session.query(Post).filter(Post.mechanism_id==data_per_shift[key]['mechanism'].id).order_by( Post.timestamp.desc()).first()
+        try:
+            last_find_item = db.session.query(Post).filter(Post.mechanism_id==data_per_shift[key]['mechanism'].id).order_by( Post.timestamp.desc()).first()
+        except Exception as e:
+            logger.debug(e)
         tmp_terminal = last_find_item.terminal
         # time_by_minuts[key]['total_terminals_180'] = {str(tmp_terminal): 0} # str becouse mongo need str key
         for i in range(1, 60 * 12 + 1): # 720 minutes in shift

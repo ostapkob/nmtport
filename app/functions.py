@@ -152,9 +152,12 @@ def data_from_1c(date_shift, shift):
     else:
         time_from += timedelta(hours=20)
     time_to = time_from + timedelta(hours=12)
-    cursor = db.session.query(Work_1C_1).filter(
-        Work_1C_1.data_nach >= time_from,
-        Work_1C_1.data_nach <= time_to).all()
+    try:
+        cursor = db.session.query(Work_1C_1).filter(
+            Work_1C_1.data_nach >= time_from,
+            Work_1C_1.data_nach <= time_to).all()
+    except Exception as e:
+        logger.debug(e)
     data_1C = [x.get() for x in cursor]
     return data_1C
 
@@ -166,13 +169,16 @@ def data_from_1c_by_id(date_shift, shift, id_mech):
     # else:
     #     time_from += timedelta(hours=20)
     # time_to = time_from + timedelta(hours=12)
-    cursor = db.session.query(Work_1C_1).filter(
-        # Work_1C_1. >= time_from,
-        # Work_1C_1.data_nach < time_to,
-        Work_1C_1.data_smen == date_shift,
-        Work_1C_1.smena == shift,
-        Work_1C_1.inv_num == id_mech
-        ).all()
+    try:
+        cursor = db.session.query(Work_1C_1).filter(
+            # Work_1C_1. >= time_from,
+            # Work_1C_1.data_nach < time_to,
+            Work_1C_1.data_smen == date_shift,
+            Work_1C_1.smena == shift,
+            Work_1C_1.inv_num == id_mech
+            ).all()
+    except Exception as e:
+        logger.debug(e)
     data_1C = [x.get() for x in cursor]
     return data_1C
 
@@ -358,9 +364,12 @@ def is_alarm_sennebogen(args):
 
 
 def get_status_alarm(mech_id, mech_type):
-    last = db.session.query(Post).filter(
-        Post.mechanism_id == mech_id).order_by(
-        Post.timestamp.desc()).limit(20)
+    try:
+        last = db.session.query(Post).filter(
+            Post.mechanism_id == mech_id).order_by(
+            Post.timestamp.desc()).limit(20)
+    except Exception as e:
+        logger.debug(e)
     now_hour = datetime.now().hour + datetime.now().minute/60
     cofe_time = any(now_hour > t1 and now_hour < t2 for t1, t2 in TIME_PERIODS)
     # logger.inf o(mech_type)
@@ -398,6 +407,7 @@ def line_kran(number):
     for el in lines_krans:
         if number in el['numbers']:
             return el['k1'], el['b1']
+    return None, None
 
 
 def which_terminal(latitude, longitude):
@@ -443,8 +453,11 @@ def mech_periods(type_mechanism, date, shift):
 
 def hash_all_last_data_state():
     start = datetime.now()
-    last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
-        Post.timestamp.desc()).first() for x in all_mechanisms_id()]
+    try:
+        last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
+            Post.timestamp.desc()).first() for x in all_mechanisms_id()]
+    except Exception as e:
+        logger.debug(e)
     last_data_mech = filter(lambda x: x is not None, last_data_mech)
     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
                                                  'name': el.mech.name,
@@ -493,7 +506,10 @@ def hash_now(type_mechanism):
 def get_dict_mechanisms():
     dict_mechanisms = {mech_type:{} for mech_type in mechanisms_type}
     for mech_type in mechanisms_type:
-        dict_mechanisms[mech_type] = {m.number:m.id for m in db.session.query(Mechanism).filter(Mechanism.type==mech_type).all()}
+        try:
+            dict_mechanisms[mech_type] = {m.number:m.id for m in db.session.query(Mechanism).filter(Mechanism.type==mech_type).all()}
+        except Exception as e:
+            logger.debug(e)
     return dict_mechanisms
 
 if __name__ == "__main__":
