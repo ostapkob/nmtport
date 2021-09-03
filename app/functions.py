@@ -478,11 +478,11 @@ def hash_all_last_data_state():
     client = MongoClient('mongodb://localhost:27017')
     mongodb = client['HashShift']
     posts = mongodb['hash']
-    # logger.debug(data)
     if data is not None:
         data['_id'] = 'last_data'
         posts.delete_one({"_id":"last_data"})
         posts.insert_one(data)
+
 
 
 def hash_now(type_mechanism):
@@ -502,6 +502,7 @@ def hash_now(type_mechanism):
         mongo_data['_id'] = "now"
         posts.delete_one({"_id": "now"})
         posts.insert_one(mongo_data)
+        #logger.debug("NowData: " + str(datetime.now()))
 
 def get_dict_mechanisms():
     dict_mechanisms = {mech_type:{} for mech_type in mechanisms_type}

@@ -173,6 +173,7 @@ def get_data_period_with_fio(type_mechanism, date_shift, shift):
 @app.route("/api/v2.0/get_data_period_with_fio/<type_mechanism>/<date_shift>/<int:shift>", methods=['GET', 'POST'])
 def get_data_period_with_fio2(type_mechanism, date_shift, shift):
     '''get data shift for by type of mechanism'''
+    today_date, today_shift = today_shift_date()
     try:
         date = datetime.strptime(date_shift, '%d.%m.%Y').date()
         # convert 1.1.2020 to 01.01.2020
@@ -180,8 +181,12 @@ def get_data_period_with_fio2(type_mechanism, date_shift, shift):
     except ValueError:
         return make_response(jsonify({'error': 'Bad format date'}), 400)
 
-    mongo_request = mongodb[type_mechanism].find_one(  # request
-        {"_id": f"{date_shift}|{shift}"})
+    if today_date == date and today_shift == shift:
+        mongo_request = mongodb[type_mechanism].find_one(  
+            {"_id": "now"})
+    else:
+        mongo_request = mongodb[type_mechanism].find_one( 
+            {"_id": f"{date_shift}|{shift}"})
     if mongo_request is not None:  # if item alredy exist
         del mongo_request["_id"]
         return jsonify(mongo_request)
@@ -191,7 +196,6 @@ def get_data_period_with_fio2(type_mechanism, date_shift, shift):
 
     # add_to_mongo(data, date, shift)
     if data is not None:
-        today_date, today_shift = today_shift_date()
         # convert int key to str
         mongo_data = {str(key): value for key, value in data.items()}
         for key, value in data.items():

@@ -11,21 +11,28 @@ from app import db
 from app.model import Post
 from datetime import date
 
-date = date(2021, 7, 6)
-shift = 1
-value = 0 
-mech =  32771 
+date = date(2021, 9, 2)
+shift = 2
+value = 3 
+mech = 4513 
 
-cursor = db.session.query(Post).filter(Post.mechanism_id == mech,
-                                       Post.date_shift == date, Post.shift == shift, Post.value == value)
+# cursor = db.session.query(Post).filter(Post.mechanism_id == mech,
+#                                        Post.date_shift == date, Post.shift == shift, Post.value == value)
 
 # db.session.query(Post)\
 #     .filter(Post.mechanism_id == mech, Post.date_shift == date, Post.shift == shift, Post.value == value)\
-#     .update({"value": 2})
+#     .update({"value": 5})
+
+cursor = db.session.query(Post).filter(Post.terminal == 11,
+                                       Post.date_shift == date, Post.shift == shift)
+
+db.session.query(Post)\
+    .filter(Post.terminal == 13, Post.date_shift == date, Post.shift == shift)\
+    .update({"terminal": 12})
 
 count = 0
 for i in cursor:
-    print(i)
+    print(i.terminal)
     count += 1
 print('--------------------------------')
 print(count, 'items have been updated')

@@ -55,6 +55,11 @@ psw.py не комичу там переменные с паролями:
     pip install gunicorn
     sudo apt-get install unixodbc-dev
     pip install pyodbc
+    if debian:
+      yum install unixODBC unixODBC-devel
+      yum install gcc-c++
+      yum install python-devel
+      pip install pyodbc
 
 ### Brandmauer
     sudo apt-get install -y ufw

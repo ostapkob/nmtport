@@ -37,7 +37,7 @@ def loop():
         time.sleep(15)
 
 
-logger.debug(datetime.now())
+logger.debug("RESTART: " + str(datetime.now()))
 thread = threading.Thread(target=loop, daemon=True)
 thread.start()
 
