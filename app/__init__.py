@@ -26,6 +26,7 @@ logger.add("logs/debug.json", format="{time} {level} {message}", level="DEBUG", 
 from app import views, api,  model, functions
 hash_last_data = functions.hash_all_last_data_state
 hash_now = functions.hash_now
+
 db.create_all()
 
 

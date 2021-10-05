@@ -16,3 +16,6 @@
 
 # BackUp SQL DB
   Melaykin
+
+# Back
+  Add posible insert item to db by period from Nginx

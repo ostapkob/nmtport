@@ -1,5 +1,5 @@
 from app.functions_for_all import all_mechanisms_id, today_shift_date
-from config import HOURS
+from config import HOURS, usm_tons_in_hour 
 from app.model import Post
 from app import db
 from datetime import datetime, timedelta
@@ -34,7 +34,6 @@ def time_for_shift_usm(date_shift, shift):
             data_per_shift[el.mech.number]['data'][date_t] = val_min, el.value3, el.value
             data_per_shift[el.mech.number]['time_coal'] += el.value
             data_per_shift[el.mech.number]['total_time'] += 1
-
         else:
             data_per_shift[el.mech.number] = {}
             data_per_shift[el.mech.number]['mechanism'] = el.mech
@@ -60,18 +59,16 @@ def time_for_shift_usm(date_shift, shift):
     # pprint(data_per_shift)
     for key in data_per_shift.keys():
         flag_start = True
-        # flag_finish = True
+        mech = data_per_shift[key]['mechanism']
         time_by_minuts[key] = {}
-        time_by_minuts[key]['name'] = data_per_shift[key]['mechanism'].name
-        time_by_minuts[key]['id'] = data_per_shift[key]['mechanism'].id
-        time_by_minuts[key]['number'] = data_per_shift[key]['mechanism'].number
+        time_by_minuts[key]['name'] = mech.name
+        time_by_minuts[key]['id'] = mech.id
+        time_by_minuts[key]['number'] = mech.number
+        time_by_minuts[key]['tons_in_hour'] =usm_tons_in_hour[mech.number]
         # translate hours into minutes and round
-        time_by_minuts[key]['time_coal'] = round(
-            data_per_shift[key]['time_coal'] / 60, 2)
-        time_by_minuts[key]['total_time'] = round(
-            data_per_shift[key]['total_time'] / 60, 1)
-        time_by_minuts[key]['work_time'] = round(
-            data_per_shift[key]['work_time'] / 60, 1)
+        time_by_minuts[key]['time_coal']  = round(data_per_shift[key]['time_coal'] / 60, 2)
+        time_by_minuts[key]['total_time'] = round(data_per_shift[key]['total_time'] / 60, 1)
+        time_by_minuts[key]['work_time']  = round(data_per_shift[key]['work_time'] / 60, 1)
         time_by_minuts[key]['data'] = {}
         delta_minutes = start
         time_coal = 0
@@ -132,7 +129,8 @@ def usm_periods(mechanisms_data):
             else:
                 step += 1
         new_data[counter] = {'time': pre_time,
-                             'value': values_period, 'step': step}
+                             'value': values_period, 
+                             'step': step}
         mechanisms_data[mech]['data'] = new_data
     return mechanisms_data
 

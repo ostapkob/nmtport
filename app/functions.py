@@ -3,7 +3,7 @@ from flask import flash, redirect, url_for
 from app.model import Post, Mechanism, Work_1C_1
 from app import db
 from config import TIME_PERIODS
-from config import lines_krans, names_terminals, mechanisms_type
+from config import lines_krans, names_terminals, mechanisms_type, usm_tons_in_hour 
 from app  import logger
 from pymongo import MongoClient
 from app.kran import  kran_periods, time_for_shift_kran
@@ -385,6 +385,7 @@ def get_status_alarm(mech_id, mech_type):
         return False
 
 
+
 def straight_line_equation(x1, y1, x2, y2):
     k = (y1 - y2) / (x1 - x2)
     b = y2 - k * x2
@@ -464,17 +465,18 @@ def hash_all_last_data_state():
                                                  'type': el.mech.type,
                                                  'number': el.mech.number,
                                                  # if roller not work
-                                                 'value': round(el.value, 2) if not el.value3 else 0,
+                                                 'value': round(el.value, 2) if not el.value3 else 0, # !need function
                                                  'value2': el.value2,
                                                  'value3': el.value3,
                                                  'latitude': el.latitude,
                                                  'longitude': el.longitude,
                                                  'state': state_mech(el.mech.type, el.value, el.value2, el.value3, el.timestamp + timedelta(hours=HOURS)),
                                                  'alarm': get_status_alarm(el.mech.id, el.mech.type),
-                                                 # 'alarm': True,
-                                                 # 'alarm': False,
                                                  'terminal': el.terminal,
-                                                 'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
+                                                 'time': el.timestamp + timedelta(hours=HOURS)
+                                                } 
+            for el in last_data_mech
+            }
     client = MongoClient('mongodb://localhost:27017')
     mongodb = client['HashShift']
     posts = mongodb['hash']

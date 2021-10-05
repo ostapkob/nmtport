@@ -195,7 +195,7 @@ def get_data_period_with_fio2(type_mechanism, date_shift, shift):
     data = add_fio(data, date, shift)
 
     # add_to_mongo(data, date, shift)
-    if data is not None:
+    if data is not None: 
         # convert int key to str
         mongo_data = {str(key): value for key, value in data.items()}
         for key, value in data.items():
