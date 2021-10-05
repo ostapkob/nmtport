@@ -401,7 +401,7 @@ def add_usm():
             logger.debug(e)
         latitude = data_mech.latitude
         longitude = data_mech.longitude
-    terminal = which_terminal(latitude, longitude)
+    terminal = which_terminal('usm', number, latitude, longitude) # exist 9, 11, 13, 15
     new_post = Post(value=value, value2=value2, value3=value3, count=count,
                     latitude=latitude, longitude=longitude, mechanism_id=mechanism_id,
                     terminal=terminal)
@@ -453,7 +453,7 @@ def add_kran():
     k2, b2 = perpendicular_line_equation(
         k1, float(latitude), float(longitude))
     latitude, longitude = intersection_point_of_lines(k1, b1, k2, b2)
-    terminal = which_terminal(latitude, longitude)
+    terminal = which_terminal('kran', number, latitude, longitude) # exist 9, 11, 13, 15
     new_post = Post(value=value, value3=value3, latitude=latitude,
                     longitude=longitude, mechanism_id=mechanism_id, terminal=terminal)
     db.session.add(new_post)
@@ -495,7 +495,7 @@ def add_kran2():
     if value==0 and ((x>500 and y > 500) or x>850 or y>850) :
         value = 5 # kran move
     latitude, longitude = corect_position(mech, latitude, longitude)
-    terminal = which_terminal(latitude, longitude)
+    terminal = which_terminal('kran', number, latitude, longitude) # exist 9, 11, 13, 15
     new_post = Post(value=value, count=count, latitude=latitude,
                     longitude=longitude, mechanism_id=mechanism_id, terminal=terminal)
     db.session.add(new_post)
@@ -538,7 +538,7 @@ def add_sennebogen():
             logger.debug(e)
         latitude = data_mech.latitude
         longitude = data_mech.longitude
-    terminal = which_terminal(latitude, longitude) # exist 9, 11, 13, 15
+    terminal = which_terminal('sennebogen', number, latitude, longitude) # exist 9, 11, 13, 15
     new_post = Post(value=x, value2=y, count=count,
                     latitude=latitude, longitude=longitude, mechanism_id=mechanism_id,
                     terminal=terminal)

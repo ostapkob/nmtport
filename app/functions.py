@@ -12,6 +12,7 @@ from app.sennebogen import sennebogen_periods, time_for_shift_sennebogen
 from config import HOURS
 from app.functions_for_all import all_mechanisms_id, today_shift_date #  all_mechanisms_type, all_number, name_by_id
 
+
 def multiple_5(date):  # not use
     '''Return time multiple 5 minutes and remite microseconds'''
     global HOURS
@@ -411,8 +412,11 @@ def line_kran(number):
     return None, None
 
 
-def which_terminal(latitude, longitude):
-    k1, b1 = 0.5932709085972241, 107.49050635162425
+def which_terminal(type_mech, number, latitude, longitude):
+    if type_mech == 'kran': 
+        k1, b1 = line_kran(int(number))
+    else:
+        k1, b1 = 0.5932709085972241, 107.49050635162425
     k2, b2 = perpendicular_line_equation(
         k1, float(latitude), float(longitude))
     nx, ny = intersection_point_of_lines(k1, b1, k2, b2)
@@ -420,6 +424,7 @@ def which_terminal(latitude, longitude):
     for name, lon_max, lon_min in names_terminals:
         if ny < lon_max and ny > lon_min:
             name_terminal = name
+
     return name_terminal
 
 

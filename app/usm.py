@@ -71,6 +71,11 @@ def time_for_shift_usm(date_shift, shift):
         time_by_minuts[key]['work_time']  = round(data_per_shift[key]['work_time'] / 60, 1)
         time_by_minuts[key]['data'] = {}
         delta_minutes = start
+        try:
+            last_find_item = db.session.query(Post).filter(Post.mechanism_id==data_per_shift[key]['mechanism'].id).order_by(Post.timestamp.desc()).first()
+        except Exception as e:
+            logger.debug(e)
+        terminal = last_find_item.terminal
         time_coal = 0
         for i in range(1, 60 * 12 + 1):
             date_t = delta_minutes.strftime("%H:%M")
@@ -83,6 +88,7 @@ def time_for_shift_usm(date_shift, shift):
                                               'value': val_minute[0],
                                               'speed': val_minute[1],
                                               'time_coal': round(time_coal, 2),
+                                              'terminal': terminal,
                                               }
             delta_minutes += timedelta(minutes=1)
             today_date, today_shift = today_shift_date()
@@ -93,6 +99,7 @@ def time_for_shift_usm(date_shift, shift):
                 time_by_minuts[key]['finish'] = date_t
             if delta_minutes >= datetime.now() and date_shift == today_date and today_shift == shift:
                 break
+            time_by_minuts[key]['terminal'] = terminal
     return time_by_minuts
 
 

@@ -90,7 +90,10 @@ def time_for_shift_kran(date_shift, shift):
             if val_minute == 4: # show 4 how 0 look get api
                 val_minute =0
             time_by_minuts[key]['data'][i] = {
-                'time': date_t, 'value': val_minute, 'terminal': terminal}
+                                            'time': date_t, 
+                                            'value': val_minute,
+                                            'terminal': terminal
+                                            }
             delta_minutes += timedelta(minutes=1)
             today_date, today_shift = today_shift_date()
             if val_minute > 0 and flag_start:
@@ -100,7 +103,7 @@ def time_for_shift_kran(date_shift, shift):
                 time_by_minuts[key]['finish'] = date_t
             if delta_minutes >= datetime.now() and date_shift == today_date and today_shift == shift: # if now moment
                 break
-
+            time_by_minuts[key]['terminal'] = terminal
         # replace items from -1 to 0 if kran work, show + 4 minuts
         pre_items = -1
         work_count = 0
