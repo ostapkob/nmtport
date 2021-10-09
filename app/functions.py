@@ -511,11 +511,20 @@ def hash_now(type_mechanism):
         posts.insert_one(mongo_data)
         #logger.debug("NowData: " + str(datetime.now()))
 
-def get_dict_mechanisms():
+def get_dict_mechanisms_id_by_number():
     dict_mechanisms = {mech_type:{} for mech_type in mechanisms_type}
     for mech_type in mechanisms_type:
         try:
             dict_mechanisms[mech_type] = {m.number:m.id for m in db.session.query(Mechanism).filter(Mechanism.type==mech_type).all()}
+        except Exception as e:
+            logger.debug(e)
+    return dict_mechanisms
+
+def get_dict_mechanisms_number_by_id():
+    dict_mechanisms = {mech_type:{} for mech_type in mechanisms_type}
+    for mech_type in mechanisms_type:
+        try:
+            dict_mechanisms[mech_type] = {m.id:m.number for m in db.session.query(Mechanism).filter(Mechanism.type==mech_type).all()}
         except Exception as e:
             logger.debug(e)
     return dict_mechanisms

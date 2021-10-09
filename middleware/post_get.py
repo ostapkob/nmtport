@@ -106,7 +106,11 @@ if __name__ == "__main__":
               count=0, latitude=42.8144, longitude=132.8913)
     E11 = USM(mechanism_id=33287, value=0, value2=0, value3=0,
               count=0, latitude=42.8152, longitude=132.8910)
-    kran4 = Kran(mechanism_id=30301, value=0, value2=0, value3=0,
+    E12 = USM(mechanism_id=33287, value=0, value2=0, value3=0,
+              count=0, latitude=42.8152, longitude=132.8910)
+    E13 = USM(mechanism_id=34213, value=0, value2=0, value3=0,
+              count=0, latitude=42.8152, longitude=132.8910)
+    kran4 = Kran(mechanism_id=34213, value=0, value2=0, value3=0,
                  count=0, latitude=42.8106, longitude=132.8880)
     kran12 = Kran(mechanism_id=13893, value=0, value2=0, value3=0,
                   count=0, latitude=42.8114, longitude=132.8882)
@@ -119,18 +123,17 @@ if __name__ == "__main__":
     kran16 = Kran(mechanism_id=15510,  value=3, value2=0, value3=0,
                   count=0, latitude=42.8142, longitude=132.8915)
 
-    usms = Pt1, Pt2,  E4, S5,  S6,  S7,  S8, U9,  U10, E11
-    usms = E3,  E4,  # S5,  S6,  S7,  S8, U9,  U10, E11
+    usms = Pt1, Pt2,  E4, S5,  S6,  S7,  S8, U9,  U10, E11, E12, E13
+    usms = E12,  # S5,  S6,  S7,  S8, U9,  U10, E11
     krans = kran12,  kran13, kran22, kran14, kran16
-    mechanisms = usms + krans
+    mechanisms = usms
 
     flag = True
     lat = 0.0001
     lng = -0.0001
     last_sent = time.time() - 61
-    [x.chenge_value(0) for x in usms[1::2]]
-    [x.chenge_value(0.8) for x in usms[::2]]
-    [x.chenge_value3(20) for x in usms]
+    [x.chenge_value(0) for x in usms]
+    [x.chenge_value3(0) for x in usms]
 
     [print(x) for x in mechanisms]
     kran4.chenge_value(3)

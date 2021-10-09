@@ -11,11 +11,12 @@ from app import db
 from app.model import Post
 from datetime import date
 
-date = date(2021, 10, 5)
-shift = 2
+date = date(2021, 10, 9)
+shift = 1
 value = 3 
-mech = 28369 # kran 58
-mech = 25390 # kran 1
+mech = 34214
+# mech = 28369 # kran 58
+# mech = 25390 # kran 1
 # cursor = db.session.query(Post).filter(Post.mechanism_id == mech,
 #                                        Post.date_shift == date, Post.shift == shift, Post.value == value)
 
@@ -26,23 +27,32 @@ mech = 25390 # kran 1
 # cursor = db.session.query(Post).filter(Post.terminal == 11,
 #                                        Post.date_shift == date, Post.shift == shift)
 
-cursor = db.session.query(Post).filter(Post.mechanism_id == mech,
-                                       Post.date_shift == date,
-                                       Post.shift == shift,
-                                       )
+cursor = db.session.query(Post).filter(
+    Post.mechanism_id == mech,
+    Post.date_shift == date,
+    Post.value > 0.3,
+    Post.value < 0.4,
+    Post.shift == shift,
+   )
 
 count = 0
 for i in cursor:
-    print(i.terminal)
+    print(i)
     count += 1
 
-# db.session.query(Post)\
-#     .filter(Post.terminal == 12, Post.date_shift == date, Post.shift == shift)\
-#     .update({"terminal": 11})
-
 db.session.query(Post)\
-    .filter(Post.mechanism_id == mech, Post.date_shift == date, Post.shift == shift)\
-    .delete()
+    .filter(
+        Post.mechanism_id == mech,
+        Post.date_shift == date, 
+        Post.value > 0.2,
+        Post.value < 0.3,
+        Post.shift == shift
+    )\
+    .update({"value": 0.5})
+
+# db.session.query(Post)\
+#     .filter(Post.mechanism_id == mech, Post.date_shift == date, Post.shift == shift)\
+#     .delete()
 
 print('--------------------------------')
 print(count, 'items have been updated')
