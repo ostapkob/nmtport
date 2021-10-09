@@ -40,9 +40,8 @@ class Post(db.Model):
     count = db.Column(db.Integer)
     # timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     timestamp = db.Column(db.DateTime, index=True)
-    date_shift = db.Column(db.Date)
-    shift = db.Column(db.Integer)
-    # this column must form by GPS
+    date_shift = db.Column(db.Date, index=True)
+    shift = db.Column(db.Integer, index=True)
     terminal = db.Column(db.SmallInteger, index=True)
 
     def __init__(self, mechanism_id, latitude=0, longitude=0, value=None, value2=None, value3=None, count=None, terminal=0, timestamp=None):
@@ -56,10 +55,9 @@ class Post(db.Model):
         else:
             date_shift = datetime.now()
             shift = 2
-
-        if timestamp:
+        if timestamp is not None:
             self.timestamp = timestamp
-        else:
+        elif timestamp is None:
             self.timestamp = datetime.utcnow()
         self.value = value
         self.value2 = value2

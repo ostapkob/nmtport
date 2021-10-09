@@ -4,12 +4,13 @@ from flask import render_template  # ,redirect
 from app import db, app
 from app.model import Mechanism, Post
 from datetime import datetime, timedelta
-from app.functions import   add_fio, state_mech,  get_status_alarm, get_dict_mechanisms
+from app.functions import   add_fio, state_mech,  get_status_alarm, get_dict_mechanisms_number_by_id, get_dict_mechanisms_id_by_number
 from app.usm import time_for_shift_usm, usm_periods
 from app.kran import time_for_shift_kran, kran_periods
 from app.sennebogen import time_for_shift_sennebogen, sennebogen_periods
 from app.functions import image_mechanism 
-from app.functions_for_all import all_mechanisms_id, today_shift_date, id_by_number # all_mechanisms_type, all_number, name_by_id
+from app.functions_for_all import all_mechanisms_id, today_shift_date, id_by_number, name_by_id
+ # all_mechanisms_type, all_number, name_by_id
 from psw import post_pass
 
 from config import HOURS
@@ -22,7 +23,8 @@ from pprint import pprint
 
 client = MongoClient('mongodb://localhost:27017')
 mongodb = client['HashShift']
-dict_mechanisms = get_dict_mechanisms()
+dict_mechanisms_number_by_id = get_dict_mechanisms_number_by_id()
+dict_mechanisms_id_by_number = get_dict_mechanisms_id_by_number()
 
 def add_fix_post(post):  # !move
     ''' I use it fix because arduino sometimes accumulates an extra minute '''
@@ -370,19 +372,15 @@ def add_usm():
     latitude = request.args.get('latitude')
     longitude = request.args.get('longitude')
     try:
+        number = dict_mechanisms_number_by_id['usm'][int(mechanism_id)]
+    except KeyError:
+        return 'Not this id or not usm'
+    try:
         mech = Mechanism.query.get(mechanism_id)
     except Exception as e:
         logger.debug(e)
-
     # if mechanism_id == '34213' and value3 == '0': # FIX
     #     value3 = '15'
-
-    if mech.number in usm_no_move:
-        latitude = 0
-        longitude = 0
-    if latitude == '': 
-        latitude = 0
-        longitude = 0
     items = mechanism_id, password, latitude, longitude
     test_items = any([item is None for item in items])
     if int(value3) < 5:  # if roller not circle
@@ -393,6 +391,12 @@ def add_usm():
         return 'Bad password'
     if int(mechanism_id) not in all_mechanisms_id('usm'):
         return 'Not this id'
+    if number in usm_no_move:
+        latitude = 0
+        longitude = 0
+    if latitude == '': 
+        latitude = 0
+        longitude = 0
     if float(latitude) == 0 or float(longitude) == 0:
         try:
             data_mech = db.session.query(Post).filter(
@@ -422,9 +426,7 @@ def add_kran():
         mech = Mechanism.query.get(mechanism_id)
     except Exception as e:
         logger.debug(e)
-    if latitude == '':
-        latitude = 0
-        longitude = 0
+
 
     # if mechanism_id == '15510' and value == '1':
     #     value = '2'
@@ -437,6 +439,9 @@ def add_kran():
         return 'Bad password'
     if int(mechanism_id) not in all_mechanisms_id('kran'):
         return 'Not this id or not kran'
+    if latitude == '':
+        latitude = 0
+        longitude = 0
     if float(latitude) == 0 or float(longitude) == 0:
         try:
             data_mech = db.session.query(Post).filter(
@@ -463,7 +468,7 @@ def add_kran():
 @app.route('/api/v2.0/add_kran', methods=['GET'])
 def add_kran2():
     '''add post by GET request from arduino'''
-    number = request.args.get('number')
+    number = int(request.args.get('number'))
     password = request.args.get('passw')
     value = int(request.args.get('value'))
     count = request.args.get('count')
@@ -472,28 +477,28 @@ def add_kran2():
     x = abs(int(request.args.get('x'))) # accelerometr x-axis
     y = abs(int(request.args.get('y'))) # accelerometr y-axis
     try:
-        mechanism_id = dict_mechanisms['kran'][int(number)]
+        mechanism_id = dict_mechanisms_id_by_number['kran'][number]
     except KeyError:
         return 'Not this id or not kran'
     try:
         mech = Mechanism.query.get(mechanism_id)
     except Exception as e:
         logger.debug(e)
-    if latitude == '':
-        latitude = 0
-        longitude = 0
     items = mechanism_id, password, latitude, longitude, value, count
     test_items = any([item is None for item in items]) # if this id is exist
     if test_items:
         return 'Bad request'
     if password not in post_pass:
         return 'Bad password'
-    if mech.number in krans_if_3_then_2 and value == 3:
+    if number in krans_if_3_then_2 and value == 3:
         value = 2
-    if mech.number in krans_if_1_then_0 and value == 1:
+    if number in krans_if_1_then_0 and value == 1:
         value = 4 # 4 work how 0
     if value==0 and ((x>500 and y > 500) or x>850 or y>850) :
         value = 5 # kran move
+    if latitude == '':
+        latitude = 0
+        longitude = 0
     latitude, longitude = corect_position(mech, latitude, longitude)
     terminal = which_terminal('kran', number, latitude, longitude) # exist 9, 11, 13, 15
     new_post = Post(value=value, count=count, latitude=latitude,
