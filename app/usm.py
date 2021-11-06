@@ -115,16 +115,9 @@ def usm_periods(mechanisms_data):
         counter = 1
 
         for number, value_number in data_mech['data'].items():
-            if value_number['value'] >= 0 and value_number['value'] < 0.1:
-                value_min = 0  # yellow
-            elif value_number['value'] >= 0.1:
-                value_min = 1  # blue
-            else:
-                value_min = -1  # red
+            value_min = get_values_min(value_number)
 
             if value_min != values_period:
-                if values_period > 0:
-                    values_period = 1
                 new_data[counter] = {'time': pre_time,
                                      'value': values_period,
                                      'step': step,
@@ -141,6 +134,20 @@ def usm_periods(mechanisms_data):
         mechanisms_data[mech]['data'] = new_data
     return mechanisms_data
 
-# from pprint import pprint
-# pprint(time_for_shift_usm(*today_shift_date()))
-# pprint(usm_periods(time_for_shift_usm(*today_shift_date())))
+def get_values_min(value_number):
+    if value_number['value'] >= 0 and value_number['value'] < 0.1:
+        if value_number['speed'] <= 5:
+            return 0  # yellow
+        else:
+            # return 0  # yellow
+            return 2 # dark yellow
+    elif value_number['value'] >= 0.1:
+        return  1  # blue
+    else:
+        return -1  # red
+
+
+if __name__ == "__main__":
+    from pprint import pprint
+    # pprint(time_for_shift_usm(*today_shift_date()))
+    pprint(usm_periods(time_for_shift_usm(*today_shift_date())))

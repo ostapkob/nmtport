@@ -58,7 +58,7 @@ class Post(db.Model):
         if timestamp is not None:
             self.timestamp = timestamp
         elif timestamp is None:
-            self.timestamp = datetime.utcnow()
+            self.timestamp = datetime.utcnow() # i'm sorry about that 
         self.value = value
         self.value2 = value2
         self.value3 = value3
