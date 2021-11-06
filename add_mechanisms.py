@@ -53,29 +53,29 @@ mech = [
     # (33611, 'nmtp', 'sennebogen', '860', 7, 'Sennebogen-7'),
     # (33609, 'nmtp', 'sennebogen', '860', 8, 'Sennebogen-8'),
     # (33610, 'nmtp', 'sennebogen', '860', 9, 'Sennebogen-9'),
-    (25390	, 'nmtp', 'kran', 'sokol',	1,	'кран-1' ),
-    (4144	, 'nmtp', 'kran', 'albrecht',	10,	'кран-10'),
-    (29531	, 'nmtp', 'kran', 'kondor',	17,	'кран-17'),
-    (22909	, 'nmtp', 'kran', 'sokol',	18,	'кран-18'),
-    (31182	, 'nmtp', 'kran', 'sokol',	23,	'кран-23'),
-    (13809	, 'nmtp', 'kran', 'albatross',	28,	'кран-28'),
-    (29120	, 'nmtp', 'kran', 'kondor',	31,	'кран-31'),
-    (31186	, 'nmtp', 'kran', 'sokol',	35,	'кран-35'),
-    (31185	, 'nmtp', 'kran', 'kondor',	38,	'кран-38'),
-    (31183	, 'nmtp', 'kran', 'sokol',	39,	'кран-39'),
-    (31184	, 'nmtp', 'kran', 'sokol',	48,	'кран-48'),
-    (22081	, 'nmtp', 'kran', 'kondor',	49,	'кран-49'),
-    (28369	, 'nmtp', 'kran', 'kondor',	58,	'кран-58'),
-    (31388	, 'nmtp', 'kran', 'kondor',	60,	'кран-60'),
-    (5619	, 'nmtp', 'kran', 'albrecht',	65,	'кран-65'),
-    (5632	, 'nmtp', 'kran', 'albrecht',	72,	'кран-72'),
-    (6364	, 'nmtp', 'kran', 'albatross',	6,	'кран-6' ),
-    (6574	, 'nmtp', 'kran', 'albatross',	26,	'кран-26'),
+    # (25390	, 'nmtp', 'kran', 'sokol',	1,	'кран-1' ),
+    # (4144	, 'nmtp', 'kran', 'albrecht',	10,	'кран-10'),
+    # (29531	, 'nmtp', 'kran', 'kondor',	17,	'кран-17'),
+    # (22909	, 'nmtp', 'kran', 'sokol',	18,	'кран-18'),
+    # (31182	, 'nmtp', 'kran', 'sokol',	23,	'кран-23'),
+    # (13809	, 'nmtp', 'kran', 'albatross',	28,	'кран-28'),
+    # (29120	, 'nmtp', 'kran', 'kondor',	31,	'кран-31'),
+    # (31186	, 'nmtp', 'kran', 'sokol',	35,	'кран-35'),
+    # (31185	, 'nmtp', 'kran', 'kondor',	38,	'кран-38'),
+    # (31183	, 'nmtp', 'kran', 'sokol',	39,	'кран-39'),
+    # (31184	, 'nmtp', 'kran', 'sokol',	48,	'кран-48'),
+    # (22081	, 'nmtp', 'kran', 'kondor',	49,	'кран-49'),
+    # (28369	, 'nmtp', 'kran', 'kondor',	58,	'кран-58'),
+    # (31388	, 'nmtp', 'kran', 'kondor',	60,	'кран-60'),
+    # (5619	, 'nmtp', 'kran', 'albrecht',	65,	'кран-65'),
+    # (5632	, 'nmtp', 'kran', 'albrecht',	72,	'кран-72'),
+    # (6364	, 'nmtp', 'kran', 'albatross',	6,	'кран-6' ),
+    # (6574	, 'nmtp', 'kran', 'albatross',	26,	'кран-26'),
 ]
 
-for id, company, type, model, number, name in mech:
-    db.session.add(Mechanism(id, company, type, model, number, name))
-    print(id, company, type, model, number, name)
+# for id, company, type, model, number, name in mech:
+#     db.session.add(Mechanism(id, company, type, model, number, name))
+#     print(id, company, type, model, number, name)
 
 # for id, username, password in users:
 #     db.session.add(User(id, username, password))
@@ -93,11 +93,12 @@ for id, company, type, model, number, name in mech:
 #     db.session.add(Work_1C_1(id, inv_num, greifer_num, greifer_vol, fio, start, finish, date_shift, shift))
 
 
-db.session.commit()
+# db.session.commit()
 
 # m = Mechanism(32777, company='nmtp', type='sennebogen', model='860', number=1, name='Sennebogen-1')
-a = [mech.id for mech in Mechanism.query.all()]
-print(a)
+mechanisms = [mech for mech in Mechanism.query.all()]
+for mech in mechanisms:
+    print(mech.id, mech.name, mech.number)
 # b = [(user.username, user.password_hash) for user in User.query.all()]
 # print('---------------')
 # print(b)

@@ -13,6 +13,7 @@ from app.functions_for_all import all_mechanisms_id, today_shift_date, id_by_num
  # all_mechanisms_type, all_number, name_by_id
 from psw import post_pass
 
+import time
 from config import HOURS
 from app.functions import perpendicular_line_equation, intersection_point_of_lines, line_kran
 from app.functions import which_terminal, mech_periods
@@ -44,7 +45,12 @@ def add_fix_post(post):  # !move
         if dt_minutes == 2 or dt_minutes == -58:
             post.timestamp -= timedelta(seconds=30)
     db.session.add(post)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception as e:
+        logger.debug(e)
+        time.sleep(10)
+        db.session.commit()
 
 def corect_position(mech, latitude, longitude):
     if float(latitude) == 0 or float(longitude) == 0: # get last values
@@ -379,8 +385,8 @@ def add_usm():
         mech = Mechanism.query.get(mechanism_id)
     except Exception as e:
         logger.debug(e)
-    # if mechanism_id == '34213' and value3 == '0': # FIX
-    #     value3 = '15'
+    if mechanism_id == '33287' and value3 == '0': # FIX
+        value3 = '15'
     items = mechanism_id, password, latitude, longitude
     test_items = any([item is None for item in items])
     if int(value3) < 5:  # if roller not circle
@@ -484,6 +490,8 @@ def add_kran2():
         mech = Mechanism.query.get(mechanism_id)
     except Exception as e:
         logger.debug(e)
+    if mechanism_id == 4513 and value == 1: # FIX
+        value = 2 
     items = mechanism_id, password, latitude, longitude, value, count
     test_items = any([item is None for item in items]) # if this id is exist
     if test_items:
