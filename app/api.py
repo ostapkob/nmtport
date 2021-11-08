@@ -385,8 +385,8 @@ def add_usm():
         mech = Mechanism.query.get(mechanism_id)
     except Exception as e:
         logger.debug(e)
-    if mechanism_id == '33287' and value3 == '0': # FIX
-        value3 = '15'
+    # if mechanism_id == '33287' and value3 == '0': # FIX
+    #     value3 = '15'
     items = mechanism_id, password, latitude, longitude
     test_items = any([item is None for item in items])
     if int(value3) < 5:  # if roller not circle
@@ -490,8 +490,8 @@ def add_kran2():
         mech = Mechanism.query.get(mechanism_id)
     except Exception as e:
         logger.debug(e)
-    if mechanism_id == 4513 and value == 1: # FIX
-        value = 2 
+    # if mechanism_id == 4513 and value == 1: # FIX
+    #     value = 2 
     items = mechanism_id, password, latitude, longitude, value, count
     test_items = any([item is None for item in items]) # if this id is exist
     if test_items:

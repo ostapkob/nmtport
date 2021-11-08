@@ -139,7 +139,6 @@ def get_values_min(value_number):
         if value_number['speed'] <= 5:
             return 0  # yellow
         else:
-            # return 0  # yellow
             return 2 # dark yellow
     elif value_number['value'] >= 0.1:
         return  1  # blue
