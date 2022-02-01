@@ -52,11 +52,19 @@ def name_by_id(id):
     '''Need to do then'''
     return Mechanism.query.filter(Mechanism.id == id).first().name
 
+
 def id_by_number(type, number):
     '''Find mechanism_id by type and number'''
     mech = Mechanism.query.filter(Mechanism.type==type,  Mechanism.number==number).first()
     if mech:
         return mech.id
-    else:
-        return None
+    return None
+
+
+def id_and_number(type):
+    '''id and number by type'''
+    mechanisms = Mechanism.query.filter(Mechanism.type==type).all()
+    if mechanisms:
+        return {mech.id: mech.number for mech in mechanisms}
+    return None
 

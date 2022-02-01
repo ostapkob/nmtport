@@ -21,6 +21,7 @@ from config import krans_if_3_then_2, krans_if_1_then_0, usm_no_move
 from loguru import logger
 from pymongo import MongoClient
 from pprint import pprint
+import random
 
 client = MongoClient('mongodb://localhost:27017')
 mongodb = client['HashShift']
@@ -316,7 +317,7 @@ def get_all_last_data_state():
                                                  'value3': el.value3,
                                                  'latitude': el.latitude,
                                                  'longitude': el.longitude,
-                                                 'state': state_mech(el.mech.type, el.value, el.value2, el.value3, el.timestamp + timedelta(hours=HOURS)),
+                                                 'state': state_mech(el),
                                                  # 'alarm': get_status_alarm(el.mech.id, el.mech.type),
                                                  # 'alarm': True,
                                                  'alarm': False,
@@ -385,8 +386,8 @@ def add_usm():
         mech = Mechanism.query.get(mechanism_id)
     except Exception as e:
         logger.debug(e)
-    # if mechanism_id == '33287' and value3 == '0': # FIX
-    #     value3 = '15'
+    # if float(value) == 1: # FIX
+    #     value = random.randrange(20, 100, 1)/100
     items = mechanism_id, password, latitude, longitude
     test_items = any([item is None for item in items])
     if int(value3) < 5:  # if roller not circle
@@ -490,7 +491,7 @@ def add_kran2():
         mech = Mechanism.query.get(mechanism_id)
     except Exception as e:
         logger.debug(e)
-    # if mechanism_id == 4513 and value == 1: # FIX
+    # if number == 28 and value == 1: # FIX
     #     value = 2 
     items = mechanism_id, password, latitude, longitude, value, count
     test_items = any([item is None for item in items]) # if this id is exist
@@ -502,7 +503,7 @@ def add_kran2():
         value = 2
     if number in krans_if_1_then_0 and value == 1:
         value = 4 # 4 work how 0
-    if value==0 and ((x>500 and y > 500) or x>850 or y>850) :
+    if value==0 and ((x>300 and y > 300) or x>700 or y>700) :  #acselerometer
         value = 5 # kran move
     if latitude == '':
         latitude = 0

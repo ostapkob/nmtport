@@ -1,9 +1,11 @@
-from app.functions_for_all import all_mechanisms_id, today_shift_date
+from app.functions_for_all import all_mechanisms_id, today_shift_date, id_and_number
 from config import HOURS, usm_tons_in_hour 
-from app.model import Post
+from app.model import Post, Mechanism_downtime_1C as MD, Work_1C_1 as W1C, Downtime
 from app import db
 from datetime import datetime, timedelta
 
+TYPE = 'usm'
+ids_and_nums = id_and_number(TYPE)
 
 def time_for_shift_usm(date_shift, shift):
     '''get dict with all minute's values for the period, name and total
@@ -11,10 +13,11 @@ def time_for_shift_usm(date_shift, shift):
     '''
     # get data from db
     shift = int(shift)
-    all_mechs = all_mechanisms_id('usm')
+    all_mechs = all_mechanisms_id(TYPE)
     try:
         cursor = db.session.query(Post).filter(Post.date_shift == date_shift, Post.shift ==
                                                shift, Post.mechanism_id.in_(all_mechs)).order_by(Post.mechanism_id).all()
+        resons = process_resons(get_resons(date_shift, shift))
     except Exception as e:
         logger.debug(e)
     # create dict all works mechanism in shift
@@ -52,7 +55,7 @@ def time_for_shift_usm(date_shift, shift):
         start = start.replace(hour=20, minute=0, second=0, microsecond=0)
 
     if data_per_shift == {}:
-        return None
+        return {}
     # create dict with all minutes to now if value is not return (-1) because
     # 0 may exist
     time_by_minuts = {}
@@ -100,10 +103,12 @@ def time_for_shift_usm(date_shift, shift):
             if delta_minutes >= datetime.now() and date_shift == today_date and today_shift == shift:
                 break
             time_by_minuts[key]['terminal'] = terminal
-    return time_by_minuts
+    return {"time_by_minuts":time_by_minuts, "resons":resons}
 
 
-def usm_periods(mechanisms_data):
+def usm_periods(data):
+    mechanisms_data = data.get('time_by_minuts', [])
+    resons = data.get('resons', [])
     if not mechanisms_data:
         return None
     for mech, data_mech in mechanisms_data.items():
@@ -113,14 +118,15 @@ def usm_periods(mechanisms_data):
         step = 0
         pre_time = ''  # data_mech['data'][1]['time']
         counter = 1
-
+        reson = None
         for number, value_number in data_mech['data'].items():
             value_min = get_values_min(value_number)
-
             if value_min != values_period:
+                reson = resons.get(mech, None) and resons.get(mech, None).get(pre_time, None)
                 new_data[counter] = {'time': pre_time,
                                      'value': values_period,
                                      'step': step,
+                                     'reson': reson,
                                      'time_coal': value_number['time_coal']}
                 step = 1
                 values_period = value_min
@@ -130,7 +136,9 @@ def usm_periods(mechanisms_data):
                 step += 1
         new_data[counter] = {'time': pre_time,
                              'value': values_period, 
-                             'step': step}
+                             'step': step,
+                             'reson': reson,
+                             'time_coal': value_number['time_coal']}
         mechanisms_data[mech]['data'] = new_data
     return mechanisms_data
 
@@ -145,8 +153,42 @@ def get_values_min(value_number):
     else:
         return -1  # red
 
+from typing import Dict, List
+from collections import defaultdict
+
+def get_resons(date_shift: datetime.date, shift: int) -> dict:
+    shift = int(shift)
+    all_mechs = all_mechanisms_id(TYPE)
+    cursor = db.session.query(MD).filter(MD.data_smen == date_shift, MD.smena ==
+                                           shift, MD.inv_num.in_(all_mechs)).order_by(MD.inv_num).all()
+    return cursor
+
+
+def process_resons(resons: list) -> dict:
+    result = {}
+    for el in resons:
+        number = ids_and_nums[el.inv_num]
+        start = el.data_nach.strftime("%H:%M")
+        reson = el.id_downtime
+        try: 
+            result[number][start] = reson
+        except KeyError:
+            result[number] = {}
+            result[number][start] = reson
+    return result
+
 
 if __name__ == "__main__":
-    from pprint import pprint
+    from pprint import pp
     # pprint(time_for_shift_usm(*today_shift_date()))
-    pprint(usm_periods(time_for_shift_usm(*today_shift_date())))
+    # pprint(usm_periods(time_for_shift_usm(*today_shift_date())))
+    date_shift = datetime.now().date()
+    date_shift -= timedelta(days=1)
+    shift = 2
+
+    before_resons = usm_periods(time_for_shift_usm(date_shift, shift))
+    pp(before_resons)
+    # resons = process_resons(get_resons(date_shift, shift))
+    # pp(resons)
+
+

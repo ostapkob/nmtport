@@ -20,38 +20,38 @@ nginx_log = '/var/log/nginx/access.log'
 with open(nginx_log) as f:
     lines = f.readlines()
 
-time_start = datetime(2021, 11, 2, 1, 1, 0)
-time_finish = datetime(2021, 11, 2, 1, 2, 0)
+time_start = datetime(2022, 1, 6, 8, 0, 0)
+time_finish = datetime(2022, 1, 6, 17, 0, 0)
 for line in lines:
-    # if 'add_kran' in line:
-    #     line = line.split('&')
-    #     time = re.search(r'\[.*\]', line[0])[0]
-    #     time = time[1:21]
-    #     time = datetime.strptime(time, '%d/%b/%Y:%H:%M:%S')
-    #     if time<time_start or time>time_finish:
-    #         continue
-    #     number = line[0].split('=')[1]
-    #     passw = line[1].split('=')[1]
-    #     value = line[2].split('=')[1]
-    #     count = line[3].split('=')[1]
-    #     lat = line[4].split('=')[1]
-    #     lon = line[5].split('=')[1]
-    #     x = line[6].split('=')[1]
-    #     y = line[7].split(' ')[0].split('=')[1]
-    #     mechanism_id = dict_mechanisms_id_by_number['kran'][int(number)]
-    #     terminal = which_terminal('kran', number, lat, lon) 
-    #     timestamp=time-timedelta(hours=10)
-        # print(timestamp,number, mechanism_id, passw, value, count, lat, lon, x, y, terminal)
-        # new_post = Post(
-        #             timestamp=timestamp,
-        #             mechanism_id=mechanism_id, 
-        #             value=value,
-        #             count=count,
-        #             latitude=lat,
-        #             longitude=lon,
-        #             terminal=terminal,
-        # )
-        # db.session.add(new_post)
+    if 'add_kran' in line:
+        line = line.split('&')
+        time = re.search(r'\[.*\]', line[0])[0]
+        time = time[1:21]
+        time = datetime.strptime(time, '%d/%b/%Y:%H:%M:%S')
+        if time<time_start or time>time_finish:
+            continue
+        number = line[0].split('=')[1]
+        passw = line[1].split('=')[1]
+        value = line[2].split('=')[1]
+        count = line[3].split('=')[1]
+        lat = line[4].split('=')[1]
+        lon = line[5].split('=')[1]
+        x = line[6].split('=')[1]
+        y = line[7].split(' ')[0].split('=')[1]
+        mechanism_id = dict_mechanisms_id_by_number['kran'][int(number)]
+        terminal = which_terminal('kran', number, lat, lon) 
+        timestamp=time-timedelta(hours=10)
+        print(timestamp,number, mechanism_id, passw, value, count, lat, lon, x, y, terminal)
+        new_post = Post(
+                    timestamp=timestamp,
+                    mechanism_id=mechanism_id, 
+                    value=value,
+                    count=count,
+                    latitude=lat,
+                    longitude=lon,
+                    terminal=terminal,
+        )
+        db.session.add(new_post)
     if 'add_usm' in line:
         line = line.split('&')
         time = re.search(r'\[.*\]', line[0])[0]
@@ -81,9 +81,9 @@ for line in lines:
                     longitude=lon,
                     terminal=terminal,
         )
-        if mechanism_id!='34214':
-            continue
+        # if mechanism_id!='34214':
+        #     continue
         print(timestamp,number, mechanism_id, value, value2, value3, count, lat, lon, terminal)
-        # db.session.add(new_post)
-# db.session.commit()
-# print('FINISH')
+        db.session.add(new_post)
+db.session.commit()
+print('FINISH')

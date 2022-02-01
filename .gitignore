@@ -1,4 +1,5 @@
 venv/
+flask/
 .vscode/
 __pycache__/
 app/__pycache__/
@@ -13,3 +14,4 @@ hash.log
 get.log
 get.json
 /middleware/get.json
+get_all_last_data_state
