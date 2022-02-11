@@ -248,7 +248,12 @@ def get_state():
 #     return 'work'
 
 
-def state_mech(type_mechanism, value, value2,  value3, last_time):
+def state_mech(el):
+    type_mechanism = el.mech.type 
+    value = el.value
+    value2 = el.value2
+    value3 = el.value3
+    last_time = el.timestamp + timedelta(hours=HOURS)
     dt = datetime.now() - last_time
     dt = dt.total_seconds() / 60
     if type_mechanism == 'kran':
@@ -266,18 +271,19 @@ def state_mech(type_mechanism, value, value2,  value3, last_time):
             return '90_2'
         if value == 5:
             return 'move'
-        else:
-            return 'err'
+        return 'err'
 
     if type_mechanism == 'usm': # value - lever, value3 - roller
         if dt > 120.0:
             return 'long_no_power'
         if dt >= 3.0:
             return 'no_power'
-        if value < 0.1 or not value3:
-            return 'stay'
         if value >= 0.1:
             return 'work'
+        if value < 0.1 and value3>=5:
+            return 'move'
+        if value < 0.1 or value3<5:
+            return 'stay'
         else:
             return 'err'
 
@@ -475,7 +481,7 @@ def hash_all_last_data_state():
                                                  'value3': el.value3,
                                                  'latitude': el.latitude,
                                                  'longitude': el.longitude,
-                                                 'state': state_mech(el.mech.type, el.value, el.value2, el.value3, el.timestamp + timedelta(hours=HOURS)),
+                                                 'state': state_mech(el),
                                                  'alarm': get_status_alarm(el.mech.id, el.mech.type),
                                                  'terminal': el.terminal,
                                                  'time': el.timestamp + timedelta(hours=HOURS)

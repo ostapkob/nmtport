@@ -111,7 +111,6 @@ class Work_1C_1(db.Model):
     data_nach = db.Column(db.DateTime, index=True)
     data_kon = db.Column(db.DateTime, index=True)
     data_smen = db.Column(db.DateTime, index=True)
-    data_smen = db.Column(db.DateTime, index=True)
     smena =db.Column(db.Integer, index=True)
     port =db.Column(db.Integer, index=True)
 
@@ -128,9 +127,53 @@ class Work_1C_1(db.Model):
         self.port =port
 
     def __repr__(self):
-        # return f'{self.inv_num}, {self.greifer_num}, {self.greifer_vol}, {self.fio}, {self.data_nach}, {self.data_kon}'
-        return [self.inv_num, self.greifer_num, self.greifer_vol, self.fio, self.data_nach, self.data_kon, self.data_smen, self.smena, self.port]
+        return f'{self.inv_num}, {self.greifer_num}, {self.greifer_vol},\
+                {self.fio}, {self.data_nach}, {self.data_kon},\
+                {self.data_smen}, {self.smena}, {self.port}'
 
     def get(self):
         return [self.inv_num, self.greifer_num, self.greifer_vol, self.fio, self.data_nach, self.data_kon, self.data_smen, self.smena, self.port]
+
+
+
+
+class Mechanism_downtime_1C(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    inv_num = db.Column(db.Integer, index=True)
+    data_smen = db.Column(db.DateTime)
+    smena =db.Column(db.Integer)
+    data_nach = db.Column(db.DateTime)
+    data_kon = db.Column(db.DateTime)
+    id_downtime =db.Column(db.Integer)
+
+    def __init__(self, id, inv_num, data_smen, smena, data_nach, data_kon, id_downtime):
+        self.id = id
+        self.inv_num = inv_num
+        self.data_smen =data_smen
+        self.smena =smena
+        self.data_nach =data_nach
+        self.data_kon =data_kon
+        self.id_downtime =id_downtime
+
+    def __repr__(self):
+        return f'{self.inv_num}, {self.data_smen}, {self.smena}, {self.data_nach}, {self.data_kon}, {self.id_downtime}'
+
+
+    def get(self):
+        return [self.inv_num, self.data_smen, self.smena, self.data_nach, self.data_kon, self.id_downtime]
+
+
+class Downtime(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64))
+
+    def __init__(self, id, name):
+        self.id = id
+        self.name =name
+
+    def __repr__(self):
+        return f'{self.id}, {self.name}'
+
+    def get(self):
+        return [self.id, self.name]
 

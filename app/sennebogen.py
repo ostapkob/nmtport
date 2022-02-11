@@ -26,6 +26,7 @@ def time_for_shift_sennebogen(date_shift, shift):
         x = -1 if el.value is None else el.value
         y = -1 if el.value2 is None else el.value2
         if x< 500 and y < 500: # and change state_mech in function
+        # if (x>300 and y > 300) or x>700 or y>700 :  #acselerometer
         # if y < 750: # and change state_mech in function
             value_minute = 0
         else:
@@ -60,6 +61,7 @@ def time_for_shift_sennebogen(date_shift, shift):
     # pprint(data_per_shift)
     for key in data_per_shift.keys():
         flag_start = True
+        mech = data_per_shift[key]['mechanism']
         # flag_finish = True
         time_by_minuts[key] = {}
         time_by_minuts[key]['name'] = data_per_shift[key]['mechanism'].name
@@ -72,6 +74,12 @@ def time_for_shift_sennebogen(date_shift, shift):
             data_per_shift[key]['work_time'] / 60, 1)
         time_by_minuts[key]['data'] = {}
         delta_minutes = start
+        try:
+            # ! maybe is slower request
+            last_find_item = db.session.query(Post).filter(Post.mechanism_id==data_per_shift[key]['mechanism'].id).order_by(Post.timestamp.desc()).first()
+        except Exception as e:
+            logger.debug(e)
+        terminal = last_find_item.terminal
         time_move = 0
         for i in range(1, 60 * 12 + 1):
             date_t = delta_minutes.strftime("%H:%M")
@@ -84,6 +92,7 @@ def time_for_shift_sennebogen(date_shift, shift):
                                               'x': val_minute[1],
                                               'y': val_minute[2],
                                               'time_move': round(time_move, 2),
+                                              'terminal': terminal,
                                               }
             delta_minutes += timedelta(minutes=1)
             today_date, today_shift = today_shift_date()
@@ -94,6 +103,7 @@ def time_for_shift_sennebogen(date_shift, shift):
                 time_by_minuts[key]['finish'] = date_t
             if delta_minutes >= datetime.now() and date_shift == today_date and today_shift == shift:
                 break
+            time_by_minuts[key]['terminal'] = terminal
     return time_by_minuts
 
 
