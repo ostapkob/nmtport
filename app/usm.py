@@ -48,11 +48,11 @@ def time_for_shift_usm(date_shift, shift):
         if el.value > 0:
             data_per_shift[el.mech.number]['work_time'] += 1
     # get start time for this shift
-    start = datetime.combine(date_shift, datetime.min.time())
+    start_shift = datetime.combine(date_shift, datetime.min.time())
     if shift == 1:
-        start = start.replace(hour=8, minute=0, second=0, microsecond=0)
+        start_shift = start_shift.replace(hour=8, minute=0, second=0, microsecond=0)
     else:
-        start = start.replace(hour=20, minute=0, second=0, microsecond=0)
+        start_shift = start_shift.replace(hour=20, minute=0, second=0, microsecond=0)
 
     if data_per_shift == {}:
         return {}
@@ -67,13 +67,15 @@ def time_for_shift_usm(date_shift, shift):
         time_by_minuts[key]['name'] = mech.name
         time_by_minuts[key]['id'] = mech.id
         time_by_minuts[key]['number'] = mech.number
+        # time_by_minuts[key]['resons'] = resons.get(mech.number, {})
+        # mechanisms_data = data.get('time_by_minuts', [])
         time_by_minuts[key]['tons_in_hour'] =usm_tons_in_hour[mech.number]
         # translate hours into minutes and round
         time_by_minuts[key]['time_coal']  = round(data_per_shift[key]['time_coal'] / 60, 2)
         time_by_minuts[key]['total_time'] = round(data_per_shift[key]['total_time'] / 60, 1)
         time_by_minuts[key]['work_time']  = round(data_per_shift[key]['work_time'] / 60, 1)
         time_by_minuts[key]['data'] = {}
-        delta_minutes = start
+        delta_minutes = start_shift
         try:
             last_find_item = db.session.query(Post).filter(Post.mechanism_id==data_per_shift[key]['mechanism'].id).order_by(Post.timestamp.desc()).first()
         except Exception as e:
@@ -103,12 +105,13 @@ def time_for_shift_usm(date_shift, shift):
             if delta_minutes >= datetime.now() and date_shift == today_date and today_shift == shift:
                 break
             time_by_minuts[key]['terminal'] = terminal
-    return {"time_by_minuts":time_by_minuts, "resons":resons}
+            # pp(resons[mech.number])
+        time_by_minuts[key]['resons'] = convert_resons_to_720minuts(resons.get(mech.number, None), start_shift)
+    return time_by_minuts
 
 
 def usm_periods(data):
-    mechanisms_data = data.get('time_by_minuts', [])
-    resons = data.get('resons', [])
+    mechanisms_data = data
     if not mechanisms_data:
         return None
     for mech, data_mech in mechanisms_data.items():
@@ -118,15 +121,13 @@ def usm_periods(data):
         step = 0
         pre_time = ''  # data_mech['data'][1]['time']
         counter = 1
-        reson = None
+        # reson = resons.get(mech, None) and resons.get(mech, None).get(pre_time, None)
         for number, value_number in data_mech['data'].items():
             value_min = get_values_min(value_number)
             if value_min != values_period:
-                reson = resons.get(mech, None) and resons.get(mech, None).get(pre_time, None)
                 new_data[counter] = {'time': pre_time,
                                      'value': values_period,
                                      'step': step,
-                                     'reson': reson,
                                      'time_coal': value_number['time_coal']}
                 step = 1
                 values_period = value_min
@@ -137,7 +138,6 @@ def usm_periods(data):
         new_data[counter] = {'time': pre_time,
                              'value': values_period, 
                              'step': step,
-                             'reson': reson,
                              'time_coal': value_number['time_coal']}
         mechanisms_data[mech]['data'] = new_data
     return mechanisms_data
@@ -165,16 +165,61 @@ def get_resons(date_shift: datetime.date, shift: int) -> dict:
 
 
 def process_resons(resons: list) -> dict:
-    result = {}
+    result:dict = {}
     for el in resons:
         number = ids_and_nums[el.inv_num]
-        start = el.data_nach.strftime("%H:%M")
+        start = el.data_nach
+        stop = el.data_kon
         reson = el.id_downtime
         try: 
-            result[number][start] = reson
+            result[number].append(
+                {
+                    'start': start,
+                    'stop': stop,
+                    'reson': reson
+                }
+            )
         except KeyError:
-            result[number] = {}
-            result[number][start] = reson
+            result[number] = []
+            result[number].append(
+                {
+                    'start': start,
+                    'stop': stop,
+                    'reson': reson
+                }
+            )
+    return result
+
+
+def handle_reson(start:datetime, stop:datetime, reson:[int, None]):
+    start = start.replace(second=0)
+    stop = stop.replace(second=0)
+    return {
+        "start": start.strftime("%H:%M"),
+        "stop": stop.strftime("%H:%M"),
+        "reson": reson,
+        "step": int((stop - start).total_seconds()/60)
+    }
+
+
+def convert_resons_to_720minuts(resons: List[Dict[str, object]], start_shift: datetime) -> dict:
+    if not resons:
+        return {}
+    result: dict = {
+        0: handle_reson(start_shift,  resons[0]["start"],  None)
+    }
+    count = 0
+    for i in range(len(resons)):
+        count += 1
+        result[count] = handle_reson(
+            resons[i]["start"], resons[i]["stop"],  resons[i]["reson"])
+        count += 1
+        try:
+            result[count] = handle_reson(
+                resons[i]["stop"], resons[i+1]["start"],  None)
+        except IndexError:
+            result[count] = handle_reson(
+                resons[i]["stop"], start_shift + timedelta(minutes=719), None)
     return result
 
 
@@ -183,12 +228,13 @@ if __name__ == "__main__":
     # pprint(time_for_shift_usm(*today_shift_date()))
     # pprint(usm_periods(time_for_shift_usm(*today_shift_date())))
     date_shift = datetime.now().date()
-    date_shift -= timedelta(days=1)
-    shift = 2
+    date_shift -= timedelta(days=5)
+    shift = 1
 
+    # resons = process_resons(get_resons(date_shift, shift))
+    # res = convert_resons_to_720minuts(resons[11], start_shift)
     before_resons = usm_periods(time_for_shift_usm(date_shift, shift))
     pp(before_resons)
     # resons = process_resons(get_resons(date_shift, shift))
-    # pp(resons)
 
 
