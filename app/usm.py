@@ -206,19 +206,19 @@ def convert_resons_to_720minuts(resons: List[Dict[str, object]], start_shift: da
     if not resons:
         return {}
     result: dict = {
-        0: handle_reson(start_shift,  resons[0]["start"],  None)
+        '0': handle_reson(start_shift,  resons[0]["start"],  None)
     }
     count = 0
     for i in range(len(resons)):
         count += 1
-        result[count] = handle_reson(
+        result[str(count)] = handle_reson(
             resons[i]["start"], resons[i]["stop"],  resons[i]["reson"])
         count += 1
         try:
-            result[count] = handle_reson(
+            result[str(count)] = handle_reson(
                 resons[i]["stop"], resons[i+1]["start"],  None)
         except IndexError:
-            result[count] = handle_reson(
+            result[str(count)] = handle_reson(
                 resons[i]["stop"], start_shift + timedelta(minutes=719), None)
     return result
 
