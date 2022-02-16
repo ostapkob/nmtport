@@ -1,33 +1,24 @@
-from app.functions_for_all import all_mechanisms_id, today_shift_date
+from app.functions_for_all import *
 from config import HOURS
 from app.model import Post
 from app import db
 from datetime import datetime, timedelta
 
+TYPE = 'sennebogen'
+ids_and_nums = id_and_number(TYPE)
 
-def time_for_shift_sennebogen(date_shift, shift):
-    '''get dict with all minute's values for the period, name and total
-    value is lever, value3 is speed roler,
-    '''
-    # get data from db
-    shift = int(shift)
-    all_mechs = all_mechanisms_id('sennebogen')
-    try:
-        cursor = db.session.query(Post).filter(Post.date_shift == date_shift, Post.shift ==
-                                               shift, Post.mechanism_id.in_(all_mechs)).order_by(Post.mechanism_id).all()
-    except Exception as e:
-        logger.debug(e)
-    # create dict all works mechanism in shift
+def get_data_per_shift(cursor: dict) -> dict:
+    '''create dict with all minutes to now if value is None return (-1) because  0 may exist'''
     data_per_shift = {}
     for el in cursor:
         date_t = el.timestamp.replace(second=0, microsecond=0)
         date_t += timedelta(hours=HOURS)
-        # date_t = date_t.strftime("%H:%M")
         x = -1 if el.value is None else el.value
         y = -1 if el.value2 is None else el.value2
+
+        #acselerometer
         if x< 500 and y < 500: # and change state_mech in function
-        # if (x>300 and y > 300) or x>700 or y>700 :  #acselerometer
-        # if y < 750: # and change state_mech in function
+        # if (x>300 and y > 300) or x>700 or y>700 :  
             value_minute = 0
         else:
             value_minute = 1
@@ -45,20 +36,12 @@ def time_for_shift_sennebogen(date_shift, shift):
         data_per_shift[el.mech.number].setdefault('work_time', 0)
         if value_minute != 0:
             data_per_shift[el.mech.number]['work_time'] += 1
-    # get start time for this shift
-    start = datetime.combine(date_shift, datetime.min.time())
-    if shift == 1:
-        start = start.replace(hour=8, minute=0, second=0, microsecond=0)
-    else:
-        start = start.replace(hour=20, minute=0, second=0, microsecond=0)
+    return data_per_shift
 
-    if data_per_shift == {}:
-        return None
-    # create dict with all minutes to now if value is not return (-1) because
-    # 0 may exist
-    #---------------------------PART2------------------------------  i don't want 2 functions
+
+def get_time_by_minuts(data_per_shift: dict, date_shift: datetime, shift: int):
+    start_shift = get_start_shift(date_shift, shift)
     time_by_minuts = {}
-    # pprint(data_per_shift)
     for key in data_per_shift.keys():
         flag_start = True
         mech = data_per_shift[key]['mechanism']
@@ -73,7 +56,7 @@ def time_for_shift_sennebogen(date_shift, shift):
         time_by_minuts[key]['work_time'] = round(
             data_per_shift[key]['work_time'] / 60, 1)
         time_by_minuts[key]['data'] = {}
-        delta_minutes = start
+        delta_minutes = start_shift
         try:
             # ! maybe is slower request
             last_find_item = db.session.query(Post).filter(Post.mechanism_id==data_per_shift[key]['mechanism'].id).order_by(Post.timestamp.desc()).first()
@@ -104,10 +87,39 @@ def time_for_shift_sennebogen(date_shift, shift):
             if delta_minutes >= datetime.now() and date_shift == today_date and today_shift == shift:
                 break
             time_by_minuts[key]['terminal'] = terminal
+        try:
+            resons = process_resons(get_resons(TYPE, date_shift, shift), ids_and_nums)
+        except Exception as e:
+            resons = {}
+        # time_by_minuts[key]['resons'] = convert_resons_to_720minuts(resons.get(mech.number, None), start_shift)
+
     return time_by_minuts
 
 
-def sennebogen_periods(mechanisms_data):
+
+def time_for_shift_sennebogen(date_shift: datetime, shift: int) -> dict:
+    '''get dict with all minute's values for the period, name and total
+    value is lever, value3 is speed roler,
+    '''
+    shift = int(shift)
+    all_mechs = all_mechanisms_id(TYPE)
+    start_shift = get_start_shift(date_shift, datetime.min.time())
+    try:
+        cursor = db.session.query(Post).filter(Post.date_shift == date_shift, Post.shift ==
+                                               shift, Post.mechanism_id.in_(all_mechs)).order_by(Post.mechanism_id).all()
+    except Exception as e:
+        logger.debug(e)
+
+    data_per_shift = get_data_per_shift(cursor) # create dict all works mechanism in shift
+
+    if data_per_shift == {}:
+        return {}
+
+    time_by_minuts =  get_time_by_minuts(data_per_shift, date_shift, shift)
+    return time_by_minuts
+
+
+def sennebogen_periods(mechanisms_data: dict) -> dict:
     if not mechanisms_data:
         return None
     for mech, data_mech in mechanisms_data.items():
@@ -143,7 +155,26 @@ def sennebogen_periods(mechanisms_data):
         mechanisms_data[mech]['data'] = new_data
     return mechanisms_data
 
-# from pprint import pprint
 
-# pprint(time_for_shift_sennebogen(*today_shift_date()))
-# pprint(sennebogen_periods(time_for_shift_sennebogen(*today_shift_date())))
+
+if __name__ == "__main__":
+    from pprint import pp
+    import pickle
+    date_shift = datetime.now().date()
+    date_shift -= timedelta(days=3)
+    shift = 1
+
+    before_resons = sennebogen_periods(time_for_shift_sennebogen(date_shift, shift))
+    # pp(before_resons)
+
+    name_file_pickle = TYPE+'_'+str(date_shift)+"_"+str(shift)
+    # with open(name_file_pickle, 'wb') as f:
+    #     pickle.dump(before_resons, f)
+
+    with open(name_file_pickle, 'rb') as f:
+        load = pickle.load(f)
+
+    pp(load==before_resons)
+
+
+

@@ -293,7 +293,6 @@ def state_mech(el):
         if dt >= 3.0:
             return 'no_power'
         if value >= 500 or value2>=500:
-        # if  value2>=750:
             return 'work'
         else:
             return 'stay'
@@ -495,7 +494,6 @@ def hash_all_last_data_state():
         data['_id'] = 'last_data'
         posts.delete_one({"_id":"last_data"})
         posts.insert_one(data)
-
 
 
 def hash_now(type_mechanism):
