@@ -416,14 +416,38 @@ def line_kran(number):
             return el['k1'], el['b1']
     return None, None
 
+def get_kompleks(latitude, longitude):
+    x = (longitude-132) / (latitude-42)
+    if (x < 1.1):  
+        return 1
+    else:
+        return 2
+
+def get_kompleksGut(latitude, longitude): 
+    if 7.265 > (longitude-132)*10*(latitude-42):
+        return 5
+    return 4
+
+def get_k1_b1_not_kran(latitude, longitude):
+      kompleks = get_kompleks(latitude, longitude)
+      if  kompleks == 1:
+        return [0.593270908597224, 107.49050635162425] # ut
+      else:
+        if get_kompleksGut(latitude, longitude) == 5:
+          return [1.696165886483065, 60.30071859473439] # 5k
+        else: 
+          return [0.339389423498601, 118.37599497658572] # 4k
+
 
 def which_terminal(type_mech, number, latitude, longitude):
     if type_mech == 'kran': 
         k1, b1 = line_kran(int(number))
     else:
-        k1, b1 = 0.5932709085972241, 107.49050635162425
+        k1, b1 = get_k1_b1_not_kran(latitude, longitude)
+
     k2, b2 = perpendicular_line_equation(
         k1, float(latitude), float(longitude))
+
     nx, ny = intersection_point_of_lines(k1, b1, k2, b2)
     name_terminal = None
     for name, lon_max, lon_min in names_terminals:
@@ -537,10 +561,12 @@ def get_dict_mechanisms_number_by_id():
     return dict_mechanisms
 
 if __name__ == "__main__":
-    x1, y1 = 42.80691726848499, 132.88660505374455
-    x2, y2 = 42.81408152044796, 132.89085539601604
-    # x1, y1 = 42.807735079133295, 132.88577535577383
-    # x2, y2 = 42.81760201722565, 132.89163529190128
-    # x1, y1 = 42.81381686151741, 132.89146624081198
-    # x2, y2 = 42.81697813067333, 132.89335636137457
-    # print(straight_line_equation(x1, y1, x2, y2))
+    
+    type_mech = 'sennebogen'
+    # type_mech = 'kran'
+    # number = 1
+    # for term, degress in tests:
+    #     latitude = degress[1]
+    #     longitude = degress[0]
+    #     res = which_terminal(type_mech, number, latitude, longitude)
+    #     print(term, res, term == res)
