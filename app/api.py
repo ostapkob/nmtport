@@ -386,8 +386,10 @@ def add_usm():
         mech = Mechanism.query.get(mechanism_id)
     except Exception as e:
         logger.debug(e)
-    # if float(value) == 1: # FIX
-    #     value = random.randrange(20, 100, 1)/100
+    # if (number==13 or number==11) and float(value) == 1: # FIX
+    if number==7  and float(value) == 1: # FIX
+        value = random.randrange(50, 100, 1)/100
+
     items = mechanism_id, password, latitude, longitude
     test_items = any([item is None for item in items])
     if int(value3) < 5:  # if roller not circle

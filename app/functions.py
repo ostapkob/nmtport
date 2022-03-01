@@ -512,7 +512,10 @@ def hash_now(type_mechanism):
                 str(k): v for k, v in value['data'].items()}
         mongo_data['_id'] = "now"
         posts.delete_one({"_id": "now"})
-        posts.insert_one(mongo_data)
+        if mongo_data:
+            posts.insert_one(mongo_data)
+        else: 
+            posts.insert_one({})
         #logger.debug("NowData: " + str(datetime.now()))
 
 def get_dict_mechanisms_id_by_number():

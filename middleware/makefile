@@ -7,8 +7,14 @@ kran:
 usm:
 	bash nmtport/middleware/usm.sh
 
-find:
-	cat  /var/log/nginx/access.log | rg "number=$n\&" | rg count=
+sen:
+	bash nmtport/middleware/sennebogen.sh
+
+f:
+	cat  /var/log/nginx/access.log | rg "number=$n\&" 
 
 stat:
 	sudo systemctl status nmtport.service
+
+test: 
+	echo "-> $1 = $2"
