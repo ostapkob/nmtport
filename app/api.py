@@ -554,7 +554,7 @@ def add_sennebogen():
             logger.debug(e)
         latitude = data_mech.latitude
         longitude = data_mech.longitude
-    terminal = which_terminal('sennebogen', number, latitude, longitude) # exist 9, 11, 13, 15
+    terminal = which_terminal('sennebogen', number, latitude, longitude)
     new_post = Post(value=x, value2=y, count=count,
                     latitude=latitude, longitude=longitude, mechanism_id=mechanism_id,
                     terminal=terminal)

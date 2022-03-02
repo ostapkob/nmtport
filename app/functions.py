@@ -417,7 +417,7 @@ def line_kran(number):
     return None, None
 
 def get_kompleks(latitude, longitude):
-    x = (longitude-132) / (latitude-42)
+    x = (longitude-132) / (latitude-42+0.0000001)
     if (x < 1.1):  
         return 1
     else:
@@ -429,10 +429,12 @@ def get_kompleksGut(latitude, longitude):
     return 4
 
 def get_k1_b1_not_kran(latitude, longitude):
-      kompleks = get_kompleks(latitude, longitude)
-      if  kompleks == 1:
+    kompleks = get_kompleks(latitude, longitude)
+    latitude = int(latitude)
+    longitude = int(longitude)
+    if  kompleks == 1:
         return [0.593270908597224, 107.49050635162425] # ut
-      else:
+    else:
         if get_kompleksGut(latitude, longitude) == 5:
           return [1.696165886483065, 60.30071859473439] # 5k
         else: 
@@ -440,17 +442,20 @@ def get_k1_b1_not_kran(latitude, longitude):
 
 
 def which_terminal(type_mech, number, latitude, longitude):
+    latitude = float(latitude)
+    longitude = float(longitude)
     if type_mech == 'kran': 
         k1, b1 = line_kran(int(number))
     else:
         k1, b1 = get_k1_b1_not_kran(latitude, longitude)
 
     k2, b2 = perpendicular_line_equation(
-        k1, float(latitude), float(longitude))
-
+        k1, latitude, longitude)
+    # print(k1, b1)
     nx, ny = intersection_point_of_lines(k1, b1, k2, b2)
-    name_terminal = None
+    name_terminal = 78 # !make None
     for name, lon_max, lon_min in names_terminals:
+        # print(name, lon_max, ny, lon_min)
         if ny < lon_max and ny > lon_min:
             name_terminal = name
 
@@ -536,10 +541,13 @@ def hash_now(type_mechanism):
                 str(k): v for k, v in value['data'].items()}
         mongo_data['_id'] = "now"
         posts.delete_one({"_id": "now"})
-        if mongo_data:
-            posts.insert_one(mongo_data)
-        else: 
-            posts.insert_one({})
+        posts.insert_one(mongo_data)
+    else:
+        mongo_data = {}
+        mongo_data['_id'] = "now"
+        posts.delete_one({"_id": "now"})
+        posts.insert_one(mongo_data)
+
         #logger.debug("NowData: " + str(datetime.now()))
 
 def get_dict_mechanisms_id_by_number():
@@ -563,10 +571,14 @@ def get_dict_mechanisms_number_by_id():
 if __name__ == "__main__":
     
     type_mech = 'sennebogen'
+    number = 1
+    lat=42.805052
+    lon=132.905318
+
+    res = which_terminal(type_mech, number, lat, lon)
+    print(res)
     # type_mech = 'kran'
     # number = 1
     # for term, degress in tests:
     #     latitude = degress[1]
     #     longitude = degress[0]
-    #     res = which_terminal(type_mech, number, latitude, longitude)
-    #     print(term, res, term == res)

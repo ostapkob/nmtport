@@ -88,7 +88,6 @@ def get_time_by_minuts(data_per_shift: dict, date_shift: datetime, shift: int) -
                 flag_start = False
             if val_minute > 0:
                 time_by_minuts[key]['finish'] = date_t
-                time_by_minuts[key]['terminal'] = terminal # last item
             if delta_minutes >= datetime.now() and date_shift == today_date and today_shift == shift: # if now moment
                 break
         time_by_minuts[key]['data'] = add_4_minutes(time_by_minuts[key]['data'])
@@ -96,6 +95,7 @@ def get_time_by_minuts(data_per_shift: dict, date_shift: datetime, shift: int) -
             resons = process_resons(get_resons(TYPE, date_shift, shift), ids_and_nums)
         except Exception as e:
             resons = {}
+        time_by_minuts[key]['terminal'] = terminal # last item
         time_by_minuts[key]['resons'] = convert_resons_to_720minuts(resons.get(mech.number, None), start_shift)
     return time_by_minuts
 
