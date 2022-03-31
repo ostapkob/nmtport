@@ -493,8 +493,8 @@ def add_kran2():
         mech = Mechanism.query.get(mechanism_id)
     except Exception as e:
         logger.debug(e)
-    # if number == 28 and value == 1: # FIX
-    #     value = 2 
+    if (number == 31 or number == 17 or number==28) and value == 1: # FIX
+        value = 2 
     items = mechanism_id, password, latitude, longitude, value, count
     test_items = any([item is None for item in items]) # if this id is exist
     if test_items:

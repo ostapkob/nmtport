@@ -13,9 +13,9 @@ from datetime import date, datetime, timedelta
 from middleware import  list_mechanisms 
 kran = list_mechanisms.kran
 usm = list_mechanisms.usm
-date = date(2022, 1, 30)
-shift = 2
-mech = kran[10]
+date = date(2022, 3, 29)
+shift = 1
+mech = kran[28]
 # cursor = db.session.query(Post).filter(Post.mechanism_id == mech,
 #                                        Post.date_shift == date, Post.shift == shift, Post.value == value)
 # delta = timedelta(seconds=1)
@@ -63,12 +63,12 @@ mech = kran[10]
 print(mech)
 db.session.query(Post)\
     .filter(
-        Post.mechanism_id ==33428,
+        Post.mechanism_id ==mech,
         Post.date_shift == date, 
         Post.shift == shift,
-        # Post.value == 1,
+        Post.value == 1,
     )\
-    .update({"terminal": 9})
+    .update({"value": 2})
     # .update({"value": Post.value*0.55})
 
 # db.session.query(Post)\

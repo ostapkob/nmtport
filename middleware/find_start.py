@@ -45,6 +45,8 @@ def get_start(cursor, zone_start):
 
 
 def get_avr_time(time_start):
+    assert time_start, "no items"
+    print(time_start)
     mysum = timedelta()
     for i in time_start:
         h = i.hour
@@ -53,8 +55,8 @@ def get_avr_time(time_start):
     return mysum/len(time_start)
 
 
-for i in range(1, 10):
-    date_shift = date(2022, 2, i)
+for i in range(1, 2):
+    date_shift = date(2022, 9, i)
     for shift in (1,2):
         start_shift = get_start_shift(date_shift, shift)
         start_shift_h = timedelta(hours=start_shift.hour)
