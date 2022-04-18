@@ -18,3 +18,5 @@ get_all_last_data_state
 kran_20*
 usm_20*
 sennebogen_20*
+/middleware/*.xslx
+*.xslx

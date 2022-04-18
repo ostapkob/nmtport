@@ -15,15 +15,10 @@ from middleware import  list_mechanisms
 import pickle
 from pprint import pp
 from app.functions_for_all import *
+import pandas as pd
 
-# kran = list_mechanisms.kran
-# usm = list_mechanisms.usm
-# date_shift = date(2022, 2, 14)
-# shift = 2
-# mech = kran[8]
 TYPE = "kran"
 HOURS = 10
-
 all_mechs = all_mechanisms_id(TYPE)
 
 
@@ -55,22 +50,26 @@ def get_avr_time(time_start):
     return mysum/len(time_start)
 
 
-for i in range(1, 2):
-    date_shift = date(2022, 9, i)
-    for shift in (1,2):
+if __name__ == "__main__":
+    date_shift = date(2022, 4, 1)
+    for shift in (1,1):
         start_shift = get_start_shift(date_shift, shift)
         start_shift_h = timedelta(hours=start_shift.hour)
         zone_start = start_shift + timedelta(hours=1, minutes=30)
+        print(zone_start)
 
         cursor = db.session.query(Post).filter(
             Post.date_shift == date_shift,
             Post.shift == shift,
-            Post.value != 0,
-            Post.value !=4,
+            # Post.value != 0,
+            # Post.value !=4,
             Post.mechanism_id.in_(all_mechs)
         )
-
-        time_start = get_start(cursor, zone_start)
-        dt = get_avr_time(time_start)
-        avg_time_start = (dt-start_shift_h)
-        print(date_shift, shift, avg_time_start)
+        # for i in cursor:
+        #     print(i)
+        df = pd.DataFrame(cursor)
+        print(df)
+        # time_start = get_start(cursor, zone_start)
+        # dt = get_avr_time(time_start)
+        # avg_time_start = (dt-start_shift_h)
+        # print(date_shift, shift, avg_time_start)
