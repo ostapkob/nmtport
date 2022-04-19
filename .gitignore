@@ -19,4 +19,5 @@ kran_20*
 usm_20*
 sennebogen_20*
 /middleware/*.xslx
-*.xslx
+./*.xslx
+**.xslx

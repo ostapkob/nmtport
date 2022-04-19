@@ -8,6 +8,41 @@ from datetime import datetime, timedelta
 from rich import print
 from openpyxl import Workbook
 import smtplib
+import csv
+from tabulate import tabulate
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+# HOST = 'mail.nmtport.ru'
+HOST = 'smtp.yandex.ru'
+TO = 'Alexander.Ostapchenko@nmtport.ru'
+FROM = 'ostap666@yandex.ru'
+# FROM ='office-rocket@yandex.ru'
+# FROM ='smartportdaly@yandex.ru'
+
+passw = ''
+nameTerminal = {1: 'УТ-1 ', 2: "ГУТ-2"}
+addresses = {
+    1: [
+        'Vadim.Evsyukov@nmtport.ru'
+        'Konstantin.Nikitenko@nmtport.ru'
+        'Maxim.Anufriev@nmtport.ru'
+        'Dmitry.Chernyavskiy@nmtport.ru'
+        ],
+    2: [
+        'Dmitry.Golynsky@nmtport.ru'
+        'Vyacheslav.Gaz@nmtport.ru'
+        'Vladimir.Speransky@nmtport.ru'
+        'Denis.Medvedev@nmtport.ru'
+    ],
+    3: [
+        'Alexander.Ostapchenko@nmtport.ru',
+        'Petr.Gerasimenko@nmtport.ru',
+        'Radion.Bespalov@nmtport.ru'
+    ],
+}
+# passw = 'Port=2022'
+# passw = 'or11235813'
 
 krans = list_mechanisms.kran
 usm = list_mechanisms.usm
@@ -15,16 +50,10 @@ usm = list_mechanisms.usm
 krans_UT = [45, 34, 53, 69, 21, 37, 4, 41, 5, 36, 40, 32, 25, 11, 33, 20, 8, 22, 12, 13, 6, 26, 47, 54, 14, 16, 82]
 krans_GUT = [28, 18, 1, 35, 31, 17, 58, 60, 49, 38, 39, 23, 48, 72, 65, 10]
 
-def getData(mech_id, date_shift, shift, terminal):
+def getData(mech_id, date_shift, shift ):
     mech_id = str(mech_id)
     date_shift= str(date_shift) 
     shift = str(shift)
-    if terminal==1:
-        min_number_berth = '7'
-        max_number_berth = '15'
-    elif terminal==2:
-        min_number_berth = '70'
-        max_number_berth = '78'
     ServerName = "192.168.99.106"
     Database = "nmtport"
     UserPwd = "ubuntu:Port2020"
@@ -42,16 +71,15 @@ def getData(mech_id, date_shift, shift, terminal):
     where 
     mechanism_id=""" + mech_id + """ and 
     date_shift='"""  + date_shift + """' and
-    shift=""" + shift + """ and
-    terminal>=""" + min_number_berth  + """ and
-    terminal<=""" + max_number_berth  + """ order by timestamp  """
+    shift=""" + shift + """ 
+    order by timestamp  """
 
     df = pd.read_sql(sql, engine)
     df = df.set_index('time')
     return df
 
 
-def get_diapozones_by_shift (date, shift):
+def get_red_diapozones (date, shift):
     tommorow = date + timedelta(days=1)
     date = str(date) + " "
     tommorow = str(tommorow) + " "
@@ -69,7 +97,7 @@ def get_diapozones_by_shift (date, shift):
         }
     if shift == 2:
         diapozones = {
-        "start" :        [date + '20:00', date + '20:20'],
+        "start" :        [date + '20:00',     date + '20:20'],
         "work_1" :       [date + '20:20',     tommorow + '00:50'],
         "lanch_start" :  [tommorow + '00:50', tommorow + '01:00'],
         "lanch_finish" : [tommorow + '02:00', tommorow + '02:10'],
@@ -94,15 +122,15 @@ def diapozone(df, diapozone):
 
 def get_mech_diapozones(df, diapozones):
     return {
-    "start" : diapozone(df, diapozones['start']),
-    "work_1" : diapozone(df, diapozones['work_1']),
-    "lanch_start" : diapozone(df, diapozones['lanch_start']),
-    "lanch_finish" : diapozone(df, diapozones['lanch_finish']),
-    "work_2" : diapozone(df, diapozones['work_2']),
-    "tea_start" : diapozone(df, diapozones['tea_start']),
-    "tea_finish" : diapozone(df, diapozones['tea_finish']),
-    "work_3" : diapozone(df, diapozones['work_3']),
-    "finish" : diapozone(df, diapozones['finish']),
+        "start" : diapozone(df, diapozones['start']),
+        "work_1" : diapozone(df, diapozones['work_1']),
+        "lanch_start" : diapozone(df, diapozones['lanch_start']),
+        "lanch_finish" : diapozone(df, diapozones['lanch_finish']),
+        "work_2" : diapozone(df, diapozones['work_2']),
+        "tea_start" : diapozone(df, diapozones['tea_start']),
+        "tea_finish" : diapozone(df, diapozones['tea_finish']),
+        "work_3" : diapozone(df, diapozones['work_3']),
+        "finish" : diapozone(df, diapozones['finish']),
     }
 
 def sum_mech_diapozones(diapozones):
@@ -141,7 +169,7 @@ def save_to_xlsx(list_kran, name):
     wb.save(filename = 'kran_periods'+name+'.xlsx')
 
 def find_periods(date, shift, terminal):
-    diapozones = get_diapozones_by_shift(date, shift)
+    diapozones = get_red_diapozones(date, shift)
     list_mechanisms = []
     search_conditions = (
         ('work_1', 'start', 0),
@@ -151,8 +179,13 @@ def find_periods(date, shift, terminal):
         ('work_3', 'tea_finish', 0),
         ('work_3', 'finish', -1)
     )
-    for kran_num, kran_id in krans.items():
-        df = getData(kran_id, date, shift, terminal)
+    if terminal==1:
+        krans_terminal = [(k, v) for k, v in krans.items() if k in krans_UT]
+    else:
+        krans_terminal = [(k, v) for k, v in krans.items() if k in krans_GUT]
+
+    for kran_num, kran_id in krans_terminal:
+        df = getData(kran_id, date, shift)
         mech_diapozones = get_mech_diapozones(df, diapozones)
         mech_sum = sum_mech_diapozones(mech_diapozones)
         mech_zones = []
@@ -167,35 +200,88 @@ def find_periods(date, shift, terminal):
     return list_mechanisms
 
 
-if __name__ == "__main__":
-    HOST = 'mail.nmtport.ru'
-    # TO = 'Alexander.Ostapchenko@nmtport.ru'
-    TO = 'ostap666@yandex.ru'
-    # FROM ='ostap@yandex.ru'
-    FROM = 'Alexander.Ostapchenko@nmtport.ru'
-    SUBJECT = "test"
-    BODY = "\r\n".join((
-        "From: %s" % FROM,
-        "To: %s"  % TO,
-        "Subject: %s" % SUBJECT,
-        "",
-        "texxxxxxxxxxxxxt",
+def make_table(data, shift):
+    if not data:
+        return None
+    table = '<h5>' +  str(shift) + " смена </h5>  <table>" 
+    titles = [
+        "номер крана", 
+        "начало смены", 
+        "окончание перед обедом", 
+        "начало после обеда ", 
+        "окончание перед тех. перерывом", 
+        'начало после тех. перерыва', 
+        'окончание смены'
+        ]
+    data.insert(0,titles)
+    for row in data:
+        table += '<tr>'
+        for cell in row:
+            cell = '' if cell is None else cell
+            table += f'<td>{cell}</td>'
+        table += '</tr>'
+    table += '</table>' 
+    return table
 
-    ))
-    # pd.options.display.max_rows = 210 
-    yesterday =  datetime.now().date() - timedelta(days=1)
-    # UT_1 = find_periods(yesterday, 1, 1)
-    # UT_2 = find_periods(yesterday, 2, 1)
-    # GUT_1 = find_periods(yesterday, 1, 2)
-    # GUT_2 = find_periods(yesterday, 2, 2)
-    # save_to_xlsx(list_kran_UT, 'UT')
-    # save_to_xlsx(list_kran_GUT, 'GUT')
-    # print(list_kran_UT)
-    # print(list_kran_GUT)
+def make_html(table1, table2,date):
+    html = """
+    <html>
+    <head>
+    <style> 
+      table, th, td {{ border: 1px solid #999; border-collapse: collapse; }}
+      th, td {{ padding: 5px; }}
+    </style>
+    </head>
+    <body><p>""" + date + """</p>
+    <p>Позднее начало, ранее окончание по 
+    производственным периодам</p>""" + table1 +  """ 
+    </br>""" + table2 +  """ 
+    </br>
+    <a href="https://m1.nmtport.ru/krans"> SmartPort </a>
+    </body></html>
+    """
+    return html
+
+
+def sent_email(periods1, periods2, date, terminal):
+    date = str(date)
+    data = periods1 +['-']*7+ periods2
+    SUBJECT = "простои кранов "+ nameTerminal[terminal]  + date
+    text = date + """
+    Позднее начало, ранее окончание по производственным периодам
+    {table}
+    SmartPort
+    """
+    table1 = make_table(periods1, 1)
+    table2 = make_table(periods2, 2)
+    html = make_html(table1, table2, date)
+
+    text = text.format(table=tabulate(data, headers="firstrow", tablefmt="grid"))
+    html = html.format(table=tabulate(data, headers="firstrow", tablefmt="html"))
+
+    message = MIMEMultipart(
+    "alternative", None, [MIMEText(text), MIMEText(html,'html')])
+    message['Subject'] = SUBJECT
+    message['From'] = FROM
+    message['To'] = TO
+
     server = smtplib.SMTP_SSL(HOST, 465)
     server.ehlo()
-    server.login('Alexander.Ostapchenko@nmtport.ru', 'Port=2022')
-    server.sendmail(FROM, [TO], BODY)
+    server.login(FROM, passw)
+    server.sendmail(FROM, [TO], message.as_string())
     server.quit()
+
+
+if __name__ == "__main__":
+
+    yesterday =  datetime.now().date() - timedelta(days=1)
+    UT_shift_1 = find_periods(yesterday, 1, 1)
+    UT_shift_2 = find_periods(yesterday, 2, 1)
+    # GUT_1 = find_periods(yesterday, 1, 2)
+    # GUT_2 = find_periods(yesterday, 2, 2)
+    sent_email(UT_shift_1, UT_shift_2, yesterday, 1)
+    # save_to_xlsx(UT_1, 'UT')
+    # save_to_xlsx(GUT_1, 'GUT')
+
 
 
