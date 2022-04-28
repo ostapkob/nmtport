@@ -8,7 +8,6 @@
   Numbers berths
   Triangle css
   update Invite
-  HardReset Map
 
 # Power Bi
   work

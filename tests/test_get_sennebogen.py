@@ -13,6 +13,10 @@ from psw import post_pass, debug
 
 pasw = post_pass[2]
 
+'''
+this test script for sent get reques to Flask
+'''
+
 class Mechanism:
     if debug:
         ip = 'http://127.0.0.1:5000'

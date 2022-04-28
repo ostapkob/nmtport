@@ -1,4 +1,5 @@
 #!/bin/bash
+# your app must be run on 5000 port
 month=2
 year=2022
 url=127.0.0.1:5000
