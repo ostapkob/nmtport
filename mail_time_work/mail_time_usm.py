@@ -30,9 +30,12 @@ FROM ='smartportdaly@yandex.ru'
 nameTerminal = {1: "УТ-1", 2: "ГУТ-2"}
 addresses = {
     1: [
+        'Petr.Gerasimenko@nmtport.ru',
+        'Fedor.Tormasov@nmtport.ru',
         'Alexander.Ostapchenko@nmtport.ru',
         ],
     2: [
+        # 'Petr.Gerasimenko@nmtport.ru',
         'Alexander.Ostapchenko@nmtport.ru',
     ],
 }
@@ -206,7 +209,7 @@ def find_periods(date, shift, terminal):
 
         if any(mech_zones):
             mechanisms[usm_num] = mech_zones
-    print(mechanisms)
+    # print(mechanisms)
     return mechanisms
 
 def get_bg(time, red_zones, en):
@@ -288,6 +291,10 @@ def count_different(real_time, border_zones):
     return int(sum_time)
 
 def make_html(table1, table2, date):
+    if table1 is None:
+        table1 = ""
+    if table2 is None:
+        table2 = ""
     html = """
     <html>
         <head>
@@ -334,7 +341,7 @@ def make_html(table1, table2, date):
             производственным периодам</p>""" + table1 +  """ 
             </br>""" + table2 +  """ 
             </br>
-            <a href="https://m1.nmtport.ru/krans"> SmartPort </a>
+            <a href="https://m1.nmtport.ru/usm"> SmartPort </a>
         </body>
     </html>
     """
@@ -383,7 +390,10 @@ def every_day():
     yesterday =  datetime.now().date() - timedelta(days=1)
     UT_shift_1 = find_periods(yesterday, 1, 1)
     UT_shift_2 = find_periods(yesterday, 2, 1)
-    sent_email(UT_shift_1, UT_shift_2, yesterday, 1)
+    if UT_shift_1 or UT_shift_2:
+        sent_email(UT_shift_1, UT_shift_2, yesterday, 1)
+    else:
+        print('empty')
 
 
 if __name__ == "__main__":
@@ -391,8 +401,8 @@ if __name__ == "__main__":
     while True:
         hour = datetime.now().hour
         minute = datetime.now().minute
-        if hour==10 and minute==2:
-            print(f'time {hour}:{minute}')
+        if hour==10 and minute==10:
+            print(datetime.now())
             every_day()
             time.sleep(60)
         time.sleep(15)

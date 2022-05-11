@@ -35,8 +35,8 @@ addresses = {
         'Maxim.Anufriev@nmtport.ru'
         'Konstantin.Nikitenko@nmtport.ru'
 
-        # 'Dmitry.Chernyavskiy@nmtport.ru',
-        # 'Radion.Bespalov@nmtport.ru',
+            # 'Dmitry.Chernyavskiy@nmtport.ru',
+            # 'Radion.Bespalov@nmtport.ru',
         'Petr.Gerasimenko@nmtport.ru',
         'Alexander.Ostapchenko@nmtport.ru',
         'ostap666@yandex.ru'
@@ -312,6 +312,9 @@ def count_different(real_time, border_zones):
     return int(sum_time)
 
 def make_html(table1, table2, date):
+    table1 = table1 if table1  else ""
+    table2 = table2 if table2  else ""
+
     html = """
     <html>
         <head>
@@ -409,7 +412,6 @@ def every_day():
     UT_shift_2 = find_periods(yesterday, 2, 1)
     GUT_shift_1 = find_periods(yesterday, 1, 2)
     GUT_shift_2 = find_periods(yesterday, 2, 2)
-
     sent_email(UT_shift_1, UT_shift_2, yesterday, 1)
     sent_email(GUT_shift_1, GUT_shift_2, yesterday, 2)
 
@@ -431,7 +433,7 @@ if __name__ == "__main__":
     # name_file_pickle = 'dump'+'_'+str(yesterday)+"_"+str(1)
     # with open(name_file_pickle, 'rb') as f:
     #     UT_shift_1 = pickle.load(f)
-    # name_file_pickle = 'dump'+'_'+str(yesterday)+"_"+str(2)
+    # name_file_pickle = 'dump'+'_'+str(yesterday)+"_"+str(3)
     # with open(name_file_pickle, 'rb') as f:
     #     UT_shift_2 = pickle.load(f)
 
@@ -442,7 +444,7 @@ if __name__ == "__main__":
         hour = datetime.now().hour
         minute = datetime.now().minute
         if hour==10 and minute==0:
-            print(f'time {hour}:{minute}')
+            print(datetime.now())
             every_day()
             time.sleep(60)
         time.sleep(15)
