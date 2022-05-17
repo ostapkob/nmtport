@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from app import db
-from app.model import  Mechanism
+from app.model import  Mechanism, Rfid_ids
 from datetime import datetime, timedelta
 from typing import Dict, List
 from collections import defaultdict
@@ -143,3 +143,9 @@ def get_start_shift(date_shift, shift):
         return start_shift.replace(hour=8, minute=0, second=0, microsecond=0)
     else:
         return start_shift.replace(hour=20, minute=0, second=0, microsecond=0)
+
+def fio_by_rfid_id(rfid_id):
+    val = Rfid_ids.query.filter(Rfid_ids.rfid_id==rfid_id).first()
+    if val:
+        return val.fio
+    return None

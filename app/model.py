@@ -177,3 +177,31 @@ class Downtime(db.Model):
     def get(self):
         return [self.id, self.name]
 
+
+class Rfid_work(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    mechanism_id = db.Column(db.Integer, db.ForeignKey('mechanism.id'))
+    rfid_id = db.Column(db.Integer) 
+    flag = db.Column(db.Boolean(64))
+    timestamp = db.Column(db.DateTime, index=True)
+
+    def __init__(self, mechanism_id, rfid_id, flag, timestamp=None):
+        self.mechanism_id = mechanism_id
+        self.rfid_id = rfid_id
+        self.flag = flag 
+        self.timestamp = timestamp or datetime.now() 
+
+    def __repr__(self):
+        return f'{self.timestamp}, {self.id}, {self.mechanism_id}, {self.rfid_id}, {flag}'
+
+
+class Rfid_ids(db.Model):
+    rfid_id = db.Column(db.Integer, primary_key=True) 
+    fio = db.Column(db.String(64))
+
+    def __init__(self, rfid_id, fio):
+        self.rfid_id = rfid_id
+        self.fio = fio 
+
+    def __repr__(self):
+        return f'{self.rfid_id}, {self.flag}'

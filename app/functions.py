@@ -12,6 +12,30 @@ from app.sennebogen import sennebogen_periods, time_for_shift_sennebogen
 from config import HOURS
 from app.functions_for_all import all_mechanisms_id, today_shift_date #  all_mechanisms_type, all_number, name_by_id
 
+def add_fix_post(post):  # !move
+    ''' I use it fix because arduino sometimes accumulates an extra minute '''
+    try:
+        last = db.session.query(Post).filter(
+            Post.mechanism_id == post.mechanism_id).order_by(Post.timestamp.desc()).first()
+    except Exception as e:
+        logger.debug(e)
+    if last:  # if not exist item in db not use function
+        dt_seconds = (post.timestamp - last.timestamp).seconds
+    else:
+        dt_seconds = 201
+    if dt_seconds < 200:  # whatever the difference is not big
+        last_minute = last.timestamp.minute
+        post_minute = post.timestamp.minute
+        dt_minutes = post_minute - last_minute
+        if dt_minutes == 2 or dt_minutes == -58:
+            post.timestamp -= timedelta(seconds=30)
+    db.session.add(post)
+    try:
+        db.session.commit()
+    except Exception as e:
+        logger.debug(e)
+        time.sleep(10)
+        db.session.commit()
 
 def multiple_5(date):  # not use
     '''Return time multiple 5 minutes and remite microseconds'''

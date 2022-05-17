@@ -10,148 +10,113 @@ current_dir = os.path.dirname(os.path.abspath(
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
-from psw import post_pass, debug
+from psw import post_passw, debug
 
-class Mechanism:
-    # ip ='http://18.139.162.128'
-    if debug:
-        ip = 'http://127.0.0.1:5000'
-    else:
-        ip = 'http://127.0.0.1:5000'
-        # ip = 'https://m1.nmtport.ru'
+class USM:
+    api_work = '/api/v2.0/add_usm_work?'
+    api_rfid = '/api/v2.0/add_usm_rfid?'
+    ip = 'http://127.0.0.1:5000'
 
-    def __init__(self, mechanism_id, value, value2,
-                 value3, count, latitude, longitude):
+    def __repr__(self):
+        return f'u{self.number, self.passw, self.count, self.lever, self.roll, self.lat, self.lon}'
+
+    def __init__(self, mechanism_id, number, count, lever, roll, lat, lon):
+        self.passw = post_passw[1]
         self.mechanism_id = mechanism_id
-        self.password = post_pass
-        self.value = value
-        self.value2 = value2
-        self.value3 = value3
-        self.latitude = latitude
-        self.longitude = longitude
+        self.number = number
         self.count = count
+        self.lever = lever
+        self.roll = roll
+        self.lat = lat
+        self.lon = lon
 
-    def send_get_request(self):
-        params = {'mechanism_id': self.mechanism_id,
-                  'password': self.password,
-                  'value': self.value,
-                  'value2': self.value2,
-                  'value3': self.value3,
+    def send_req_work(self):
+        params = {'number': self.number,
+                  'passw': self.passw,
                   'count': self.count,
-                  'latitude': round(self.latitude, 4),
-                  'longitude': round(self.longitude, 4)}
+                  'lever': self.lever,
+                  'roll': self.roll,
+                  'lat': round(self.lat, 4),
+                  'lon': round(self.lon, 4)}
         try:
-            http = (self.ip+self.api)
+            http = (self.ip+self.api_work)
             response = requests.get(http, params)
             response.raise_for_status()
-            print(self.mechanism_id, http, self.password, self.value,
-                  self.value2, self.value3, self.count,
-                  self.latitude, self.longitude)
+            print(http, self.number, self.count, self.passw, self.lever,
+                  self.roll, self.lat, self.lon)
         except HTTPError as http_err:
-            print(f'HTTP error occurred: {http_err}')
+            print(f'HTTP error occurred -> {http_err}')
         except Exception as err:
-            print(f'Other error occurred: {err}')
+            print(f'Other error occurred -> {err}')
         else:
-            print('Success!', datetime.now())
+            print('Success! ->', datetime.now())
         self.count += 1
 
-    def chenge_value(self, value):
-        self.value = value
+    def send_req_rfid(self):
+        params = {'number': self.number,
+                  'passw': self.passw,
+                  'rfid': self.rfid_id,
+                  'flag': self.flag,
+                  }
+        try:
+            http = (self.ip+self.api_work)
+            response = requests.get(http, params)
+            response.raise_for_status()
+            print(http, self.number, self.rfid_id, self.flag) 
+        except HTTPError as http_err:
+            print(f'HTTP error occurred -> {http_err}')
+        except Exception as err:
+            print(f'Other error occurred -> {err}')
+        else:
+            print('Success! ->', datetime.now())
+        self.count += 1
 
-    def chenge_value2(self, value):
-        self.value2 = value
 
-    def chenge_value3(self, value):
-        self.value3 = value
+    def change_lever(self, value):
+        self.lever = value
 
-    def chenge_position(self, lat, lng):
-        self.latitude += lat
-        self.longitude += lng
+    def change_roll(self, value):
+        self.roll = value
 
-
-class USM(Mechanism):
-    api = '/api/v1.0/add_usm?'
-
-    def __repr__(self):
-        return f'u{self.mechanism_id, self.password, self.value, self.value2, self.value3, self.count, self.latitude, self.longitude}'
-
-
-class Kran(Mechanism):
-    api = '/api/v1.0/add_kran?'
-
-    def __repr__(self):
-        return f'k{self.mechanism_id, self.password, self.value,self.value2, self.value3, self.count, self.latitude, self.longitude}'
+    def change_position(self, lat, lon):
+        self.lat += lat
+        self.lon += lon
 
 
 if __name__ == "__main__":
-    Pt1 = USM(mechanism_id=32046, value=0, value2=0, value3=0,
-              count=0, latitude=42.8089, longitude=132.8865)
-    Pt2 = USM(mechanism_id=32047, value=0, value2=0, value3=0,
-              count=0, latitude=42.8082, longitude=132.8869)
-    E3 = USM(mechanism_id=32711, value=0, value2=0, value3=0,
-             count=0, latitude=42.8094, longitude=132.8878)
-    E4 = USM(mechanism_id=32740, value=0, value2=0, value3=0,
-             count=0, latitude=42.8106, longitude=132.8885)
-    S5 = USM(mechanism_id=32770, value=0, value2=0, value3=0,
-             count=0, latitude=42.8118, longitude=132.8893)
-    S6 = USM(mechanism_id=32771, value=0, value2=0, value3=0,
-             count=0, latitude=42.8122, longitude=132.8887)
-    S7 = USM(mechanism_id=32772, value=0, value2=0, value3=0,
-             count=0, latitude=42.8144, longitude=132.8899)
-    S8 = USM(mechanism_id=32773, value=0, value2=0, value3=0,
-             count=0, latitude=42.8171, longitude=132.8926)
-    U9 = USM(mechanism_id=32941, value=0, value2=0, value3=0,
-             count=0, latitude=42.8132, longitude=132.8899)
-    U10 = USM(mechanism_id=32942, value=0, value2=0, value3=0,
-              count=0, latitude=42.8144, longitude=132.8913)
-    E11 = USM(mechanism_id=33287, value=0, value2=0, value3=0,
-              count=0, latitude=42.8152, longitude=132.8910)
-    E12 = USM(mechanism_id=33287, value=0, value2=0, value3=0,
-              count=0, latitude=42.8152, longitude=132.8910)
-    E13 = USM(mechanism_id=34213, value=0, value2=0, value3=0,
-              count=0, latitude=42.8152, longitude=132.8910)
-    kran4 = Kran(mechanism_id=34213, value=0, value2=0, value3=0,
-                 count=0, latitude=42.8106, longitude=132.8880)
-    kran12 = Kran(mechanism_id=13893, value=0, value2=0, value3=0,
-                  count=0, latitude=42.8114, longitude=132.8882)
-    kran13 = Kran(mechanism_id=15125, value=0, value2=0, value3=0,
-                  count=0, latitude=42.8098, longitude=132.8884)
-    kran22 = Kran(mechanism_id=5908,  value=0, value2=0, value3=0,
-                  count=0, latitude=42.8132, longitude=132.89)
-    kran14 = Kran(mechanism_id=15512,  value=3, value2=0, value3=0,
-                  count=0, latitude=42.8161, longitude=132.8928)
-    kran16 = Kran(mechanism_id=15510,  value=3, value2=0, value3=0,
-                  count=0, latitude=42.8142, longitude=132.8915)
+    print(post_passw)
+    S5  = USM(mechanism_id=32770, number=5,  count=0, lever=0, roll=0,  lat=42.8118, lon=132.8893)
+    S6  = USM(mechanism_id=32771, number=6,  count=0, lever=0, roll=0,  lat=42.8122, lon=132.8887)
+    S7  = USM(mechanism_id=32772, number=7,  count=0, lever=0, roll=0,  lat=42.8144, lon=132.8899)
+    S8  = USM(mechanism_id=32773, number=8,  count=0, lever=0, roll=0,  lat=42.8171, lon=132.8926)
+    U9  = USM(mechanism_id=32941, number=9,  count=0, lever=0, roll=0,  lat=42.8132, lon=132.8899)
+    U10 = USM(mechanism_id=32942, number=10, count=0, lever=0, roll=0,  lat=42.8144, lon=132.8913)
+    E11 = USM(mechanism_id=33287, number=11, count=0, lever=0, roll=0,  lat=42.8152, lon=132.8910)
+    E12 = USM(mechanism_id=34213, number=12, count=0, lever=0, roll=0,  lat=42.8152, lon=132.8910)
+    E13 = USM(mechanism_id=34214, number=13, count=0, lever=0, roll=0,  lat=42.8152, lon=132.8910)
 
-    usms = Pt1, Pt2,  E4, S5,  S6,  S7,  S8, U9,  U10, E11, E12, E13
-    usms = E12,  # S5,  S6,  S7,  S8, U9,  U10, E11
-    krans = kran12,  kran13, kran22, kran14, kran16
-    mechanisms = usms
+    usms = S5,  S6,  S7,  S8, U9,  U10, E11, E12, E13
 
     flag = True
     lat = 0.0001
-    lng = -0.0001
+    lon = -0.0001
     last_sent = time.time() - 61
-    [x.chenge_value(0) for x in usms]
-    [x.chenge_value3(0) for x in usms]
+    [x.change_lever(0) for x in usms]
+    [x.change_roll(0) for x in usms]
+    # [m.send_req_rfid() for m in usms]
 
-    [print(x) for x in mechanisms]
-    kran4.chenge_value(3)
-    kran13.chenge_value(3)
-    kran12.chenge_value(3)
-    kran22.chenge_value(3)
+    [print(x) for x in usms]
     while True:
-        if time.time() - last_sent >= 70.0:
+        if time.time() - last_sent >= 60.0:
             last_sent = time.time()
-            # n += 0.01
-            # [x.chenge_value(n) for x in usms[::3]]
-            [m.chenge_position(lat, lng) for m in mechanisms]
-            [m.send_get_request() for m in mechanisms]
+            time.sleep(1)
+            [m.change_position(lat, lon) for m in usms]
+            [m.send_req_work() for m in usms]
             if flag:
                 lat = -0.0002
-                lng = -0.0005
+                lon = -0.0005
                 flag = False
             else:
                 lat = 0.0002
-                lng = 0.0004
+                lon = 0.0004
                 flag = True

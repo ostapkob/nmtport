@@ -4,14 +4,14 @@ from flask import render_template  # ,redirect
 from app import db, app
 from app.model import Mechanism, Post
 from datetime import datetime, timedelta
-from app.functions import   add_fio, state_mech,  get_status_alarm, get_dict_mechanisms_number_by_id, get_dict_mechanisms_id_by_number
+from app.functions import   *
+from app.functions_for_all import *
 from app.usm import time_for_shift_usm, usm_periods
 from app.kran import time_for_shift_kran, kran_periods
 from app.sennebogen import time_for_shift_sennebogen, sennebogen_periods
-from app.functions import image_mechanism 
-from app.functions_for_all import all_mechanisms_id, today_shift_date, id_by_number, name_by_id
+from app.functions import image_mechanism, add_fix_post
  # all_mechanisms_type, all_number, name_by_id
-from psw import post_pass
+from psw import post_passw
 
 import time
 from config import HOURS
@@ -28,30 +28,6 @@ mongodb = client['HashShift']
 dict_mechanisms_number_by_id = get_dict_mechanisms_number_by_id()
 dict_mechanisms_id_by_number = get_dict_mechanisms_id_by_number()
 
-def add_fix_post(post):  # !move
-    ''' I use it fix because arduino sometimes accumulates an extra minute '''
-    try:
-        last = db.session.query(Post).filter(
-            Post.mechanism_id == post.mechanism_id).order_by(Post.timestamp.desc()).first()
-    except Exception as e:
-        logger.debug(e)
-    if last:  # if not exist item in db not use function
-        dt_seconds = (post.timestamp - last.timestamp).seconds
-    else:
-        dt_seconds = 201
-    if dt_seconds < 200:  # whatever the difference is not big
-        last_minute = last.timestamp.minute
-        post_minute = post.timestamp.minute
-        dt_minutes = post_minute - last_minute
-        if dt_minutes == 2 or dt_minutes == -58:
-            post.timestamp -= timedelta(seconds=30)
-    db.session.add(post)
-    try:
-        db.session.commit()
-    except Exception as e:
-        logger.debug(e)
-        time.sleep(10)
-        db.session.commit()
 
 def corect_position(mech, latitude, longitude):
     if float(latitude) == 0 or float(longitude) == 0: # get last values
@@ -396,7 +372,7 @@ def add_usm():
         value = 0
     if test_items:
         return 'Bad request'
-    if password not in post_pass:
+    if password not in post_passw:
         return 'Bad password'
     if int(mechanism_id) not in all_mechanisms_id('usm'):
         return 'Not this id'
@@ -444,7 +420,7 @@ def add_kran():
     test_items = any([item is None for item in items]) # if this id is exist
     if test_items:
         return 'Bad request'
-    if password not in post_pass:
+    if password not in post_passw:
         return 'Bad password'
     if int(mechanism_id) not in all_mechanisms_id('kran'):
         return 'Not this id or not kran'
@@ -493,13 +469,13 @@ def add_kran2():
         mech = Mechanism.query.get(mechanism_id)
     except Exception as e:
         logger.debug(e)
-    if (number == 31 or number == 17 or number==1) and value == 1: # FIX
+    if (number == 31 or number == 17) and value == 1: # FIX
         value = 2 
     items = mechanism_id, password, latitude, longitude, value, count
     test_items = any([item is None for item in items]) # if this id is exist
     if test_items:
         return 'Bad request'
-    if password not in post_pass:
+    if password not in post_passw:
         return 'Bad password'
     if number in krans_if_3_then_2 and value == 3:
         value = 2
@@ -539,7 +515,7 @@ def add_sennebogen():
 
     if test_items:
         return 'Bad request'
-    if password not in post_pass:
+    if password not in post_passw:
         return 'Bad password'
     if int(mechanism_id) not in all_mechanisms_id(type_mechanism):
         return 'Not this id'
@@ -572,7 +548,7 @@ def add_post():
         keys = [p for p in request_j.keys()]
         if not set(keys).issubset(need_keys):
             abort(400)
-        if request_j['password'] not in post_pass:
+        if request_j['password'] not in post_passw:
             abort(403)  # need use this password in Arduino
         if request_j['mechanism_id'] not in all_mechanisms_id():
             abort(405)
@@ -611,3 +587,64 @@ def wrong_password(error):
     return make_response(jsonify({'error': 'Wrong password'}), 403)
 
 
+@app.route('/api/v2.0/add_usm_work', methods=['GET'])
+def add_usm2():
+    '''add post by GET request from arduino'''
+    # mechanism_id = request.args.get('mechanism_id')
+    type_mech = 'usm'
+    number = request.args.get('number')
+    mech_id = id_by_number(type_mech, number)  
+    passw = request.args.get('passw')
+    count = request.args.get('count')
+    lever = request.args.get('lever')
+    roll = request.args.get('roll')
+    lat = request.args.get('lat')
+    lon = request.args.get('lon')
+    items = number, mech_id, passw, count, lever, roll, lat, lon
+    if any([item is None for item in items]):
+        return 'Bad request'
+    if mech_id is None:
+        return 'No this number' + type_mech
+    if passw not in post_passw:
+        return 'Bad password'
+    if int(roll) < 5:  # if roller not circle
+        lever= 0
+    if number in usm_no_move:
+        lat = 0
+        lon = 0
+    if float(lat) == 0 or float(lon) == 0: # get last position
+        try:
+            data_mech = db.session.query(Post).filter(
+                Post.mechanism_id == mech_id).order_by(Post.timestamp.desc()).first()
+        except Exception as e:
+            logger.debug(e)
+        lat = data_mech.latitude
+        lon = data_mech.longitude
+    terminal = which_terminal(type_mech, number, lat, lon) # exist 9, 11, 13, 15
+
+    new_post = Post(count=count, value=lever, value3=roll, 
+                    latitude=lat, longitude=lon, mechanism_id=mech_id,
+                    terminal=terminal)
+    add_fix_post(new_post)
+    return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
+
+
+@app.route('/api/v2.0/add_usm_rfid', methods=['GET'])
+def add_usm_rfid_2():
+    '''add post by GET request from arduino'''
+    type_mech = 'usm'
+    number = request.args.get('number')
+    mech_id = id_by_number(type_mech, number)  
+    passw = request.args.get('passw')
+    rfid_id = request.args.get('rfid')
+    flag = request.args.get('flag')
+    items = number, mech_id, passw, rfid, flag 
+    if any([item is None for item in items]):
+        return 'Bad request'
+    if mech_id is None:
+        return 'No this number' + type_mech
+    if passw not in post_passw:
+        return 'Bad password'
+    fio = fio_by_rfid_id(rfid_id)
+    res = fio, type_mech, number, mech_id, passw, rfid_id, flag, items
+    print(res)
