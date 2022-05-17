@@ -12,6 +12,30 @@ from app.sennebogen import sennebogen_periods, time_for_shift_sennebogen
 from config import HOURS
 from app.functions_for_all import all_mechanisms_id, today_shift_date #  all_mechanisms_type, all_number, name_by_id
 
+def add_fix_post(post):  # !move
+    ''' I use it fix because arduino sometimes accumulates an extra minute '''
+    try:
+        last = db.session.query(Post).filter(
+            Post.mechanism_id == post.mechanism_id).order_by(Post.timestamp.desc()).first()
+    except Exception as e:
+        logger.debug(e)
+    if last:  # if not exist item in db not use function
+        dt_seconds = (post.timestamp - last.timestamp).seconds
+    else:
+        dt_seconds = 201
+    if dt_seconds < 200:  # whatever the difference is not big
+        last_minute = last.timestamp.minute
+        post_minute = post.timestamp.minute
+        dt_minutes = post_minute - last_minute
+        if dt_minutes == 2 or dt_minutes == -58:
+            post.timestamp -= timedelta(seconds=30)
+    db.session.add(post)
+    try:
+        db.session.commit()
+    except Exception as e:
+        logger.debug(e)
+        time.sleep(10)
+        db.session.commit()
 
 def multiple_5(date):  # not use
     '''Return time multiple 5 minutes and remite microseconds'''
@@ -568,11 +592,26 @@ def get_dict_mechanisms_number_by_id():
             logger.debug(e)
     return dict_mechanisms
 
+def dez10_to_dez35C(n):
+    '''
+        convert rf_idid to "text_format" rfid
+        https://guardsaas.com/ru/content/keycode
+    '''
+    n = str(n).zfill(10)
+    hex_n = hex(int(n)).split('x')[-1]
+    hex_n = hex_n.zfill(6)
+    left = str(int(hex_n[:2], 16))
+    left = left.zfill(3)
+    right = str(int(hex_n[2:], 16))
+    right = right.zfill(5)
+    # return left+','+right
+    return str(int(left))+'/'+right
+
 if __name__ == "__main__":
     
     type_mech = 'sennebogen'
     number = 1
-    lat=42.805052
+    lat=43.805052
     lon=132.905318
 
     res = which_terminal(type_mech, number, lat, lon)
