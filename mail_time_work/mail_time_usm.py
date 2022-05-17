@@ -30,34 +30,38 @@ FROM ='smartportdaly@yandex.ru'
 nameTerminal = {1: "УТ-1", 2: "ГУТ-2"}
 addresses = {
     1: [
+        'Pavel.Shunin@nmtport.ru',
+        'Oleg.Evsyukov@nmtport.ru', 
+        'Disp.Smen@nmtport.ru',
+        # 'Vladimir.Grigoriev@nmtport.ru',
+
         'Petr.Gerasimenko@nmtport.ru',
         'Fedor.Tormasov@nmtport.ru',
         'Alexander.Ostapchenko@nmtport.ru',
         ],
     2: [
-        # 'Petr.Gerasimenko@nmtport.ru',
-        'Alexander.Ostapchenko@nmtport.ru',
+        # 'Alexander.Ostapchenko@nmtport.ru',
     ],
 }
 titles = {
     1: [
     "номер крана ", 
-    "начало смены </br>(> 8:20)", 
+    "начало смены </br>(> 8:30)", 
     "окончание перед обедом </br>(< 12:00)", 
     "начало после обеда </br>(> 13:00)", 
     "окончание перед тех. перерывом </br>(< 16:00)", 
-    'начало после тех. перерыва </br>(> 17:00)', 
-    'окончание смены </br>(< 19:40)',
+    'начало после тех. перерыва </br>(> 16:30)', 
+    'окончание смены </br>(< 19:30)',
     'общие потери по крану </br> (минут)',
     ],
     2: [
     "номер крана ", 
-    "начало смены </br>(> 20:20)", 
+    "начало смены </br>(> 20:30)", 
     "окончание перед обедом </br>(< 01:00)", 
     "начало после обеда </br>(> 02:00)", 
     "окончание перед тех. перерывом </br>(< 04:00)", 
-    'начало после тех. перерыва </br>(> 05:00)', 
-    'окончание смены </br>(< 07:40)',
+    'начало после тех. перерыва </br>(> 04:30)', 
+    'окончание смены </br>(< 07:30)',
     'общие потери по крану </br> (минут)',
     ]
 }
@@ -102,27 +106,27 @@ def get_yellow_diapozones (date, shift):
     tommorow = str(tommorow) + " "
     if shift == 1:
         diapozones = {
-        "start" :        [date + '08:00', date + '08:20'],
-        "work_1" :       [date + '08:20', date + '11:58'],
+        "start" :        [date + '08:00', date + '08:30'],
+        "work_1" :       [date + '08:30', date + '11:58'],
         "lanch_start" :  [date + '11:58', date + '12:00'],
         "lanch_finish" : [date + '13:00', date + '13:02'],
         "work_2" :       [date + '13:02', date + '15:58'],
         "tea_start" :    [date + '15:58', date + '16:00'],
-        "tea_finish" :   [date + '17:00', date + '17:02'],
-        "work_3" :       [date + '17:02', date + '19:40'],
-        "finish" :       [date + '19:40', date + '20:00'],
+        "tea_finish" :   [date + '16:00', date + '16:32'],
+        "work_3" :       [date + '16:32', date + '19:30'],
+        "finish" :       [date + '19:30', date + '20:00'],
         }
     if shift == 2:
         diapozones = {
-        "start" :        [date + '20:00',     date + '20:20'],
-        "work_1" :       [date + '20:20',     tommorow + '00:58'],
+        "start" :        [date + '20:00',     date + '20:30'],
+        "work_1" :       [date + '20:30',     tommorow + '00:58'],
         "lanch_start" :  [tommorow + '00:58', tommorow + '01:00'],
         "lanch_finish" : [tommorow + '02:00', tommorow + '02:02'],
         "work_2" :       [tommorow + '02:02', tommorow + '03:58'],
         "tea_start" :    [tommorow + '03:58', tommorow + '04:00'],
-        "tea_finish" :   [tommorow + '05:00', tommorow + '05:02'],
-        "work_3" :       [tommorow + '05:02', tommorow + '07:40'],
-        "finish" :       [tommorow + '07:40', tommorow + '08:00'],
+        "tea_finish" :   [tommorow + '04:30', tommorow + '04:32'],
+        "work_3" :       [tommorow + '04:32', tommorow + '07:30'],
+        "finish" :       [tommorow + '07:30', tommorow + '08:00'],
         }
     return diapozones
 

@@ -35,8 +35,12 @@ addresses = {
         'Maxim.Anufriev@nmtport.ru'
         'Konstantin.Nikitenko@nmtport.ru'
 
-            # 'Dmitry.Chernyavskiy@nmtport.ru',
-            # 'Radion.Bespalov@nmtport.ru',
+        'Pavel.Shunin@nmtport.ru',
+        'Oleg.Evsyukov@nmtport.ru', 
+        'Disp.Smen@nmtport.ru',
+        # 'Vladimir.Grigoriev@nmtport.ru',
+        # 'Dmitry.Chernyavskiy@nmtport.ru',
+        # 'Radion.Bespalov@nmtport.ru',
         'Petr.Gerasimenko@nmtport.ru',
         'Alexander.Ostapchenko@nmtport.ru',
         'ostap666@yandex.ru'
@@ -48,6 +52,10 @@ addresses = {
         'Vladimir.Speransky@nmtport.ru'
         'Denis.Medvedev@nmtport.ru'
 
+        'Pavel.Shunin@nmtport.ru',
+        'Oleg.Evsyukov@nmtport.ru', 
+        'Disp.Smen@nmtport.ru',
+        # 'Vladimir.Grigoriev@nmtport.ru',
         'Petr.Gerasimenko@nmtport.ru',
         'Alexander.Ostapchenko@nmtport.ru',
         'ostap666@yandex.ru'
@@ -59,7 +67,7 @@ titles = {
     "начало смены </br>(> 8:20)", 
     "окончание перед обедом </br>(< 12:00)", 
     "начало после обеда </br>(> 13:00)", 
-    "окончание перед тех. перерывом </br>(< 16:00)", 
+    "окончание перед тех. перерывом </br>(< 16:30)", 
     'начало после тех. перерыва </br>(> 17:00)', 
     'окончание смены </br>(< 19:40)',
     'общие потери по крану </br> (минут)',
@@ -69,7 +77,7 @@ titles = {
     "начало смены </br>(> 20:20)", 
     "окончание перед обедом </br>(< 01:00)", 
     "начало после обеда </br>(> 02:00)", 
-    "окончание перед тех. перерывом </br>(< 04:00)", 
+    "окончание перед тех. перерывом </br>(< 04:30)", 
     'начало после тех. перерыва </br>(> 05:00)', 
     'окончание смены </br>(< 07:40)',
     'общие потери по крану </br> (минут)',
@@ -121,8 +129,8 @@ def get_yellow_diapozones (date, shift):
         "work_1" :       [date + '08:20', date + '11:58'],
         "lanch_start" :  [date + '11:58', date + '12:00'],
         "lanch_finish" : [date + '13:00', date + '13:02'],
-        "work_2" :       [date + '13:02', date + '15:58'],
-        "tea_start" :    [date + '15:58', date + '16:00'],
+        "work_2" :       [date + '13:02', date + '16:28'],
+        "tea_start" :    [date + '16:28', date + '16:30'],
         "tea_finish" :   [date + '17:00', date + '17:02'],
         "work_3" :       [date + '17:02', date + '19:40'],
         "finish" :       [date + '19:40', date + '20:00'],
@@ -133,8 +141,8 @@ def get_yellow_diapozones (date, shift):
         "work_1" :       [date + '20:20',     tommorow + '00:58'],
         "lanch_start" :  [tommorow + '00:58', tommorow + '01:00'],
         "lanch_finish" : [tommorow + '02:00', tommorow + '02:02'],
-        "work_2" :       [tommorow + '02:02', tommorow + '03:58'],
-        "tea_start" :    [tommorow + '03:58', tommorow + '04:00'],
+        "work_2" :       [tommorow + '02:02', tommorow + '04:28'],
+        "tea_start" :    [tommorow + '04:28', tommorow + '04:30'],
         "tea_finish" :   [tommorow + '05:00', tommorow + '05:02'],
         "work_3" :       [tommorow + '05:02', tommorow + '07:40'],
         "finish" :       [tommorow + '07:40', tommorow + '08:00'],
