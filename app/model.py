@@ -181,8 +181,8 @@ class Downtime(db.Model):
 class Rfid_work(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     mechanism_id = db.Column(db.Integer, db.ForeignKey('mechanism.id'))
-    rfid_id = db.Column(db.Integer) 
-    flag = db.Column(db.Boolean(64))
+    rfid_id = db.Column(db.String(10), db.ForeignKey('rfid_ids.rfid_id')) 
+    flag = db.Column(db.Boolean)
     timestamp = db.Column(db.DateTime, index=True)
 
     def __init__(self, mechanism_id, rfid_id, flag, timestamp=None):
@@ -196,7 +196,7 @@ class Rfid_work(db.Model):
 
 
 class Rfid_ids(db.Model):
-    rfid_id = db.Column(db.Integer, primary_key=True) 
+    rfid_id = db.Column(db.String(10), primary_key=True)  # format 12,345678
     fio = db.Column(db.String(64))
 
     def __init__(self, rfid_id, fio):
@@ -204,4 +204,4 @@ class Rfid_ids(db.Model):
         self.fio = fio 
 
     def __repr__(self):
-        return f'{self.rfid_id}, {self.flag}'
+        return f'{self.rfid_id}, {self.fio}'

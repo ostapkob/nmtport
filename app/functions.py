@@ -592,11 +592,26 @@ def get_dict_mechanisms_number_by_id():
             logger.debug(e)
     return dict_mechanisms
 
+def dez10_to_dez35C(n):
+    '''
+        convert rf_idid to "text_format" rfid
+        https://guardsaas.com/ru/content/keycode
+    '''
+    n = str(n).zfill(10)
+    hex_n = hex(int(n)).split('x')[-1]
+    hex_n = hex_n.zfill(6)
+    left = str(int(hex_n[:2], 16))
+    left = left.zfill(3)
+    right = str(int(hex_n[2:], 16))
+    right = right.zfill(5)
+    # return left+','+right
+    return str(int(left))+'/'+right
+
 if __name__ == "__main__":
     
     type_mech = 'sennebogen'
     number = 1
-    lat=42.805052
+    lat=43.805052
     lon=132.905318
 
     res = which_terminal(type_mech, number, lat, lon)

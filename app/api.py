@@ -2,7 +2,7 @@
 from flask import request, jsonify, abort, make_response
 from flask import render_template  # ,redirect
 from app import db, app
-from app.model import Mechanism, Post
+from app.model import Mechanism, Post, Rfid_work
 from datetime import datetime, timedelta
 from app.functions import   *
 from app.functions_for_all import *
@@ -22,6 +22,7 @@ from loguru import logger
 from pymongo import MongoClient
 from pprint import pprint
 import random
+from rich import print
 
 client = MongoClient('mongodb://localhost:27017')
 mongodb = client['HashShift']
@@ -637,14 +638,26 @@ def add_usm_rfid_2():
     mech_id = id_by_number(type_mech, number)  
     passw = request.args.get('passw')
     rfid_id = request.args.get('rfid')
-    flag = request.args.get('flag')
-    items = number, mech_id, passw, rfid, flag 
+    flag = bool(request.args.get('flag'))
+    items = number, mech_id, passw, rfid_id, flag 
     if any([item is None for item in items]):
         return 'Bad request'
     if mech_id is None:
         return 'No this number' + type_mech
     if passw not in post_passw:
         return 'Bad password'
+    rfid_id = dez10_to_dez35C(int(rfid_id))
+
     fio = fio_by_rfid_id(rfid_id)
-    res = fio, type_mech, number, mech_id, passw, rfid_id, flag, items
-    print(res)
+
+    if fio is None:
+        print('-->', rfid_id)
+        logger.debug(rfid_id)
+    res = fio, type_mech, number, mech_id, passw, rfid_id,  flag, items
+    new_rfid = Rfid_work(mechanism_id = mech_id,
+                        rfid_id = rfid_id,
+                        flag = flag 
+                        )
+    db.session.add(new_rfid)
+    db.session.commit()
+    return f'Success, {res},  {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
