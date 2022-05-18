@@ -181,7 +181,8 @@ class Downtime(db.Model):
 class Rfid_work(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     mechanism_id = db.Column(db.Integer, db.ForeignKey('mechanism.id'))
-    rfid_id = db.Column(db.String(10), db.ForeignKey('rfid_ids.rfid_id')) 
+    # rfid_id = db.Column(db.String(10), db.ForeignKey('rfid_ids.rfid_id')) 
+    rfid_id = db.Column(db.String(10) )
     flag = db.Column(db.Boolean)
     timestamp = db.Column(db.DateTime, index=True)
 

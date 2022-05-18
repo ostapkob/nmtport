@@ -9,7 +9,7 @@ db.create_all()
 filepath = 'ww.xlsx'
 wb = openpyxl.load_workbook(filepath, data_only=True)
 ws = wb.active
-total_rows = 7
+total_rows = 5
 
 for i in range(2, total_rows):
     rfid_id = ws.cell(row=i, column=2).value

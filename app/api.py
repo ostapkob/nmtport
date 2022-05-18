@@ -364,8 +364,8 @@ def add_usm():
     except Exception as e:
         logger.debug(e)
     # if (number==13 or number==11) and float(value) == 1: # FIX
-    if number==7  and float(value) == 1: # FIX
-        value = random.randrange(50, 100, 1)/100
+    # if number==7  and float(value) == 1: # FIX
+    #     value = random.randrange(50, 100, 1)/100
 
     items = mechanism_id, password, latitude, longitude
     test_items = any([item is None for item in items])
@@ -638,7 +638,7 @@ def add_usm_rfid_2():
     mech_id = id_by_number(type_mech, number)  
     passw = request.args.get('passw')
     rfid_id = request.args.get('rfid')
-    flag = bool(request.args.get('flag'))
+    flag = bool(int(request.args.get('flag')))
     items = number, mech_id, passw, rfid_id, flag 
     if any([item is None for item in items]):
         return 'Bad request'
