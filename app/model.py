@@ -182,18 +182,23 @@ class Rfid_work(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     mechanism_id = db.Column(db.Integer, db.ForeignKey('mechanism.id'))
     # rfid_id = db.Column(db.String(10), db.ForeignKey('rfid_ids.rfid_id')) 
+    count = db.Column(db.Integer)
     rfid_id = db.Column(db.String(10) )
     flag = db.Column(db.Boolean)
     timestamp = db.Column(db.DateTime, index=True)
 
-    def __init__(self, mechanism_id, rfid_id, flag, timestamp=None):
+    def __init__(self, mechanism_id, count, rfid_id, flag, timestamp=None):
         self.mechanism_id = mechanism_id
+        self.count = count
         self.rfid_id = rfid_id
         self.flag = flag 
         self.timestamp = timestamp or datetime.now() 
 
     def __repr__(self):
-        return f'{self.timestamp}, {self.id}, {self.mechanism_id}, {self.rfid_id}, {flag}'
+        return f'{self.timestamp}, {self.id}, {self.mechanism_id}, {self.count} {self.rfid_id}, {self.flag}'
+
+    def get(self):
+        return [self.mechanism_id, self.count, self.rfid_id, self.flag, self.timestamp]
 
 
 class Rfid_ids(db.Model):

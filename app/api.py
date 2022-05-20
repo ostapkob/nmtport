@@ -28,6 +28,7 @@ client = MongoClient('mongodb://localhost:27017')
 mongodb = client['HashShift']
 dict_mechanisms_number_by_id = get_dict_mechanisms_number_by_id()
 dict_mechanisms_id_by_number = get_dict_mechanisms_id_by_number()
+tmp_dict = {}
 
 
 def corect_position(mech, latitude, longitude):
@@ -596,38 +597,75 @@ def add_usm2():
     number = request.args.get('number')
     mech_id = id_by_number(type_mech, number)  
     passw = request.args.get('passw')
-    count = request.args.get('count')
-    lever = request.args.get('lever')
-    roll = request.args.get('roll')
-    lat = request.args.get('lat')
-    lon = request.args.get('lon')
-    items = number, mech_id, passw, count, lever, roll, lat, lon
+    count = int(request.args.get('count'))
+    lever = float(request.args.get('lever'))
+    roll = int(request.args.get('roll'))
+    rfid = request.args.get('rfid')
+    flag = bool(request.args.get('flag'))
+    lat = float(request.args.get('lat'))
+    lon = float(request.args.get('lon'))
+    rfid = request.args.get('rfid')
+    items = number, mech_id, passw, count, rfid, flag, lever, roll, lat, lon
+    rfid = dez10_to_dez35C(int(rfid))
     if any([item is None for item in items]):
         return 'Bad request'
     if mech_id is None:
         return 'No this number' + type_mech
     if passw not in post_passw:
         return 'Bad password'
-    if int(roll) < 5:  # if roller not circle
+    if roll < 4:  # if roller not circle
         lever= 0
+    lat, lon = handler_position(mech_id, lat, lon)
+    handler_rfid(mech_id, count, rfid, flag)
+    terminal = which_terminal(type_mech, number, lat, lon) # exist 9, 11, 13, 15
+    new_post = Post(count=count, 
+                    value=lever, 
+                    value3=roll, 
+                    latitude=lat, 
+                    longitude=lon, 
+                    mechanism_id=mech_id,
+                    terminal=terminal)
+    add_fix_post(new_post)
+    tmp_dict[mech_id] = new_post
+    return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
+
+def handler_rfid(mech_id, count, rfid_id, flag):
+    if rfid_id == "0"*10:
+        return 
+    tmp_mech = tmp_dict.get(mech_id, None)
+    if tmp_mech:
+        print(f"[red]{tmp_mech.rfid_id}[/red]")
+    last_rfid = db.session.query(Rfid_work).filter(
+        Rfid_work.rfid_id == rfid_id, 
+        Rfid_work.mechanism_id == mech_id, 
+        Rfid_work.flag == flag,
+        Rfid_work.count <= count,
+    ).order_by(Rfid_work.timestamp.desc()).first()
+
+    print(f"[yellow] {mech_id}, {rfid_id}, {flag} [/yellow]")
+    print(f"{last_rfid}")
+    # if last: 
+    #     dt = (datetime.now() - last_rfid.timestamp).seconds
+        # dt_count = count - last_rfid.count
+        # if dt<100 and dt_count:
+        #     print('')
+
+
+def handler_position(mech_id, lat, lon):
+    number = number_by_id(mech_id)  
     if number in usm_no_move:
         lat = 0
         lon = 0
-    if float(lat) == 0 or float(lon) == 0: # get last position
+    if lat == 0 or lon == 0: # get last position
         try:
             data_mech = db.session.query(Post).filter(
                 Post.mechanism_id == mech_id).order_by(Post.timestamp.desc()).first()
         except Exception as e:
+            print(e)
             logger.debug(e)
         lat = data_mech.latitude
         lon = data_mech.longitude
-    terminal = which_terminal(type_mech, number, lat, lon) # exist 9, 11, 13, 15
-
-    new_post = Post(count=count, value=lever, value3=roll, 
-                    latitude=lat, longitude=lon, mechanism_id=mech_id,
-                    terminal=terminal)
-    add_fix_post(new_post)
-    return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
+    return lat, lon
 
 
 @app.route('/api/v2.0/add_usm_rfid', methods=['GET'])
@@ -635,10 +673,11 @@ def add_usm_rfid_2():
     '''add post by GET request from arduino'''
     type_mech = 'usm'
     number = request.args.get('number')
+    count = int(request.args.get('count'))
     mech_id = id_by_number(type_mech, number)  
     passw = request.args.get('passw')
     rfid_id = request.args.get('rfid')
-    flag = bool(int(request.args.get('flag')))
+    flag = bool(request.args.get('flag'))
     items = number, mech_id, passw, rfid_id, flag 
     if any([item is None for item in items]):
         return 'Bad request'
@@ -646,15 +685,17 @@ def add_usm_rfid_2():
         return 'No this number' + type_mech
     if passw not in post_passw:
         return 'Bad password'
+    if rfid_id == "0"*10:
+        return 'RFID is empy'
     rfid_id = dez10_to_dez35C(int(rfid_id))
-
     fio = fio_by_rfid_id(rfid_id)
 
     if fio is None:
         print('-->', rfid_id)
         logger.debug(rfid_id)
-    res = fio, type_mech, number, mech_id, passw, rfid_id,  flag, items
+    res = fio, type_mech, number, count, mech_id, passw, rfid_id,  flag, items
     new_rfid = Rfid_work(mechanism_id = mech_id,
+                        count = count,
                         rfid_id = rfid_id,
                         flag = flag 
                         )

@@ -63,6 +63,12 @@ def id_by_number(type, number):
         return mech.id
     return None
 
+def number_by_id(id):
+    mech = Mechanism.query.filter(Mechanism.id==id).first()
+    if mech:
+        return mech.number
+    return None
+
 
 def id_and_number(type):
     '''id and number by type'''
