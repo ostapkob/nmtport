@@ -32,7 +32,7 @@ class USM:
         self.roll = roll
         self.lat = lat
         self.lon = lon
-        self.flag = False
+        self.flag = 0
         self.rfid = '0'*10
 
     def send_req_work(self):
@@ -90,10 +90,10 @@ class USM:
         self.lon += lon
 
     def change_flag(self, value=None):
-        if value:
-            self.flag = bool(value)
+        if value is None:
+            self.flag = int(not bool(self.flag))
         else:
-            self.flag = not self.flag
+            self.flag = int(bool(value))
 
     def change_rfid(self, value):
         self.rfid = value 
@@ -108,8 +108,8 @@ class USM:
 if __name__ == "__main__":
     S5  = USM(mechanism_id=32770, number=5,  lever=0, roll=0,  lat=42.8118, lon=132.8893)
     S6  = USM(mechanism_id=32771, number=6,  lever=0, roll=0,  lat=42.8122, lon=132.8887)
-    S7  = USM(mechanism_id=32772, number=7,  lever=0, roll=0,  lat=0.0,     lon=0.0)
-    # S7  = USM(mechanism_id=32772, number=7,  lever=0, roll=0,  lat=42.8144, lon=132.8899)
+    # S7  = USM(mechanism_id=32772, number=7,  lever=0, roll=0,  lat=0.0,     lon=0.0)
+    S7  = USM(mechanism_id=32772, number=7,  lever=0, roll=0,  lat=42.8144, lon=132.8899)
     S8  = USM(mechanism_id=32773, number=8,  lever=0, roll=0,  lat=42.8171, lon=132.8926)
     U9  = USM(mechanism_id=32941, number=9,  lever=0, roll=0,  lat=42.8132, lon=132.8899)
     U10 = USM(mechanism_id=32942, number=10, lever=0, roll=0,  lat=42.8144, lon=132.8913)
@@ -124,28 +124,31 @@ if __name__ == "__main__":
     lat = 0.0
     lon = 0.0
     last_sent = time.time() - 61
-    [x.change_lever(0) for x in usms]
-    [x.change_roll(0) for x in usms[:1]]
-    [x.change_rfid(r) for x, r in zip(usms, rfid_ids)]
-    [m.change_flag(0) for m in usms if m.get_rfid()!='0'*10]
-    [m.send_req_rfid() for m in usms]
+    [x.change_lever(0.4) for x in usms]
+    [x.change_roll(20) for x in usms[:1]]
     
     counter = 0
     while True:
         time.sleep(1)
         if time.time() - last_sent >= 60.0:
             last_sent = time.time()
-            [m.change_position(lat, lon) for m in usms if m.get_position() != [.0,.0]]
+            # [m.change_position(lat, lon) for m in usms if m.get_position()[1] > 1] #! fuck
+            if counter == 1: 
+                [x.change_rfid(r) for x, r in zip(usms, rfid_ids)]
+                [m.change_flag(1) for m in usms if m.get_rfid()!='0'*10]
+
+                S5.send_req_rfid()
+                S6.send_req_rfid()
+                S7.send_req_rfid()
+            if counter%3==0: 
+                S6.change_flag()
+            # if flagPosition:
+            #     lat = -0.0002
+            #     lon = -0.0005
+            # else:
+            #     lat = 0.0002
+            #     lon = 0.0004
+            # flagPosition = not flagPosition
             [m.send_req_work() for m in usms]
-            [m.change_flag() for m in usms if m.get_rfid()!='0'*10]
-            if counter%3 == 0:
-                [m.send_req_rfid() for m in usms]
-            if flagPosition:
-                lat = -0.0002
-                lon = -0.0005
-            else:
-                lat = 0.0002
-                lon = 0.0004
-            flagPosition = not flagPosition
             [print(x) for x in usms]
             counter += 1

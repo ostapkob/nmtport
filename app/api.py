@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from flask import request, jsonify, abort, make_response
 from flask import render_template  # ,redirect
 from app import db, app
@@ -21,6 +20,7 @@ from config import krans_if_3_then_2, krans_if_1_then_0, usm_no_move
 from loguru import logger
 from pymongo import MongoClient
 from pprint import pprint
+from collections import namedtuple
 import random
 from rich import print
 
@@ -29,6 +29,7 @@ mongodb = client['HashShift']
 dict_mechanisms_number_by_id = get_dict_mechanisms_number_by_id()
 dict_mechanisms_id_by_number = get_dict_mechanisms_id_by_number()
 tmp_dict = {}
+Mech = namedtuple('Mech', ['type_mech', 'mech_id', 'number', 'count', 'lever', 'roll', 'rfid_id', 'flag', 'lat', 'lon'])
 
 
 def corect_position(mech, latitude, longitude):
@@ -413,11 +414,6 @@ def add_kran():
         mech = Mechanism.query.get(mechanism_id)
     except Exception as e:
         logger.debug(e)
-
-
-    # if mechanism_id == '15510' and value == '1':
-    #     value = '2'
-
     items = mechanism_id, password, latitude, longitude, value, value3
     test_items = any([item is None for item in items]) # if this id is exist
     if test_items:
@@ -600,23 +596,22 @@ def add_usm2():
     count = int(request.args.get('count'))
     lever = float(request.args.get('lever'))
     roll = int(request.args.get('roll'))
-    rfid = request.args.get('rfid')
-    flag = bool(request.args.get('flag'))
+    rfid = str(request.args.get('rfid'))
+    flag = bool(int(request.args.get('flag')))
     lat = float(request.args.get('lat'))
     lon = float(request.args.get('lon'))
-    rfid = request.args.get('rfid')
-    items = number, mech_id, passw, count, rfid, flag, lever, roll, lat, lon
     rfid = dez10_to_dez35C(int(rfid))
-    if any([item is None for item in items]):
-        return 'Bad request'
-    if mech_id is None:
-        return 'No this number' + type_mech
-    if passw not in post_passw:
-        return 'Bad password'
     if roll < 4:  # if roller not circle
         lever= 0
     lat, lon = handler_position(mech_id, lat, lon)
-    handler_rfid(mech_id, count, rfid, flag)
+    current = Mech(type_mech, mech_id, number, count, lever, roll, rfid, flag, lat, lon)
+    if mech_id is None:
+        return 'No this number ' + type_mech
+    if any([item is None for item in current]):
+        return 'Bad request'
+    if passw not in post_passw:
+        return 'Bad password'
+    handler_rfid(current)
     terminal = which_terminal(type_mech, number, lat, lon) # exist 9, 11, 13, 15
     new_post = Post(count=count, 
                     value=lever, 
@@ -626,29 +621,36 @@ def add_usm2():
                     mechanism_id=mech_id,
                     terminal=terminal)
     add_fix_post(new_post)
-    tmp_dict[mech_id] = new_post
-    return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
+    tmp_dict[mech_id] = current
+    # for m in tmp_dict.values():
+    #     print(f"[chartreuse1]{m.mech_id} {m.rfid_id} {m.flag}[/chartreuse1]")
+    return f'Success, {str(current)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
 
-def handler_rfid(mech_id, count, rfid_id, flag):
-    if rfid_id == "0"*10:
-        return 
-    tmp_mech = tmp_dict.get(mech_id, None)
-    if tmp_mech:
-        print(f"[red]{tmp_mech.rfid_id}[/red]")
-    last_rfid = db.session.query(Rfid_work).filter(
-        Rfid_work.rfid_id == rfid_id, 
-        Rfid_work.mechanism_id == mech_id, 
-        Rfid_work.flag == flag,
-        Rfid_work.count <= count,
-    ).order_by(Rfid_work.timestamp.desc()).first()
 
-    print(f"[yellow] {mech_id}, {rfid_id}, {flag} [/yellow]")
-    print(f"{last_rfid}")
-    # if last: 
-    #     dt = (datetime.now() - last_rfid.timestamp).seconds
-        # dt_count = count - last_rfid.count
-        # if dt<100 and dt_count:
-        #     print('')
+def handler_rfid(current):
+    if current.rfid_id == '0/00000':
+        return f'rfid is {current.rfid_id}'
+    tmp_mech = tmp_dict.get(current.mech_id, None)
+    if tmp_mech is None:
+        return 'tmp_mech is Empty'
+    if current.rfid_id != tmp_mech.rfid_id or current.flag != tmp_mech.flag:
+        two_min_ago= datetime.now() - timedelta(minutes=2)
+        last = db.session.query(Rfid_work).filter(
+            Rfid_work.rfid_id == current.rfid_id, 
+            Rfid_work.mechanism_id == current.mech_id, 
+            Rfid_work.flag == current.flag,
+            Rfid_work.timestamp > two_min_ago
+        ).order_by(Rfid_work.timestamp.desc()).first()
+        print(f"[yellow]CHANGED current RFID: {current.rfid_id}, tmp_mech RFID {tmp_mech.rfid_id}[/yellow]")
+        print(f"[yellow]CHANGED current flag: {current.flag}, tmp_mech flag:  {tmp_mech.flag}[/yellow]")
+        print(f"[sky_blue1] last  {last}[/sky_blue1]")
+        if last is None:
+            print(f"[cian]ADD {current.rfid_id}[/cian]")
+            return add_to_db_rfid_work(current)
+        if current.rfid_id != last.rfid_id or current.flag != last.flag:
+            print(f"[red]ADD {current.rfid_id}[/red]")
+            return add_to_db_rfid_work(current)
+    return 'ok'
 
 
 def handler_position(mech_id, lat, lon):
@@ -676,29 +678,33 @@ def add_usm_rfid_2():
     count = int(request.args.get('count'))
     mech_id = id_by_number(type_mech, number)  
     passw = request.args.get('passw')
-    rfid_id = request.args.get('rfid')
-    flag = bool(request.args.get('flag'))
-    items = number, mech_id, passw, rfid_id, flag 
-    if any([item is None for item in items]):
-        return 'Bad request'
+    rfid = request.args.get('rfid')
+    flag = bool(int(request.args.get('flag')))
+    items = number, mech_id, passw, rfid, flag 
+    rfid = dez10_to_dez35C(int(rfid))
+    current = Mech(type_mech, mech_id, number, count, 0, 0, rfid, flag, 0, 0)
     if mech_id is None:
-        return 'No this number' + type_mech
+        return 'No this number ' + type_mech
+    if any([item is None for item in current]):
+        return 'Bad request'
     if passw not in post_passw:
         return 'Bad password'
-    if rfid_id == "0"*10:
-        return 'RFID is empy'
-    rfid_id = dez10_to_dez35C(int(rfid_id))
-    fio = fio_by_rfid_id(rfid_id)
+    return add_to_db_rfid_work(current)
 
+
+def add_to_db_rfid_work(current):
+    if current.rfid_id == '0/00000':
+        return 'RFID is empy'
+    fio = fio_by_rfid_id(current.rfid_id)
     if fio is None:
-        print('-->', rfid_id)
+        print('fio is', None, 'for', current.rfid_id)
         logger.debug(rfid_id)
-    res = fio, type_mech, number, count, mech_id, passw, rfid_id,  flag, items
-    new_rfid = Rfid_work(mechanism_id = mech_id,
-                        count = count,
-                        rfid_id = rfid_id,
-                        flag = flag 
+    new_rfid = Rfid_work(mechanism_id = current.mech_id,
+                        count = current.count,
+                        rfid_id = current.rfid_id,
+                        flag = current.flag,
                         )
     db.session.add(new_rfid)
     db.session.commit()
-    return f'Success, {res},  {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
+    return f'Success, {fio} {current},  {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
+
