@@ -154,12 +154,15 @@ def get_data_period_with_fio(type_mechanism, date_shift, shift):
         data = kran_periods(time_for_shift_kran(date, shift))
     if type_mechanism == 'sennebogen':
         data = sennebogen_periods(time_for_shift_sennebogen(date, shift))
-    data_with_fio = add_fio(data, date, shift)
+    data_with_fio = add_fio_from_1c(data, date, shift)
     return jsonify(data_with_fio)
 
 
 @app.route("/api/v2.0/get_data_period_with_fio/<type_mechanism>/<date_shift>/<int:shift>", methods=['GET', 'POST'])
 def get_data_period_with_fio2(type_mechanism, date_shift, shift):
+    print(type_mechanism)
+    print(date_shift)
+    print(shift)
     '''get data shift for by type of mechanism'''
     today_date, today_shift = today_shift_date()
     try:
@@ -180,7 +183,8 @@ def get_data_period_with_fio2(type_mechanism, date_shift, shift):
         return jsonify(mongo_request)
 
     data = mech_periods(type_mechanism, date, shift)
-    data = add_fio(data, date, shift)
+    data = add_fio_from_1c(data, date, shift)
+    data = add_fio_from_rfid(data, date, shift)
 
     # add_to_mongo(data, date, shift)
     if data is not None: 
@@ -225,7 +229,7 @@ def get_data_period_with_fio_now(type_mechanism):
         data = kran_periods(time_for_shift_kran(*today_shift_date()))
     if type_mechanism == 'sennebogen':
         data = sennebogen_periods(time_for_shift_sennebogen(*today_shift_date()))
-    data_with_fio = add_fio(data, *today_shift_date())
+    data_with_fio = add_fio_from_1c(data, *today_shift_date())
     return jsonify(data_with_fio)
 
 
@@ -233,7 +237,7 @@ def get_data_period_with_fio_now(type_mechanism):
 def get_data_period_with_fio_now2(type_mechanism):
     '''get data shift for by type of mechanism with work NOW'''
     data = mech_periods(type_mechanism, *today_shift_date())
-    data_with_fio = add_fio(data, *today_shift_date())
+    data_with_fio = add_fio_from_1c(data, *today_shift_date())
     return jsonify(data_with_fio)
 
 
@@ -245,7 +249,6 @@ def get_all_last_data():
             Post.timestamp.desc()).first() for x in all_mechanisms_id()]
     except Exception as e:
         logger.debug(e)
-    # last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).first() for x in all_mechanisms_id()]
     last_data_mech = filter(lambda x: x is not None, last_data_mech)
     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
                                                  'name': el.mech.name,
@@ -708,3 +711,6 @@ def add_to_db_rfid_work(current):
     db.session.commit()
     return f'Success, {fio} {current},  {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
 
+
+# if __name__ == "__main__":
+#     pass

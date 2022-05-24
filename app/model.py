@@ -186,16 +186,30 @@ class Rfid_work(db.Model):
     rfid_id = db.Column(db.String(10) )
     flag = db.Column(db.Boolean)
     timestamp = db.Column(db.DateTime, index=True)
+    date_shift = db.Column(db.Date, index=True)
+    shift = db.Column(db.Integer, index=True)
 
     def __init__(self, mechanism_id, count, rfid_id, flag, timestamp=None):
+        self.timestamp = timestamp or datetime.now() 
+        hour = self.timestamp.hour
+        if hour >= 8 and hour < 20:
+            date_shift = self.timestamp
+            shift = 1
+        elif hour < 8:
+            date_shift = self.timestamp - timedelta(days=1)
+            shift = 2
+        else:
+            date_shift = self.timestamp
+            shift = 2
         self.mechanism_id = mechanism_id
         self.count = count
         self.rfid_id = rfid_id
         self.flag = flag 
-        self.timestamp = timestamp or datetime.now() 
+        self.date_shift = date_shift
+        self.shift = shift
 
     def __repr__(self):
-        return f'{self.timestamp}, {self.id}, {self.mechanism_id}, {self.count} {self.rfid_id}, {self.flag}'
+        return f'{str(self.timestamp.strftime("%d.%m.%Y %H:%M:%S"))} | {self.date_shift} | {self.shift} | {self.id} | {self.mechanism_id} | {self.count} | {self.rfid_id} | {self.flag}'
 
     def get(self):
         return [self.mechanism_id, self.count, self.rfid_id, self.flag, self.timestamp]
