@@ -17,8 +17,8 @@ def get_data_per_shift(cursor):
         el.value = -1 if el.value is None else el.value
         el.value3 = 0 if el.value3 is None else el.value3
         val_min = 0 if el.value < 0.1 else el.value
-        el.value = 0 if el.value3 < 5 else el.value  # maybe more, value3 is speed rool
-        val_min = 0 if el.value3 < 5 else el.value
+        el.value = 0 if el.value3 < 4 else el.value  # maybe more, value3 is speed rool
+        val_min = 0 if el.value3 < 4 else el.value
 
         if data_per_shift.get(el.mech.number):
             # bad
@@ -144,7 +144,7 @@ def usm_periods(data):
 
 def get_values_min(value_number):
     if value_number['value'] >= 0 and value_number['value'] < 0.1:
-        if value_number['speed'] <= 5:
+        if value_number['speed'] <= 4:
             return 0  # yellow
         else:
             return 2 # dark yellow

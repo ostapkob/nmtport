@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from flask import flash, redirect, url_for
-from app.model import Post, Mechanism, Work_1C_1
+from app.model import Post, Mechanism, Work_1C_1, Rfid_work
 from app import db
 from config import TIME_PERIODS
 from config import lines_krans, names_terminals, mechanisms_type, usm_tons_in_hour 
@@ -10,7 +10,9 @@ from app.kran import  kran_periods, time_for_shift_kran
 from app.usm import usm_periods, time_for_shift_usm
 from app.sennebogen import sennebogen_periods, time_for_shift_sennebogen
 from config import HOURS
-from app.functions_for_all import all_mechanisms_id, today_shift_date #  all_mechanisms_type, all_number, name_by_id
+from app.functions_for_all import all_mechanisms_id, today_shift_date, fio_by_rfid_id, id_by_number #  all_mechanisms_type, all_number, name_by_id
+from rich import print
+ 
 
 def add_fix_post(post):  # !move
     ''' I use it fix because arduino sometimes accumulates an extra minute '''
@@ -36,6 +38,7 @@ def add_fix_post(post):  # !move
         logger.debug(e)
         time.sleep(10)
         db.session.commit()
+
 
 def multiple_5(date):  # not use
     '''Return time multiple 5 minutes and remite microseconds'''
@@ -215,42 +218,42 @@ def fio_to_fi(item):
     return f'{fio[0].capitalize()} {fio[1][0]}.'
 
 
-def add_fio(data_kran_period, date_shift, shift):
+def add_fio_from_1c(data_period, date_shift, shift):
     ''' add fio and grab if it exec '''
-    if not data_kran_period:
+    if not data_period:
         return None
-    for key, value in data_kran_period.items():
-        id_mech = data_kran_period[key]['id']
+    for key, value in data_period.items():
+        id_mech = data_period[key]['id']
         data_by_id_mech = data_from_1c_by_id(date_shift, shift, id_mech)
         # last_find_item = db.session.query(Work_1C_1).filter(Work_1C_1.inv_num==id_mech, Work_1C_1.greifer_vol>0 ).first()
         if len(data_by_id_mech) < 1:
-            data_kran_period[key]['fio'] = None
-            data_kran_period[key]['grab'] = None
-            data_kran_period[key]['contract'] = None
+            data_period[key]['fio'] = None
+            data_period[key]['grab'] = None
+            data_period[key]['contract'] = None
         elif len(data_by_id_mech) == 1:
-            data_kran_period[key]['fio'] = fio_to_fi(data_by_id_mech[0])
-            data_kran_period[key]['contract'] = data_by_id_mech[0][8]
+            data_period[key]['fio'] = fio_to_fi(data_by_id_mech[0])
+            data_period[key]['contract'] = data_by_id_mech[0][8]
             if data_by_id_mech[0][2]:
-                data_kran_period[key]['grab'] = float(data_by_id_mech[0][2])
+                data_period[key]['grab'] = float(data_by_id_mech[0][2])
             else:
-                data_kran_period[key]['grab'] = None
+                data_period[key]['grab'] = None
         else:
             for operator in data_by_id_mech:
-                data_kran_period[key]['fio'] = 'Два оператора'
-                data_kran_period[key]['contract'] = 1
+                data_period[key]['fio'] = 'Два оператора'
+                data_period[key]['contract'] = 1
             if data_by_id_mech[0][2]: # dublicate
-                data_kran_period[key]['grab'] = float(data_by_id_mech[0][2])
+                data_period[key]['grab'] = float(data_by_id_mech[0][2])
             else:
-                data_kran_period[key]['grab'] = None
+                data_period[key]['grab'] = None
 
         # if grab not write then find last item
-        if data_kran_period[key]['grab'] == None and id_mech in all_mechanisms_id('kran'):
+        if data_period[key]['grab'] == None and id_mech in all_mechanisms_id('kran'):
             try:
                 last_find_item = db.session.query(Work_1C_1).filter(Work_1C_1.inv_num==id_mech, Work_1C_1.greifer_vol> 0 ).order_by(Work_1C_1.data_nach.desc()).first()
-                data_kran_period[key]['grab'] = float(last_find_item.greifer_vol)
+                data_period[key]['grab'] = float(last_find_item.greifer_vol)
             except AttributeError:
-                data_kran_period[key]['grab'] = None
-    return data_kran_period
+                data_period[key]['grab'] = None
+    return data_period
 
 
 def get_state():
@@ -487,6 +490,7 @@ def which_terminal(type_mech, number, latitude, longitude):
 
 
 def mech_periods(type_mechanism, date, shift):
+    data = None
     if type_mechanism == 'usm':
         data = usm_periods(time_for_shift_usm(date, shift))
     elif type_mechanism == 'kran':
@@ -494,8 +498,6 @@ def mech_periods(type_mechanism, date, shift):
     elif type_mechanism == 'sennebogen':
         data = sennebogen_periods(time_for_shift_sennebogen(date, shift))
         # logger.info(data)
-    else:
-        data = None
     return data
 
 # not to use
@@ -552,7 +554,8 @@ def hash_all_last_data_state():
 def hash_now(type_mechanism):
     date, shift = today_shift_date()
     data = mech_periods(type_mechanism, date, shift)
-    data = add_fio(data, date, shift)
+    data = add_fio_from_1c(data, date, shift)
+    data = add_fio_from_rfid(data, date, shift)
     client = MongoClient('mongodb://localhost:27017')
     mongodb = client['HashShift']
     posts = mongodb[type_mechanism]
@@ -607,17 +610,47 @@ def dez10_to_dez35C(n):
     # return left+','+right
     return str(int(left))+'/'+right
 
-if __name__ == "__main__":
-    
-    type_mech = 'sennebogen'
-    number = 1
-    lat=43.805052
-    lon=132.905318
+def add_fio_from_rfid(data_period, date_shift, shift):
+    if not data_period:
+        return None
+    cursor = db.session.query(Rfid_work).filter(
+        Rfid_work.date_shift == date_shift,
+        Rfid_work.shift == shift,
+        ).all()
+    for key, value in data_period.items():
+        mech_id = value['id']
+        rfid_work = [
+            {
+                'fio': fio_by_rfid_id(r.rfid_id), 
+                'time': r.timestamp, 
+                'flag': r.flag,
+            }
+              for r in cursor if r.mechanism_id==mech_id]
+        data_period[key]['rfid']  = rfid_work
+    return data_period
 
-    res = which_terminal(type_mech, number, lat, lon)
-    print(res)
+if __name__ == "__main__":
+    # type_mech = 'sennebogen'
+    # number = 1
+    # lat=43.805052
+    # lon=132.905318
+    # res = which_terminal(type_mech, number, lat, lon)
+    # print(res)
     # type_mech = 'kran'
     # number = 1
     # for term, degress in tests:
     #     latitude = degress[1]
     #     longitude = degress[0]
+    date_shift = datetime.now().date()
+    # date_shift -= timedelta(days=1)
+    type_mechanism = 'usm'
+    shift = 1
+    rfid_ids = [
+            '36/59956',
+            '240/01548',
+            '15/23422',
+        ]
+
+    data = mech_periods(type_mechanism, date_shift, shift)
+    data = add_fio_from_rfid(data, date_shift, shift)
+    # print(data)

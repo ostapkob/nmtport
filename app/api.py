@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from flask import request, jsonify, abort, make_response
 from flask import render_template  # ,redirect
 from app import db, app
@@ -21,6 +20,7 @@ from config import krans_if_3_then_2, krans_if_1_then_0, usm_no_move
 from loguru import logger
 from pymongo import MongoClient
 from pprint import pprint
+from collections import namedtuple
 import random
 from rich import print
 
@@ -28,6 +28,8 @@ client = MongoClient('mongodb://localhost:27017')
 mongodb = client['HashShift']
 dict_mechanisms_number_by_id = get_dict_mechanisms_number_by_id()
 dict_mechanisms_id_by_number = get_dict_mechanisms_id_by_number()
+tmp_dict = {}
+Mech = namedtuple('Mech', ['type_mech', 'mech_id', 'number', 'count', 'lever', 'roll', 'rfid_id', 'flag', 'lat', 'lon'])
 
 
 def corect_position(mech, latitude, longitude):
@@ -152,7 +154,7 @@ def get_data_period_with_fio(type_mechanism, date_shift, shift):
         data = kran_periods(time_for_shift_kran(date, shift))
     if type_mechanism == 'sennebogen':
         data = sennebogen_periods(time_for_shift_sennebogen(date, shift))
-    data_with_fio = add_fio(data, date, shift)
+    data_with_fio = add_fio_from_1c(data, date, shift)
     return jsonify(data_with_fio)
 
 
@@ -178,7 +180,8 @@ def get_data_period_with_fio2(type_mechanism, date_shift, shift):
         return jsonify(mongo_request)
 
     data = mech_periods(type_mechanism, date, shift)
-    data = add_fio(data, date, shift)
+    data = add_fio_from_1c(data, date, shift)
+    data = add_fio_from_rfid(data, date, shift)
 
     # add_to_mongo(data, date, shift)
     if data is not None: 
@@ -223,7 +226,7 @@ def get_data_period_with_fio_now(type_mechanism):
         data = kran_periods(time_for_shift_kran(*today_shift_date()))
     if type_mechanism == 'sennebogen':
         data = sennebogen_periods(time_for_shift_sennebogen(*today_shift_date()))
-    data_with_fio = add_fio(data, *today_shift_date())
+    data_with_fio = add_fio_from_1c(data, *today_shift_date())
     return jsonify(data_with_fio)
 
 
@@ -231,7 +234,7 @@ def get_data_period_with_fio_now(type_mechanism):
 def get_data_period_with_fio_now2(type_mechanism):
     '''get data shift for by type of mechanism with work NOW'''
     data = mech_periods(type_mechanism, *today_shift_date())
-    data_with_fio = add_fio(data, *today_shift_date())
+    data_with_fio = add_fio_from_1c(data, *today_shift_date())
     return jsonify(data_with_fio)
 
 
@@ -243,7 +246,6 @@ def get_all_last_data():
             Post.timestamp.desc()).first() for x in all_mechanisms_id()]
     except Exception as e:
         logger.debug(e)
-    # last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).first() for x in all_mechanisms_id()]
     last_data_mech = filter(lambda x: x is not None, last_data_mech)
     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
                                                  'name': el.mech.name,
@@ -300,7 +302,6 @@ def get_all_last_data_state():
                                                  'alarm': False,
                                                  'terminal': el.terminal,
                                                  'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
-    print('time last:', datetime.now() - start)
     return jsonify(data)
 
 
@@ -412,11 +413,6 @@ def add_kran():
         mech = Mechanism.query.get(mechanism_id)
     except Exception as e:
         logger.debug(e)
-
-
-    # if mechanism_id == '15510' and value == '1':
-    #     value = '2'
-
     items = mechanism_id, password, latitude, longitude, value, value3
     test_items = any([item is None for item in items]) # if this id is exist
     if test_items:
@@ -596,38 +592,81 @@ def add_usm2():
     number = request.args.get('number')
     mech_id = id_by_number(type_mech, number)  
     passw = request.args.get('passw')
-    count = request.args.get('count')
-    lever = request.args.get('lever')
-    roll = request.args.get('roll')
-    lat = request.args.get('lat')
-    lon = request.args.get('lon')
-    items = number, mech_id, passw, count, lever, roll, lat, lon
-    if any([item is None for item in items]):
-        return 'Bad request'
+    count = int(request.args.get('count'))
+    lever = float(request.args.get('lever'))
+    roll = int(request.args.get('roll'))
+    rfid = str(request.args.get('rfid'))
+    flag = bool(int(request.args.get('flag')))
+    lat = float(request.args.get('lat'))
+    lon = float(request.args.get('lon'))
+    rfid = dez10_to_dez35C(int(rfid))
+    if roll < 4:  # if roller not circle
+        lever= 0
+    lat, lon = handler_position(mech_id, lat, lon)
+    current = Mech(type_mech, mech_id, number, count, lever, roll, rfid, flag, lat, lon)
     if mech_id is None:
-        return 'No this number' + type_mech
+        return 'No this number ' + type_mech
+    if any([item is None for item in current]):
+        return 'Bad request'
     if passw not in post_passw:
         return 'Bad password'
-    if int(roll) < 5:  # if roller not circle
-        lever= 0
+    handler_rfid(current)
+    terminal = which_terminal(type_mech, number, lat, lon) # exist 9, 11, 13, 15
+    new_post = Post(count=count, 
+                    value=lever, 
+                    value3=roll, 
+                    latitude=lat, 
+                    longitude=lon, 
+                    mechanism_id=mech_id,
+                    terminal=terminal)
+    add_fix_post(new_post)
+    tmp_dict[mech_id] = current
+    # for m in tmp_dict.values():
+    #     print(f"[chartreuse1]{m.mech_id} {m.rfid_id} {m.flag}[/chartreuse1]")
+    return f'Success, {str(current)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
+
+
+def handler_rfid(current):
+    if current.rfid_id == '0/00000':
+        return f'rfid is {current.rfid_id}'
+    tmp_mech = tmp_dict.get(current.mech_id, None)
+    if tmp_mech is None:
+        return 'tmp_mech is Empty'
+    if current.rfid_id != tmp_mech.rfid_id or current.flag != tmp_mech.flag:
+        two_min_ago= datetime.now() - timedelta(minutes=2)
+        last = db.session.query(Rfid_work).filter(
+            Rfid_work.rfid_id == current.rfid_id, 
+            Rfid_work.mechanism_id == current.mech_id, 
+            Rfid_work.flag == current.flag,
+            Rfid_work.timestamp > two_min_ago
+        ).order_by(Rfid_work.timestamp.desc()).first()
+        print(f"[yellow]CHANGED current RFID: {current.rfid_id}, tmp_mech RFID {tmp_mech.rfid_id}[/yellow]")
+        print(f"[yellow]CHANGED current flag: {current.flag}, tmp_mech flag:  {tmp_mech.flag}[/yellow]")
+        print(f"[sky_blue1] last  {last}[/sky_blue1]")
+        if last is None:
+            print(f"[cian]ADD {current.rfid_id}[/cian]")
+            return add_to_db_rfid_work(current)
+        if current.rfid_id != last.rfid_id or current.flag != last.flag:
+            print(f"[red]ADD {current.rfid_id}[/red]")
+            return add_to_db_rfid_work(current)
+    return 'ok'
+
+
+def handler_position(mech_id, lat, lon):
+    number = number_by_id(mech_id)  
     if number in usm_no_move:
         lat = 0
         lon = 0
-    if float(lat) == 0 or float(lon) == 0: # get last position
+    if lat == 0 or lon == 0: # get last position
         try:
             data_mech = db.session.query(Post).filter(
                 Post.mechanism_id == mech_id).order_by(Post.timestamp.desc()).first()
         except Exception as e:
+            print(e)
             logger.debug(e)
         lat = data_mech.latitude
         lon = data_mech.longitude
-    terminal = which_terminal(type_mech, number, lat, lon) # exist 9, 11, 13, 15
-
-    new_post = Post(count=count, value=lever, value3=roll, 
-                    latitude=lat, longitude=lon, mechanism_id=mech_id,
-                    terminal=terminal)
-    add_fix_post(new_post)
-    return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
+    return lat, lon
 
 
 @app.route('/api/v2.0/add_usm_rfid', methods=['GET'])
@@ -635,29 +674,39 @@ def add_usm_rfid_2():
     '''add post by GET request from arduino'''
     type_mech = 'usm'
     number = request.args.get('number')
+    count = int(request.args.get('count'))
     mech_id = id_by_number(type_mech, number)  
     passw = request.args.get('passw')
-    rfid_id = request.args.get('rfid')
+    rfid = request.args.get('rfid')
     flag = bool(int(request.args.get('flag')))
-    items = number, mech_id, passw, rfid_id, flag 
-    if any([item is None for item in items]):
-        return 'Bad request'
+    items = number, mech_id, passw, rfid, flag 
+    rfid = dez10_to_dez35C(int(rfid))
+    current = Mech(type_mech, mech_id, number, count, 0, 0, rfid, flag, 0, 0)
     if mech_id is None:
-        return 'No this number' + type_mech
+        return 'No this number ' + type_mech
+    if any([item is None for item in current]):
+        return 'Bad request'
     if passw not in post_passw:
         return 'Bad password'
-    rfid_id = dez10_to_dez35C(int(rfid_id))
+    return add_to_db_rfid_work(current)
 
-    fio = fio_by_rfid_id(rfid_id)
 
+def add_to_db_rfid_work(current):
+    if current.rfid_id == '0/00000':
+        return 'RFID is empy'
+    fio = fio_by_rfid_id(current.rfid_id)
     if fio is None:
-        print('-->', rfid_id)
+        print('fio is', None, 'for', current.rfid_id)
         logger.debug(rfid_id)
-    res = fio, type_mech, number, mech_id, passw, rfid_id,  flag, items
-    new_rfid = Rfid_work(mechanism_id = mech_id,
-                        rfid_id = rfid_id,
-                        flag = flag 
+    new_rfid = Rfid_work(mechanism_id = current.mech_id,
+                        count = current.count,
+                        rfid_id = current.rfid_id,
+                        flag = current.flag,
                         )
     db.session.add(new_rfid)
     db.session.commit()
-    return f'Success, {res},  {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
+    return f'Success, {fio} {current},  {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
+
+
+# if __name__ == "__main__":
+#     pass
