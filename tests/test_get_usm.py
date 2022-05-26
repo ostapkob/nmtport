@@ -142,6 +142,8 @@ if __name__ == "__main__":
                 S7.send_req_rfid()
             if counter%3==0: 
                 S6.change_flag()
+            if counter%2==0: 
+                S5.change_flag()
             # if flagPosition:
             #     lat = -0.0002
             #     lon = -0.0005

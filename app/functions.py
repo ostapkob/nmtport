@@ -39,6 +39,7 @@ def add_fix_post(post):  # !move
         time.sleep(10)
         db.session.commit()
 
+
 def multiple_5(date):  # not use
     '''Return time multiple 5 minutes and remite microseconds'''
     global HOURS
@@ -246,7 +247,6 @@ def add_fio_from_1c(data_period, date_shift, shift):
                 data_period[key]['grab'] = None
 
         # if grab not write then find last item
-        data_period[key]['fio'] = 'Два' # <------------------- delite
         if data_period[key]['grab'] == None and id_mech in all_mechanisms_id('kran'):
             try:
                 last_find_item = db.session.query(Work_1C_1).filter(Work_1C_1.inv_num==id_mech, Work_1C_1.greifer_vol> 0 ).order_by(Work_1C_1.data_nach.desc()).first()
@@ -619,10 +619,14 @@ def add_fio_from_rfid(data_period, date_shift, shift):
         ).all()
     for key, value in data_period.items():
         mech_id = value['id']
-        rfid_work = [[fio_by_rfid_id(r.rfid_id), r.timestamp, r.flag]
+        rfid_work = [
+            {
+                'fio': fio_by_rfid_id(r.rfid_id), 
+                'time': r.timestamp, 
+                'flag': r.flag,
+            }
               for r in cursor if r.mechanism_id==mech_id]
         data_period[key]['rfid']  = rfid_work
-    print(data_period)
     return data_period
 
 if __name__ == "__main__":

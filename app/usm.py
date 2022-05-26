@@ -144,7 +144,7 @@ def usm_periods(data):
 
 def get_values_min(value_number):
     if value_number['value'] >= 0 and value_number['value'] < 0.1:
-        if value_number['speed'] <= 5:
+        if value_number['speed'] <= 4:
             return 0  # yellow
         else:
             return 2 # dark yellow

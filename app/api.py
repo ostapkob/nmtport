@@ -160,9 +160,6 @@ def get_data_period_with_fio(type_mechanism, date_shift, shift):
 
 @app.route("/api/v2.0/get_data_period_with_fio/<type_mechanism>/<date_shift>/<int:shift>", methods=['GET', 'POST'])
 def get_data_period_with_fio2(type_mechanism, date_shift, shift):
-    print(type_mechanism)
-    print(date_shift)
-    print(shift)
     '''get data shift for by type of mechanism'''
     today_date, today_shift = today_shift_date()
     try:
@@ -305,7 +302,6 @@ def get_all_last_data_state():
                                                  'alarm': False,
                                                  'terminal': el.terminal,
                                                  'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
-    print('time last:', datetime.now() - start)
     return jsonify(data)
 
 
