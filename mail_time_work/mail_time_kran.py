@@ -32,10 +32,10 @@ cc =  [
     'Pavel.Shunin@nmtport.ru',
     'Radion.Bespalov@nmtport.ru',
     'Disp.Smen@nmtport.ru',
-    'Disp.Smen1@nmtport.ru',
+    'Disp1.Smen@nmtport.ru',
     'Oleg.Evsyukov@nmtport.ru', 
     'Alexander.Ostapchenko@nmtport.ru', 
-    'Alexander.Ostapchenko@yandex.ru', 
+    # 'Alexander.Ostapchenko@yandex.ru', 
 ]
 
 nameTerminal = {1: "УТ-1", 2: "ГУТ-2"}
