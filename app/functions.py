@@ -12,33 +12,6 @@ from app.sennebogen import sennebogen_periods, time_for_shift_sennebogen
 from config import HOURS
 from app.functions_for_all import all_mechanisms_id, today_shift_date, fio_by_rfid_id, id_by_number #  all_mechanisms_type, all_number, name_by_id
 from rich import print
- 
-
-def add_fix_post(post):  # !move
-    ''' I use it fix because arduino sometimes accumulates an extra minute '''
-    try:
-        last = db.session.query(Post).filter(
-            Post.mechanism_id == post.mechanism_id).order_by(Post.timestamp.desc()).first()
-    except Exception as e:
-        logger.debug(e)
-    if last:  # if not exist item in db not use function
-        dt_seconds = (post.timestamp - last.timestamp).seconds
-    else:
-        dt_seconds = 201
-    if dt_seconds < 200:  # whatever the difference is not big
-        last_minute = last.timestamp.minute
-        post_minute = post.timestamp.minute
-        dt_minutes = post_minute - last_minute
-        if dt_minutes == 2 or dt_minutes == -58:
-            post.timestamp -= timedelta(seconds=30)
-    db.session.add(post)
-    try:
-        db.session.commit()
-    except Exception as e:
-        logger.debug(e)
-        time.sleep(10)
-        db.session.commit()
-
 
 def multiple_5(date):  # not use
     '''Return time multiple 5 minutes and remite microseconds'''
@@ -97,6 +70,7 @@ def image_mechanism(value, type_mechanism, number, last_time):
         else:
             return './static/numbers/'+str(
                 type_mechanism)+'/green/'+str(number)+'.png'
+
 
 def time_for_shift_list(date_shift, shift):  # not use
     '''get dict with all minute's values for the period'''
@@ -256,25 +230,6 @@ def add_fio_from_1c(data_period, date_shift, shift):
     return data_period
 
 
-def get_state():
-    return 'work'
-
-
-# def state_mech(args):
-#     values = list(x.value == -1 for x in args.values())
-#     result = all(values[1:])
-#     print(values, result)
-#     if result:
-#         return 'no_power'
-
-#     values = list(x.value <= .1 for x in args.values())
-#     result = all(values[1:])
-#     if result:
-#         return 'stay'
-
-#     return 'work'
-
-
 def state_mech(el):
     type_mechanism = el.mech.type 
     value = el.value
@@ -390,10 +345,10 @@ def is_alarm_usm(args):
         return False
     return True
 
+
 def is_alarm_sennebogen(args):
     """if last 15 minuts not work """
     return False
-
 
 
 def get_status_alarm(mech_id, mech_type):
@@ -416,7 +371,6 @@ def get_status_alarm(mech_id, mech_type):
         return is_alarm_sennebogen(last)
     else:
         return False
-
 
 
 def straight_line_equation(x1, y1, x2, y2):
@@ -443,6 +397,7 @@ def line_kran(number):
             return el['k1'], el['b1']
     return None, None
 
+
 def get_kompleks(latitude, longitude):
     x = (longitude-132) / (latitude-42+0.0000001)
     if (x < 1.1):  
@@ -450,10 +405,12 @@ def get_kompleks(latitude, longitude):
     else:
         return 2
 
+
 def get_kompleksGut(latitude, longitude): 
     if 7.265 > (longitude-132)*10*(latitude-42):
         return 5
     return 4
+
 
 def get_k1_b1_not_kran(latitude, longitude):
     kompleks = get_kompleks(latitude, longitude)
@@ -485,7 +442,6 @@ def which_terminal(type_mech, number, latitude, longitude):
         # print(name, lon_max, ny, lon_min)
         if ny < lon_max and ny > lon_min:
             name_terminal = name
-
     return name_terminal
 
 
@@ -500,22 +456,6 @@ def mech_periods(type_mechanism, date, shift):
         # logger.info(data)
     return data
 
-# not to use
-# def add_to_mongo(data, date, shift):
-#     if data is not None:
-#         today_date, today_shift = today_shift_date()
-#         # convert int key to str
-#         mongo_data = {str(key): value for key, value in data.items()}
-#     for key, value in data.items():
-#         mongo_data[str(key)]['data'] = {
-#             str(k): v for k, v in value['data'].items()}
-#     if today_date == date and today_shift == shift:
-#         print('No')
-#         pass
-#     else:
-#         mongo_data['_id'] = f'{date_shift}|{shift}'
-#         posts = db[type_mechanism]
-#         posts.insert_one(mongo_data)
 
 def hash_all_last_data_state():
     start = datetime.now()
@@ -575,7 +515,6 @@ def hash_now(type_mechanism):
         posts.delete_one({"_id": "now"})
         posts.insert_one(mongo_data)
 
-        #logger.debug("NowData: " + str(datetime.now()))
 
 def get_dict_mechanisms_id_by_number():
     dict_mechanisms = {mech_type:{} for mech_type in mechanisms_type}
@@ -586,6 +525,7 @@ def get_dict_mechanisms_id_by_number():
             logger.debug(e)
     return dict_mechanisms
 
+
 def get_dict_mechanisms_number_by_id():
     dict_mechanisms = {mech_type:{} for mech_type in mechanisms_type}
     for mech_type in mechanisms_type:
@@ -594,6 +534,7 @@ def get_dict_mechanisms_number_by_id():
         except Exception as e:
             logger.debug(e)
     return dict_mechanisms
+
 
 def dez10_to_dez35C(n):
     '''
@@ -609,6 +550,7 @@ def dez10_to_dez35C(n):
     right = right.zfill(5)
     # return left+','+right
     return str(int(left))+'/'+right
+
 
 def add_fio_from_rfid(data_period, date_shift, shift):
     if not data_period:
@@ -628,6 +570,7 @@ def add_fio_from_rfid(data_period, date_shift, shift):
               for r in cursor if r.mechanism_id==mech_id]
         data_period[key]['rfid']  = rfid_work
     return data_period
+
 
 if __name__ == "__main__":
     # type_mech = 'sennebogen'

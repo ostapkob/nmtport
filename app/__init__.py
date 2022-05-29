@@ -11,7 +11,7 @@ import threading
 # import datetime
 from datetime import datetime
 import time
-
+from flask_redis import FlaskRedis
 
 app = Flask(__name__)
 app.config.from_object(Configuration)
@@ -20,6 +20,7 @@ login = LoginManager(app)
 migrate = Migrate(app, db)
 moment = Moment(app)
 bootstrap = Bootstrap(app)
+redis_client = FlaskRedis(app)
 CORS(app)
 logger.add("logs/debug.json", format="{time} {level} {message}", level="DEBUG", rotation="1 day", compression="zip", serialize=True)
 
