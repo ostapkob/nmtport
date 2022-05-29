@@ -63,6 +63,7 @@ def id_by_number(type, number):
         return mech.id
     return None
 
+
 def number_by_id(id):
     mech = Mechanism.query.filter(Mechanism.id==id).first()
     if mech:
@@ -76,6 +77,7 @@ def id_and_number(type):
     if mechanisms:
         return {mech.id: mech.number for mech in mechanisms}
     return None
+
 
 def get_resons(type_mechanisms: str, date_shift: datetime.date, shift: int) -> dict:
     shift = int(shift)
@@ -143,12 +145,14 @@ def convert_resons_to_720minuts(resons: List[Dict[str, object]], start_shift: da
                 resons[i]["stop"], start_shift + timedelta(minutes=719), None)
     return result
 
+
 def get_start_shift(date_shift, shift):
     start_shift = datetime.combine(date_shift, datetime.min.time())
     if shift == 1:
         return start_shift.replace(hour=8, minute=0, second=0, microsecond=0)
     else:
         return start_shift.replace(hour=20, minute=0, second=0, microsecond=0)
+
 
 def fio_by_rfid_id(rfid_id):
     val = Rfid_ids.query.filter(Rfid_ids.rfid_id==rfid_id).first()

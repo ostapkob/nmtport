@@ -16,8 +16,8 @@ from rich import print
 class USM:
     api_work = '/api/v2.0/add_usm_work?'
     api_rfid = '/api/v2.0/add_usm_rfid?'
-    ip = 'http://127.0.0.1:5000'
-    # ip = 'http://127.0.0.2'
+    # ip = 'http://127.0.0.1:5000'
+    ip = 'http://127.0.0.1'
 
     def __repr__(self):
         # return f'{self.number=}, {self.count=}, {self.lever=}, {self.roll=}, {self.lat=}, {self.lon=}'
@@ -77,7 +77,6 @@ class USM:
             print(f'Other error occurred -> {err}')
         else:
             print('Success! ->', datetime.now())
-        self.count += 1
 
     def change_lever(self, value):
         self.lever = value
@@ -108,8 +107,8 @@ class USM:
 if __name__ == "__main__":
     S5  = USM(mechanism_id=32770, number=5,  lever=0, roll=0,  lat=42.8118, lon=132.8893)
     S6  = USM(mechanism_id=32771, number=6,  lever=0, roll=0,  lat=42.8122, lon=132.8887)
-    # S7  = USM(mechanism_id=32772, number=7,  lever=0, roll=0,  lat=0.0,     lon=0.0)
-    S7  = USM(mechanism_id=32772, number=7,  lever=0, roll=0,  lat=42.8144, lon=132.8899)
+    S7  = USM(mechanism_id=32772, number=7,  lever=0, roll=0,  lat=0.0,     lon=0.0)
+    # S7  = USM(mechanism_id=32772, number=7,  lever=0, roll=0,  lat=42.8144, lon=132.8899)
     S8  = USM(mechanism_id=32773, number=8,  lever=0, roll=0,  lat=42.8171, lon=132.8926)
     U9  = USM(mechanism_id=32941, number=9,  lever=0, roll=0,  lat=42.8132, lon=132.8899)
     U10 = USM(mechanism_id=32942, number=10, lever=0, roll=0,  lat=42.8144, lon=132.8913)
@@ -132,25 +131,23 @@ if __name__ == "__main__":
         time.sleep(1)
         if time.time() - last_sent >= 60.0:
             last_sent = time.time()
-            # [m.change_position(lat, lon) for m in usms if m.get_position()[1] > 1] #! fuck
+            [m.change_position(lat, lon) for m in usms if m.get_position()[1] > 1] #! fuck
             if counter == 1: 
                 [x.change_rfid(r) for x, r in zip(usms, rfid_ids)]
                 [m.change_flag(1) for m in usms if m.get_rfid()!='0'*10]
-
                 S5.send_req_rfid()
                 S6.send_req_rfid()
                 S7.send_req_rfid()
-            if counter%3==0: 
+            if counter%5==0: 
                 S6.change_flag()
-            if counter%2==0: 
-                S5.change_flag()
-            # if flagPosition:
-            #     lat = -0.0002
-            #     lon = -0.0005
-            # else:
-            #     lat = 0.0002
-            #     lon = 0.0004
-            # flagPosition = not flagPosition
+                S6.send_req_rfid()
+            if flagPosition:
+                lat = -0.0002
+                lon = -0.0005
+            else:
+                lat = 0.0002
+                lon = 0.0004
+            flagPosition = not flagPosition
             [m.send_req_work() for m in usms]
             [print(x) for x in usms]
             counter += 1

@@ -1,4 +1,11 @@
 #  back-end for NMTPort (Flask)
+install: 
++ python3.8
++ pyvenv
++ mongo
++ redis
++ nginx
+
 
 Все вспомогательные функции вынесенны в functions.py and functions_all.py
 
