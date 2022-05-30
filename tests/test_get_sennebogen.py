@@ -103,32 +103,6 @@ if __name__ == "__main__":
     # S9 = Sennebogen(number=9, x=5009, y=1110, count=0,
     #                 lat=42.8083, lon=132.8871)
 
-    k22 = Kran(number=22,  value=0,  count=0, x=0, y=0,
-               lat=42.809935859, lon=132.8883382114 )
-
-    k14 = Kran(number=14,  value=0,  count=0, x=0, y=0,
-               lon = 132.8884068900412, lat=42.81000536341068)
-
-    k28 = Kran(number=28, value=0, x=1400, y=910, count=0,
-                lon=132.90290816212828, lat=42.803509357113114)
-
-    k18 = Kran(number=18, value=0, x=1400, y=910, count=0,
-                    lon=132.90270816212828, lat=42.803409357113114)
-
-    k1 = Kran(number=1, value=0, x=5001, y=910, count=0,
-                    lon=132.9034574490496, lat=42.80676015655138)
-
-    k35 = Kran(number=35, value=0, x=5001, y=910, count=0,
-                    lon=132.9034574490496, lat=42.80676015655138)
-
-    k31 = Kran(number=31, value=0, x=5001, y=910, count=0,
-                    lon=132.9034574490496, lat=42.80676015655138)
-
-    k17 = Kran(number=17, value=0, x=5001, y=910, count=0,
-                    lon=132.9034574490496, lat=42.80676015655138)
-
-    k58 = Kran(number=58, value=0, x=1400, y=910, count=0,
-                    lon=132.90280816212828, lat=42.803509357113114)
 
 
 

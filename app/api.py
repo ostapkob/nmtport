@@ -1,6 +1,6 @@
 from flask import request, jsonify, abort, make_response
 from flask import render_template  
-from app import db, app, redis_client
+from app import db, app, redis_client, mongodb_client
 from app.model import Mechanism, Post, Rfid_work
 from datetime import datetime, timedelta
 from app.functions import   *
@@ -14,13 +14,13 @@ import time
 from config import HOURS
 from config import krans_if_3_then_2, krans_if_1_then_0, usm_no_move
 from loguru import logger
-from pymongo import MongoClient
 import random
 from rich import print
 import pickle
+# from pymongo import MongoClient
 
-client = MongoClient('mongodb://localhost:27017')
-mongodb = client['HashShift']
+# client = MongoClient('mongodb://localhost:27017')
+mongodb = mongodb_client.db
 dict_mechanisms_number_by_id = get_dict_mechanisms_number_by_id()
 dict_mechanisms_id_by_number = get_dict_mechanisms_id_by_number()
 

@@ -4,6 +4,7 @@ from app.model import Post
 from app import db
 from datetime import datetime, timedelta
 from app  import logger
+from rich import print
 
 TYPE = 'kran'
 ids_and_nums = id_and_number(TYPE)
@@ -189,14 +190,12 @@ def kran_periods(mechanisms_data):
     return mechanisms_data
 
 if __name__ == "__main__":
-    from pprint import pp
     import pickle
     date_shift = datetime.now().date()
     date_shift -= timedelta(days=2)
     shift = 1
 
     before_resons = kran_periods(time_for_shift_kran(date_shift, shift))
-    # pp(before_resons[8])
 
     name_file_pickle = TYPE+'_'+str(date_shift)+"_"+str(shift)
     # with open(name_file_pickle, 'wb') as f:
@@ -205,6 +204,6 @@ if __name__ == "__main__":
     with open(name_file_pickle, 'rb') as f:
         load = pickle.load(f)
 
-    pp(load==before_resons)
+    print(load==before_resons)
 
 

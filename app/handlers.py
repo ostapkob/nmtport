@@ -34,7 +34,7 @@ def add_fix_post(post):  # !move
         last = db.session.query(Post).filter(
             Post.mechanism_id == post.mechanism_id).order_by(Post.timestamp.desc()).first()
     except Exception as e:
-        print(e)
+        print('exept', e)
         logger.debug(e)
     if last:  # if not exist item in db not use function
         dt_seconds = (post.timestamp - last.timestamp).seconds
@@ -105,9 +105,9 @@ def handler_rfid(current):
             Rfid_work.flag == current.flag,
             Rfid_work.timestamp > two_min_ago
         ).order_by(Rfid_work.timestamp.desc()).first()
-        print(f"[yellow]CHANGED current RFID: {current.rfid_id}, redis_tmp RFID {redis_tmp.rfid_id}[/yellow]")
+        print(f"[yellow]CHANGED current RFID: {current.rfid_id}, redis_tmp RFID: {redis_tmp.rfid_id}[/yellow]")
         print(f"[yellow]CHANGED current flag: {current.flag}, redis_tmp flag:  {redis_tmp.flag}[/yellow]")
-        print(f"[sky_blue1]last  {last}[/sky_blue1]")
+        print(f"[sky_blue1]LAST {last}[/sky_blue1]")
         if last is None:
             print(f"[cian]ADD {current.rfid_id}[/cian]")
             return add_to_db_rfid_work(current)
@@ -132,7 +132,7 @@ def handler_position(mech):
             data_mech = db.session.query(Post).filter(
                 Post.mechanism_id == mech.mech_id).order_by(Post.timestamp.desc()).first()
         except Exception as e:
-            print(e)
+            print('exept', e)
             logger.debug(e)
         mech.lat = data_mech.latitude
         mech.lon = data_mech.longitude
