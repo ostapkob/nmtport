@@ -81,7 +81,7 @@ class Post(db.Model):
 
     def add_post(self):
         print(super().get_tables_for_bind())
-        # print(super().)
+
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -98,8 +98,6 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-
-
 
 
 class Work_1C_1(db.Model):
@@ -135,8 +133,6 @@ class Work_1C_1(db.Model):
         return [self.inv_num, self.greifer_num, self.greifer_vol, self.fio, self.data_nach, self.data_kon, self.data_smen, self.smena, self.port]
 
 
-
-
 class Mechanism_downtime_1C(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     inv_num = db.Column(db.Integer, index=True)
@@ -157,7 +153,6 @@ class Mechanism_downtime_1C(db.Model):
 
     def __repr__(self):
         return f'{self.inv_num}, {self.data_smen}, {self.smena}, {self.data_nach}, {self.data_kon}, {self.id_downtime}'
-
 
     def get(self):
         return [self.inv_num, self.data_smen, self.smena, self.data_nach, self.data_kon, self.id_downtime]

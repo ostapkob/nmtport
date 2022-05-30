@@ -1,17 +1,19 @@
 from datetime import datetime, timedelta
 from flask import flash, redirect, url_for
 from app.model import Post, Mechanism, Work_1C_1, Rfid_work
-from app import db
+from app import db, mongodb_client
+# from pymongo import MongoClient
 from config import TIME_PERIODS
 from config import lines_krans, names_terminals, mechanisms_type, usm_tons_in_hour 
 from app  import logger
-from pymongo import MongoClient
 from app.kran import  kran_periods, time_for_shift_kran
 from app.usm import usm_periods, time_for_shift_usm
 from app.sennebogen import sennebogen_periods, time_for_shift_sennebogen
 from config import HOURS
 from app.functions_for_all import all_mechanisms_id, today_shift_date, fio_by_rfid_id, id_by_number #  all_mechanisms_type, all_number, name_by_id
 from rich import print
+
+mongodb = mongodb_client.db
 
 def multiple_5(date):  # not use
     '''Return time multiple 5 minutes and remite microseconds'''
@@ -482,8 +484,9 @@ def hash_all_last_data_state():
                                                 } 
             for el in last_data_mech
             }
-    client = MongoClient('mongodb://localhost:27017')
-    mongodb = client['HashShift']
+    # client = MongoClient('mongodb://localhost:27017')
+    # mongodb = client['HashShift']
+    # mongodb = mongodb_client.db
     posts = mongodb['hash']
     if data is not None:
         data['_id'] = 'last_data'
@@ -496,8 +499,8 @@ def hash_now(type_mechanism):
     data = mech_periods(type_mechanism, date, shift)
     data = add_fio_from_1c(data, date, shift)
     data = add_fio_from_rfid(data, date, shift)
-    client = MongoClient('mongodb://localhost:27017')
-    mongodb = client['HashShift']
+    # client = MongoClient('mongodb://localhost:27017')
+    # mongodb = client['HashShift']
     posts = mongodb[type_mechanism]
     # logger.debug(data)
     if data is not None:

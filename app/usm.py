@@ -3,6 +3,7 @@ from config import HOURS, usm_tons_in_hour
 from app.model import Post, Mechanism_downtime_1C as MD, Work_1C_1 as W1C, Downtime
 from app import db
 from datetime import datetime, timedelta
+from rich import print
 
 
 TYPE = 'usm'
@@ -155,7 +156,6 @@ def get_values_min(value_number):
 
 
 if __name__ == "__main__":
-    from pprint import pp
     import pickle
     # pprint(time_for_shift_usm(*today_shift_date()))
     # pprint(usm_periods(time_for_shift_usm(*today_shift_date())))
@@ -173,7 +173,7 @@ if __name__ == "__main__":
     with open(name_file_pickle, 'rb') as f:
         load = pickle.load(f)
 
-    pp(load==res)
+    print(load==res)
 
 
 

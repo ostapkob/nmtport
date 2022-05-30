@@ -12,6 +12,7 @@ import threading
 from datetime import datetime
 import time
 from flask_redis import FlaskRedis
+from flask_pymongo import PyMongo
 
 app = Flask(__name__)
 app.config.from_object(Configuration)
@@ -21,7 +22,9 @@ migrate = Migrate(app, db)
 moment = Moment(app)
 bootstrap = Bootstrap(app)
 redis_client = FlaskRedis(app)
+mongodb_client = PyMongo(app, uri="mongodb://localhost:27017/HashShift")
 CORS(app)
+
 logger.add("logs/debug.json", format="{time} {level} {message}", level="DEBUG", rotation="1 day", compression="zip", serialize=True)
 
 from app import views, api,  model, functions
