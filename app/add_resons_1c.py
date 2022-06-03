@@ -77,11 +77,11 @@ from app.functions_for_all import get_start_shift
 #                resons[i]["stop"], start_shift + timedelta(minutes=719), None)
 #    return result
 
-def count_step(start:datetime, stop:datetime) -> int:
+def _count_step(start:datetime, stop:datetime) -> int:
     return int(round((stop - start).total_seconds()/60))
 
 
-def add_empty_spaces(resons, start_shift):
+def _add_empty_spaces(resons, start_shift):
     if not resons:
         return {}
     stop_shift = start_shift + timedelta(hours=12)
@@ -99,7 +99,7 @@ def add_empty_spaces(resons, start_shift):
     return result
 
 
-def del_dublicates(items):
+def _del_dublicates(items):
     new_items = []
     tmp_list = []
     for i in items:
@@ -110,7 +110,7 @@ def del_dublicates(items):
     return new_items
 
 
-def add_steps(resons):
+def _add_steps(resons):
     if not resons:
         return {}
     result = {}
@@ -120,16 +120,13 @@ def add_steps(resons):
             "start": i[0].strftime("%H:%M"),
             "stop": i[1].strftime("%H:%M"),
             "reson" : i[2],
-            "step" : count_step(i[0], i[1])
+            "step" : _count_step(i[0], i[1])
         }
-        sum_step += count_step(i[0], i[1])
+        sum_step += _count_step(i[0], i[1])
     if sum_step > 720:
         print(sum_step)
     if sum_step < 717:
         print(sum_step)
-    # assert sum_step >= 718 
-    # assert sum_step <= 720 
-
     return result
 
 
@@ -146,9 +143,9 @@ def add_resons_from_1c(data_period, date, shift):
     for key, value in data_period.items():
         mech_id = value['id']
         resons_1c = [x for x in cursor if x.inv_num==mech_id]
-        resons_1c = del_dublicates(resons_1c)
-        resons_1c = add_empty_spaces(resons_1c, start_shift)
-        resons_1c = add_steps(resons_1c)
+        resons_1c = _del_dublicates(resons_1c)
+        resons_1c = _add_empty_spaces(resons_1c, start_shift)
+        resons_1c = _add_steps(resons_1c)
         data_period[key]['resons'] = resons_1c
     return data_period
 

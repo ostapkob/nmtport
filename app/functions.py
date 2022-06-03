@@ -9,8 +9,7 @@ from app.kran import kran_periods, time_for_shift_kran
 from datetime import datetime, timedelta
 from flask import flash, redirect, url_for
 from app.model import Post, Mechanism, Work_1C_1, Rfid_work
-from app import db, mongodb_client
-# from pymongo import MongoClient
+from app import db, mongodb
 from config import TIME_PERIODS
 from config import lines_krans, names_terminals, mechanisms_type, usm_tons_in_hour 
 from app  import logger
@@ -26,8 +25,6 @@ from app.add_fio_rfid import add_fio_from_rfid
 from app.add_resons_1c import add_resons_from_1c
 
 
-mongodb = mongodb_client.db # TODO move to __init__
-
 def multiple_5(date):  # not use
     '''Return time multiple 5 minutes and remite microseconds'''
     global HOURS
@@ -39,6 +36,7 @@ def multiple_5(date):  # not use
 
 
 def image_mechanism(value, type_mechanism, number, last_time):
+    '''NOT USE'''
     dt = datetime.now() - last_time
     dt = dt.total_seconds() / 60
     if type_mechanism == "usm":
@@ -89,7 +87,6 @@ def image_mechanism(value, type_mechanism, number, last_time):
 
 def time_for_shift_list(date_shift, shift):  # not use
     '''get dict with all minute's values for the period'''
-    # get data from db
     try:
         cursor = db.session.query(Post).filter(
             Post.date_shift == date_shift,
@@ -431,9 +428,6 @@ def hash_all_last_data_state():
                                                 } 
             for el in last_data_mech
             }
-    # client = MongoClient('mongodb://localhost:27017')
-    # mongodb = client['HashShift']
-    # mongodb = mongodb_client.db
     posts = mongodb['hash']
     if data is not None:
         data['_id'] = 'last_data'
@@ -500,26 +494,6 @@ def dez10_to_dez35C(n):
     right = right.zfill(5)
     # return left+','+right
     return str(int(left))+'/'+right
-
-
-# def add_fio_from_rfid(data_period, date_shift, shift): # DEL
-#     if not data_period:
-#         return None
-#     cursor = db.session.query(Rfid_work).filter(
-#         Rfid_work.date_shift == date_shift,
-#         Rfid_work.shift == shift,
-#         ).all()
-#     for key, value in data_period.items():
-#         mech_id = value['id']
-#         rfid_work = [
-#             {
-#                 'fio': fio_by_rfid_id(r.rfid_id), 
-#                 'time': r.timestamp, 
-#                 'flag': r.flag,
-#             }
-#               for r in cursor if r.mechanism_id==mech_id]
-#         data_period[key]['rfid']  = rfid_work
-#     return data_period
 
 
 if __name__ == "__main__":

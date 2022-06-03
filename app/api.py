@@ -1,6 +1,6 @@
 from flask import request, jsonify, abort, make_response
 from flask import render_template  
-from app import db, app, redis_client, mongodb_client
+from app import db, app, redis_client, mongodb
 from app.model import Mechanism, Post
 from datetime import datetime, timedelta
 from app.functions import   *
@@ -20,7 +20,6 @@ from app.add_fio_1c import add_fio_and_grab_from_1c
 from app.add_fio_rfid import add_fio_from_rfid
 from app.add_resons_1c import add_resons_from_1c
 
-mongodb = mongodb_client.db
 dict_mechanisms_number_by_id = get_dict_mechanisms_number_by_id()
 dict_mechanisms_id_by_number = get_dict_mechanisms_id_by_number()
 
@@ -98,10 +97,11 @@ def get_data_period2(type_mechanism, date_shift, shift):
     if data is not None:
         today_date, today_shift = today_shift_date()
         # convert int key to str
-        mongo_data = {str(key): value for key, value in data.items()}
-        for key, value in data.items():
-            mongo_data[str(key)]['data'] = {
-                str(k): v for k, v in value['data'].items()}
+        # mongo_data = {str(key): value for key, value in data.items()}
+        # for key, value in data.items():
+        #     mongo_data[str(key)]['data'] = {
+        #         str(k): v for k, v in value['data'].items()}
+        mongo_data = convert_keys_int_to_str(data)
         if today_date == date and today_shift == shift:
             mongo_request = mongodb[type_mechanism].find_one(  # request
                 {"_id": "now"})
@@ -113,6 +113,15 @@ def get_data_period2(type_mechanism, date_shift, shift):
             posts = mongodb[type_mechanism]
             posts.insert_one(mongo_data)
     return jsonify(data)
+
+
+def convert_keys_int_to_str(data):
+    mongo_data = {str(key): value for key, value in data.items()}
+    for key, value in data.items():
+        mongo_data[str(key)]['data'] = { # del str
+            str(k): v for k, v in value['data'].items()
+        }
+    return mongo_data
 
 
 @app.route("/api/v1.0/get_data_period_with_fio/<type_mechanism>/<date_shift>/<int:shift>", methods=['GET', 'POST'])
