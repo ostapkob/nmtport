@@ -154,6 +154,7 @@ class Mechanism_downtime_1C(db.Model):
     def __repr__(self):
         return f'{self.inv_num}, {self.data_smen}, {self.smena}, {self.data_nach}, {self.data_kon}, {self.id_downtime}'
 
+
     def get(self):
         return [self.inv_num, self.data_smen, self.smena, self.data_nach, self.data_kon, self.id_downtime]
 

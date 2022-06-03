@@ -1,7 +1,7 @@
 from flask import request, jsonify, abort, make_response
 from flask import render_template  
 from app import db, app, redis_client, mongodb_client
-from app.model import Mechanism, Post, Rfid_work
+from app.model import Mechanism, Post
 from datetime import datetime, timedelta
 from app.functions import   *
 from app.functions_for_all import *
@@ -10,16 +10,16 @@ from app.usm import time_for_shift_usm, usm_periods
 from app.kran import time_for_shift_kran, kran_periods
 from app.sennebogen import time_for_shift_sennebogen, sennebogen_periods
 from psw import post_passw
-import time
 from config import HOURS
 from config import krans_if_3_then_2, krans_if_1_then_0, usm_no_move
 from loguru import logger
-import random
 from rich import print
 import pickle
-# from pymongo import MongoClient
 
-# client = MongoClient('mongodb://localhost:27017')
+from app.add_fio_1c import add_fio_and_grab_from_1c
+from app.add_fio_rfid import add_fio_from_rfid
+from app.add_resons_1c import add_resons_from_1c
+
 mongodb = mongodb_client.db
 dict_mechanisms_number_by_id = get_dict_mechanisms_number_by_id()
 dict_mechanisms_id_by_number = get_dict_mechanisms_id_by_number()
@@ -154,8 +154,9 @@ def get_data_period_with_fio2(type_mechanism, date_shift, shift):
         return jsonify(mongo_request)
 
     data = mech_periods(type_mechanism, date, shift)
-    data = add_fio_from_1c(data, date, shift)
+    data = add_fio_and_grab_from_1c(data, date, shift)
     data = add_fio_from_rfid(data, date, shift)
+    data = add_resons_from_1c(data, date, shift)
 
     # add_to_mongo(data, date, shift)
     if data is not None: 

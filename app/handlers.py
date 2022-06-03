@@ -54,7 +54,7 @@ def add_fix_post(post):  # !move
         time.sleep(10)
         db.session.commit()
 
-def corect_position(mech, latitude, longitude):
+def corect_position(mech, latitude, longitude): # TODO dataclasses
     if float(latitude) == 0 or float(longitude) == 0: # get last values
         try:
             data_mech = db.session.query(Post).filter(
@@ -71,7 +71,7 @@ def corect_position(mech, latitude, longitude):
     latitude, longitude = intersection_point_of_lines(k1, b1, k2, b2)
     return latitude, longitude
 
-def add_to_db_rfid_work(current):
+def add_to_db_rfid_work(current: CurrentUSM):
     if current.rfid_id == '0/00000':
         return 'RFID is empy'
     fio = fio_by_rfid_id(current.rfid_id)
@@ -117,7 +117,7 @@ def handler_rfid(current):
     return 'ok'
 
 
-def handler_position(mech):
+def handler_position(mech: CurrentUSM): # ? kran
     '''if position is empty or this mech should not move'''
     if mech.number in usm_no_move \
             or mech.lat == 0 \
@@ -129,11 +129,10 @@ def handler_position(mech):
             mech.lon = redis_mech.lon
             return mech
         try:
-            data_mech = db.session.query(Post).filter(
+            last_data_mech = db.session.query(Post).filter(
                 Post.mechanism_id == mech.mech_id).order_by(Post.timestamp.desc()).first()
         except Exception as e:
-            print('exept', e)
             logger.debug(e)
-        mech.lat = data_mech.latitude
-        mech.lon = data_mech.longitude
+        mech.lat = last_data_mech.latitude
+        mech.lon = last_data_mech.longitude
     return mech
