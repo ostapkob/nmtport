@@ -27,38 +27,34 @@ from psw import mail_pass
 
 HOST = 'smtp.yandex.ru'
 FROM ='smartportdaly@yandex.ru'
+cc =  [
+    'Vladimir.Grigoriev@nmtport.ru',
+    'Radion.Bespalov@nmtport.ru',
+    'Disp.Smen@nmtport.ru',
+    'Disp1.Smen@nmtport.ru',
+    'Oleg.Evsyukov@nmtport.ru', 
+    'Alexander.Ostapchenko@nmtport.ru', 
+    # 'Alexander.Ostapchenko@yandex.ru', 
+]
 
 nameTerminal = {1: "УТ-1", 2: "ГУТ-2"}
 addresses = {
     1: [
-        'Vadim.Evsyukov@nmtport.ru'
-        'Maxim.Anufriev@nmtport.ru'
-        'Konstantin.Nikitenko@nmtport.ru'
-
-        'Pavel.Shunin@nmtport.ru',
-        'Oleg.Evsyukov@nmtport.ru', 
-        'Disp.Smen@nmtport.ru',
-        # 'Vladimir.Grigoriev@nmtport.ru',
-        # 'Dmitry.Chernyavskiy@nmtport.ru',
-        # 'Radion.Bespalov@nmtport.ru',
+        'Vadim.Evsyukov@nmtport.ru',
+        'Maxim.Anufriev@nmtport.ru',
+        'Konstantin.Nikitenko@nmtport.ru',
         'Petr.Gerasimenko@nmtport.ru',
-        'Alexander.Ostapchenko@nmtport.ru',
-        'ostap666@yandex.ru'
+
+        # 'Dmitry.Chernyavskiy@nmtport.ru',
+        # 'Igor.Melyakin@nmtport.ru',
 
         ],
     2: [
-        'Dmitry.Golynsky@nmtport.ru'
-        'Vyacheslav.Gaz@nmtport.ru'
-        'Vladimir.Speransky@nmtport.ru'
-        'Denis.Medvedev@nmtport.ru'
-
-        'Pavel.Shunin@nmtport.ru',
-        'Oleg.Evsyukov@nmtport.ru', 
-        'Disp.Smen@nmtport.ru',
-        # 'Vladimir.Grigoriev@nmtport.ru',
+        'Dmitry.Golynsky@nmtport.ru',
+        'Vyacheslav.Gaz@nmtport.ru',
+        'Vladimir.Speransky@nmtport.ru',
+        'Denis.Medvedev@nmtport.ru',
         'Petr.Gerasimenko@nmtport.ru',
-        'Alexander.Ostapchenko@nmtport.ru',
-        'ostap666@yandex.ru'
     ],
 }
 titles = {
@@ -402,15 +398,16 @@ def sent_email(periods1, periods2, date, terminal):
     "alternative", None, [MIMEText(text), MIMEText(html,'html')])
     message['Subject'] = SUBJECT
     message['From'] = FROM
-    message['To'] = 'Alexander.Ostapchenko@nmtport.ru'
-
+    message['To'] = ", ".join(addresses[terminal])
+    message['Cc'] = ', '.join(cc)
+    recipients = addresses[terminal] + cc
     # with open('mail.html', 'w') as f:
     #     f.write(html)
     #     f.close()
     server = smtplib.SMTP_SSL(HOST, 465)
     server.ehlo()
     server.login(FROM, mail_pass)
-    server.sendmail(FROM, addresses[terminal], message.as_string())
+    server.sendmail(FROM, recipients, message.as_string())
     server.quit()
 
 def every_day():
@@ -448,6 +445,7 @@ if __name__ == "__main__":
     # sent_email(UT_shift_1, UT_shift_2, yesterday, 1)
 
 
+    print('Start Kran')
     while True:
         hour = datetime.now().hour
         minute = datetime.now().minute
