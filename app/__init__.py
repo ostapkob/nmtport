@@ -23,9 +23,17 @@ moment = Moment(app)
 bootstrap = Bootstrap(app)
 redis_client = FlaskRedis(app)
 mongodb_client = PyMongo(app, uri="mongodb://localhost:27017/HashShift")
+mongodb = mongodb_client.db
 CORS(app)
 
-logger.add("logs/debug.json", format="{time} {level} {message}", level="DEBUG", rotation="1 day", compression="zip", serialize=True)
+logger.add(
+        "logs/debug.json", 
+        format="{time} {level} {message}", 
+        level="DEBUG", 
+        rotation="1 day", 
+        compression="zip", 
+        serialize=True
+        )
 
 from app import views, api,  model, functions
 hash_last_data = functions.hash_all_last_data_state
@@ -34,7 +42,7 @@ hash_now = functions.hash_now
 db.create_all()
 
 
-def loop():
+def _loop():
     while True:
         hash_last_data()
         for mech_type in mechanisms_type:
@@ -43,7 +51,7 @@ def loop():
 
 
 logger.debug("RESTART: " + str(datetime.now()))
-thread = threading.Thread(target=loop, daemon=True)
+thread = threading.Thread(target=_loop, daemon=True)
 thread.start()
 
 

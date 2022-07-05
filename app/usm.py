@@ -1,10 +1,14 @@
-from app.functions_for_all import *
+from app.functions_for_all import all_mechanisms_id, get_start_shift, id_and_number, today_shift_date
+
+from app.add_fio_1c import add_fio_and_grab_from_1c
+from app.add_fio_rfid import add_fio_from_rfid
+from app.add_resons_1c import add_resons_from_1c
+
 from config import HOURS, usm_tons_in_hour 
-from app.model import Post, Mechanism_downtime_1C as MD, Work_1C_1 as W1C, Downtime
 from app  import logger
+from app.model import Post
 from app import db
 from datetime import datetime, timedelta
-from rich import print
 
 
 TYPE = 'usm'
@@ -83,11 +87,11 @@ def get_time_by_minuts(data_per_shift, date_shift, shift):
             if delta_minutes >= datetime.now() and date_shift == today_date and today_shift == shift:
                 break
             time_by_minuts[key]['terminal'] = terminal
-        try:
-            resons = process_resons(get_resons(TYPE, date_shift, shift), ids_and_nums)
-        except Exception as e:
-            resons = {}
-        time_by_minuts[key]['resons'] = convert_resons_to_720minuts(resons.get(mech.number, None), start_shift)
+        # try:
+            # resons = process_resons(get_resons(TYPE, date_shift, shift), ids_and_nums)
+        # except Exception as e:
+            # resons = {}
+        # time_by_minuts[key]['resons'] = convert_resons_to_720minuts(resons.get(mech.number, None), start_shift)
 
     return time_by_minuts
 
@@ -97,12 +101,13 @@ def time_for_shift_usm(date_shift, shift):
     value is lever, value3 is speed roler,
     '''
     shift = int(shift)
-    all_mechs = all_mechanisms_id(TYPE)
+    all_mechs = all_mechanisms_id(TYPE) # TODO
     try:
         cursor = db.session.query(Post).filter(Post.date_shift == date_shift, Post.shift ==
                                                shift, Post.mechanism_id.in_(all_mechs)).order_by(Post.mechanism_id).all()
     except Exception as e:
         logger.debug(e)
+        return None
     # create dict all works mechanism in shift
     data_per_shift = get_data_per_shift(cursor)
     if data_per_shift == {}:
@@ -158,23 +163,24 @@ def get_values_min(value_number):
 
 if __name__ == "__main__":
     import pickle
-    # pprint(time_for_shift_usm(*today_shift_date()))
-    # pprint(usm_periods(time_for_shift_usm(*today_shift_date())))
+    from rich import print
     date_shift = datetime.now().date()
-    date_shift -= timedelta(days=5)
-    shift = 1
+    date_shift -= timedelta(days=0)
+    dates_shifts = [  date_shift - timedelta(days=x) for x in range(18, 19) ]
+    shift = 2
 
-    res = usm_periods(time_for_shift_usm(date_shift, shift))
-    # pp(res)
+    for date in dates_shifts:
+        print(date)
+        name_file_pickle = TYPE+'_'+str(date)+"_"+str(shift)
+        # res = usm_periods(time_for_shift_usm(date, shift))
+        # with open(name_file_pickle, 'wb') as f:
+        #     pickle.dump(res, f)
 
-    name_file_pickle = TYPE+'_'+str(date_shift)+"_"+str(shift)
-    # with open(name_file_pickle, 'wb') as f:
-    #     pickle.dump(res, f)
+        with open(name_file_pickle, 'rb') as f:
+            load = pickle.load(f)
 
-    with open(name_file_pickle, 'rb') as f:
-        load = pickle.load(f)
-
-    print(load==res)
-
-
+        data = add_fio_and_grab_from_1c(load, date, shift)
+        data = add_fio_from_rfid(data, date, shift)
+        data = add_resons_from_1c(data, date, shift)
+        print(data[13]['resons'])
 

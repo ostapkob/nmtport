@@ -1,7 +1,7 @@
 from flask import request, jsonify, abort, make_response
 from flask import render_template  
-from app import db, app, redis_client, mongodb_client
-from app.model import Mechanism, Post, Rfid_work
+from app import db, app, redis_client, mongodb
+from app.model import Mechanism, Post
 from datetime import datetime, timedelta
 from app.functions import   *
 from app.functions_for_all import *
@@ -10,17 +10,17 @@ from app.usm import time_for_shift_usm, usm_periods
 from app.kran import time_for_shift_kran, kran_periods
 from app.sennebogen import time_for_shift_sennebogen, sennebogen_periods
 from psw import post_passw
-import time
 from config import HOURS
 from config import krans_if_3_then_2, krans_if_1_then_0, usm_no_move
 from app  import logger
 import random
 from rich import print
 import pickle
-# from pymongo import MongoClient
 
-# client = MongoClient('mongodb://localhost:27017')
-mongodb = mongodb_client.db
+from app.add_fio_1c import add_fio_and_grab_from_1c
+from app.add_fio_rfid import add_fio_from_rfid
+from app.add_resons_1c import add_resons_from_1c
+
 dict_mechanisms_number_by_id = get_dict_mechanisms_number_by_id()
 dict_mechanisms_id_by_number = get_dict_mechanisms_id_by_number()
 
@@ -98,10 +98,11 @@ def get_data_period2(type_mechanism, date_shift, shift):
     if data is not None:
         today_date, today_shift = today_shift_date()
         # convert int key to str
-        mongo_data = {str(key): value for key, value in data.items()}
-        for key, value in data.items():
-            mongo_data[str(key)]['data'] = {
-                str(k): v for k, v in value['data'].items()}
+        # mongo_data = {str(key): value for key, value in data.items()}
+        # for key, value in data.items():
+        #     mongo_data[str(key)]['data'] = {
+        #         str(k): v for k, v in value['data'].items()}
+        mongo_data = convert_keys_int_to_str(data)
         if today_date == date and today_shift == shift:
             mongo_request = mongodb[type_mechanism].find_one(  # request
                 {"_id": "now"})
@@ -113,6 +114,15 @@ def get_data_period2(type_mechanism, date_shift, shift):
             posts = mongodb[type_mechanism]
             posts.insert_one(mongo_data)
     return jsonify(data)
+
+
+def convert_keys_int_to_str(data):
+    mongo_data = {str(key): value for key, value in data.items()}
+    for key, value in data.items():
+        mongo_data[str(key)]['data'] = { # del str
+            str(k): v for k, v in value['data'].items()
+        }
+    return mongo_data
 
 
 @app.route("/api/v1.0/get_data_period_with_fio/<type_mechanism>/<date_shift>/<int:shift>", methods=['GET', 'POST'])
@@ -154,8 +164,9 @@ def get_data_period_with_fio2(type_mechanism, date_shift, shift):
         return jsonify(mongo_request)
 
     data = mech_periods(type_mechanism, date, shift)
-    data = add_fio_from_1c(data, date, shift)
+    data = add_fio_and_grab_from_1c(data, date, shift)
     data = add_fio_from_rfid(data, date, shift)
+    data = add_resons_from_1c(data, date, shift)
 
     # add_to_mongo(data, date, shift)
     if data is not None: 

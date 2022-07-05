@@ -14,7 +14,7 @@ from pprint import pprint
 import os
 from flask_login import current_user, login_user, logout_user
 
-db.create_all()
+# db.create_all()
 
 
 @app.route("/")
