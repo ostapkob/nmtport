@@ -29,7 +29,6 @@ HOST = 'smtp.yandex.ru'
 FROM ='smartportdaly@yandex.ru'
 cc =  [
     'Vladimir.Grigoriev@nmtport.ru',
-    'Pavel.Shunin@nmtport.ru',
     'Radion.Bespalov@nmtport.ru',
     'Disp.Smen@nmtport.ru',
     'Disp1.Smen@nmtport.ru',

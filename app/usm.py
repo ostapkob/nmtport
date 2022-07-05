@@ -1,6 +1,7 @@
 from app.functions_for_all import *
 from config import HOURS, usm_tons_in_hour 
 from app.model import Post, Mechanism_downtime_1C as MD, Work_1C_1 as W1C, Downtime
+from app  import logger
 from app import db
 from datetime import datetime, timedelta
 from rich import print

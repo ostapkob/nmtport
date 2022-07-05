@@ -30,7 +30,6 @@ FROM ='smartportdaly@yandex.ru'
 nameTerminal = {1: "УТ-1", 2: "ГУТ-2"}
 cc =  [
     'Vladimir.Grigoriev@nmtport.ru',
-    'Pavel.Shunin@nmtport.ru',
     'Radion.Bespalov@nmtport.ru',
     'Disp.Smen@nmtport.ru',
     'Disp1.Smen@nmtport.ru',
@@ -42,13 +41,15 @@ addresses = {
     1: [
         'Petr.Gerasimenko@nmtport.ru',
         'Fedor.Tormasov@nmtport.ru',
+        'Aleksey.Makogon@nmtport.ru',
+        'shift.engineer@nmtport.ru'
         ],
     2: [
     ],
 }
 titles = {
     1: [
-    "номер крана ", 
+    "номер усм ", 
     "начало смены </br>(> 8:30)", 
     "окончание перед обедом </br>(< 12:00)", 
     "начало после обеда </br>(> 13:00)", 
@@ -58,7 +59,7 @@ titles = {
     'общие потери по крану </br> (минут)',
     ],
     2: [
-    "номер крана ", 
+    "номер усм ", 
     "начало смены </br>(> 20:30)", 
     "окончание перед обедом </br>(< 01:00)", 
     "начало после обеда </br>(> 02:00)", 
