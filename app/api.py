@@ -3,17 +3,16 @@ from flask import render_template
 from app import db, app, redis_client, mongodb
 from app.model import Mechanism, Post
 from datetime import datetime, timedelta
-from app.functions import   *
-from app.functions_for_all import *
-from app.handlers import *
+from app.functions import   get_dict_mechanisms_number_by_id, get_dict_mechanisms_id_by_number, mech_periods, state_mech, which_terminal, dez10_to_dez35C
+from app.functions_for_all import all_mechanisms_id, today_shift_date,  id_by_number 
+from app.handlers import add_fix_post, corect_position, CurrentUSM, handler_position, handler_rfid, add_to_db_rfid_work
 from app.usm import time_for_shift_usm, usm_periods
 from app.kran import time_for_shift_kran, kran_periods
 from app.sennebogen import time_for_shift_sennebogen, sennebogen_periods
 from psw import post_passw
 from config import HOURS
 from config import krans_if_3_then_2, krans_if_1_then_0, usm_no_move
-from app  import logger
-import random
+from loguru import logger
 from rich import print
 import pickle
 
@@ -33,6 +32,7 @@ def get_per_shift(m_id):
         data_per_shift = db.session.query(Post).filter(
             Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).all()
     except Exception as e:
+        data_per_shift = []
         logger.debug(e)
     try:
         start = db.session.query(Post.timestamp).filter(
@@ -41,6 +41,7 @@ def get_per_shift(m_id):
                                                        shift, Post.mechanism_id == m_id).order_by(Post.timestamp.desc()).first()[0]
     except TypeError:
         abort(405)
+        return 
     start += timedelta(hours=HOURS)  # it should be better
     stop += timedelta(hours=HOURS)
     total = round(sum(el.value for el in data_per_shift) / 60, 3)
@@ -57,9 +58,10 @@ def get_data(type_mechanism, date_shift, shift):
         return make_response(jsonify({'error': 'Bad format date'}), 400)
     if type_mechanism == 'usm':
         data = time_for_shift_usm(date, shift)
+        return jsonify(data)
     if type_mechanism == 'kran':
         data = time_for_shift_kran(date, shift)
-    return jsonify(data)
+        return jsonify(data)
 
 
 @app.route("/api/v1.0/get_data_period/<type_mechanism>/<date_shift>/<int:shift>", methods=['GET', 'POST'])
@@ -71,9 +73,10 @@ def get_data_period(type_mechanism, date_shift, shift):
         return make_response(jsonify({'error': 'Bad format date'}), 400)
     if type_mechanism == 'usm':
         data = usm_periods(time_for_shift_usm(date, shift))
+        return jsonify(data)
     if type_mechanism == 'kran':
         data = time_for_shift_kran(date, shift)
-    return jsonify(data)
+        return jsonify(data)
 
 
 @app.route("/api/v2.0/get_data_period/<type_mechanism>/<date_shift>/<int:shift>", methods=['GET', 'POST'])
@@ -132,13 +135,14 @@ def get_data_period_with_fio(type_mechanism, date_shift, shift):
         date = datetime.strptime(date_shift, '%d.%m.%Y').date()
     except ValueError:
         return make_response(jsonify({'error': 'Bad format date'}), 400)
+    data = {}
     if type_mechanism == 'usm':
         data = usm_periods(time_for_shift_usm(date, shift))
     if type_mechanism == 'kran':
         data = kran_periods(time_for_shift_kran(date, shift))
     if type_mechanism == 'sennebogen':
         data = sennebogen_periods(time_for_shift_sennebogen(date, shift))
-    data_with_fio = add_fio_from_1c(data, date, shift)
+    data_with_fio = add_fio_and_grab_from_1c(data, date, shift)
     return jsonify(data_with_fio)
 
 
@@ -191,6 +195,7 @@ def get_data_period_with_fio2(type_mechanism, date_shift, shift):
 @app.route("/api/v1.0/get_data_now/<type_mechanism>", methods=['GET', 'POST'])
 def get_data_now(type_mechanism):
     '''get data shift for by type of mechanism with work NOW'''
+    data = {}
     if type_mechanism == 'usm':
         data = usm_periods(time_for_shift_usm(*today_shift_date()))
 
@@ -205,13 +210,14 @@ def get_data_now(type_mechanism):
 @app.route("/api/v1.0/get_data_period_with_fio_now/<type_mechanism>", methods=['GET', 'POST'])
 def get_data_period_with_fio_now(type_mechanism):
     '''get data shift for by type of mechanism with work NOW'''
+    data = {}
     if type_mechanism == 'usm':
         data = usm_periods(time_for_shift_usm(*today_shift_date()))
     if type_mechanism == 'kran':
         data = kran_periods(time_for_shift_kran(*today_shift_date()))
     if type_mechanism == 'sennebogen':
         data = sennebogen_periods(time_for_shift_sennebogen(*today_shift_date()))
-    data_with_fio = add_fio_from_1c(data, *today_shift_date())
+    data_with_fio = add_fio_and_grab_from_1c(data, *today_shift_date())
     return jsonify(data_with_fio)
 
 
@@ -219,7 +225,7 @@ def get_data_period_with_fio_now(type_mechanism):
 def get_data_period_with_fio_now2(type_mechanism):
     '''get data shift for by type of mechanism with work NOW'''
     data = mech_periods(type_mechanism, *today_shift_date())
-    data_with_fio = add_fio_from_1c(data, *today_shift_date())
+    data_with_fio = add_fio_and_grab_from_1c(data, *today_shift_date())
     return jsonify(data_with_fio)
 
 
@@ -230,6 +236,7 @@ def get_all_last_data():
         last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
             Post.timestamp.desc()).first() for x in all_mechanisms_id()]
     except Exception as e:
+        last_data_mech = []
         logger.debug(e)
     last_data_mech = filter(lambda x: x is not None, last_data_mech)
     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
@@ -243,32 +250,33 @@ def get_all_last_data():
     return jsonify(data)
 
 
-@app.route("/api/v1.0/get_all_last_data_by_type_ico/<mech_type>", methods=["GET"])
-def get_all_last_data_by_type(mech_type):
-    '''get all data mechanism'''
-    try:
-        last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
-            Post.timestamp.desc()).first() for x in all_mechanisms_id(mech_type)]
-    except Exception as e:
-        logger.debug(e)
-    data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
-                                                 'name': el.mech.name,
-                                                 'value': el.value,
-                                                 'latitude': el.latitude,
-                                                 'longitude': el.longitude,
-                                                 'src': image_mechanism(el.value, el.mech.type, el.mech.number, el.timestamp + timedelta(hours=HOURS)),
-                                                 'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
-    return jsonify(data)
+# @app.route("/api/v1.0/get_all_last_data_by_type_ico/<mech_type>", methods=["GET"])
+# def get_all_last_data_by_type(mech_type):
+#     '''get all data mechanism'''
+#     try:
+#         last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
+#             Post.timestamp.desc()).first() for x in all_mechanisms_id(mech_type)]
+#     except Exception as e:
+#         logger.debug(e)
+#     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
+#                                                  'name': el.mech.name,
+#                                                  'value': el.value,
+#                                                  'latitude': el.latitude,
+#                                                  'longitude': el.longitude,
+#                                                  'src': image_mechanism(el.value, el.mech.type, el.mech.number, el.timestamp + timedelta(hours=HOURS)),
+#                                                  'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
+#     return jsonify(data)
 
 
 @app.route("/api/v1.0/get_all_last_data_state", methods=["GET"])
 def get_all_last_data_state():
     '''get all data mechanism and mechanism state'''
-    start = datetime.now()
+    # start = datetime.now()
     try:
         last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
             Post.timestamp.desc()).first() for x in all_mechanisms_id()]
     except Exception as e:
+        last_data_mech = []
         logger.debug(e)
     last_data_mech = filter(lambda x: x is not None, last_data_mech)
     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
@@ -301,23 +309,24 @@ def get_all_last_data_state2():
     return jsonify({})
 
 
-@app.route("/api/v1.0/get_all_last_data_ico", methods=["GET"])
-def get_all_last_data_ico():
-    '''get all data mechanism and mechanism state'''
-    try:
-        last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
-            Post.timestamp.desc()).first() for x in all_mechanisms_id()]
-    except Exception as e:
-        logger.debug(e)
-    last_data_mech = filter(lambda x: x is not None, last_data_mech)
-    data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
-                                                 'name': el.mech.name,
-                                                 'value': el.value,
-                                                 'latitude': el.latitude,
-                                                 'longitude': el.longitude,
-                                                 'src': image_mechanism(el.value, el.mech.type, el.mech.number, el.timestamp + timedelta(hours=HOURS)),
-                                                 'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
-    return jsonify(data)
+# @app.route("/api/v1.0/get_all_last_data_ico", methods=["GET"])
+# def get_all_last_data_ico():
+#     '''get all data mechanism and mechanism state'''
+#     try:
+#         last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
+#             Post.timestamp.desc()).first() for x in all_mechanisms_id()]
+#     except Exception as e:
+#         last_data_mech = []
+#         logger.debug(e)
+#     last_data_mech = filter(lambda x: x is not None, last_data_mech)
+#     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
+#                                                  'name': el.mech.name,
+#                                                  'value': el.value,
+#                                                  'latitude': el.latitude,
+#                                                  'longitude': el.longitude,
+#                                                  'src': image_mechanism(el.value, el.mech.type, el.mech.number, el.timestamp + timedelta(hours=HOURS)),
+#                                                  'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
+#     return jsonify(data)
 
 
 @app.route("/api/v1.0/get_mech/<int:m_id>", methods=["GET"])
@@ -325,9 +334,10 @@ def get_mech(m_id):
     '''get name mechanism'''
     try:
         mech = Mechanism.query.get(m_id)
+        return f'{mech.name}'
     except Exception as e:
         logger.debug(e)
-    return f'{mech.name}'
+        return 
 
 
 @app.route('/api/v1.0/add_usm', methods=['GET'])
@@ -349,10 +359,9 @@ def add_usm():
         mech = Mechanism.query.get(mechanism_id)
     except Exception as e:
         logger.debug(e)
-    if number==7  and float(value) == 1: # FIX
-        value = random.randrange(50, 100, 1)/100
-    # if number==10  and float(value) > 0: # FIX
-    #     value3 = 10
+    # if (number==13 or number==11) and float(value) == 1: # FIX
+    # if number==7  and float(value) == 1: # FIX
+    #     value = random.randrange(50, 100, 1)/100
 
     items = mechanism_id, password, latitude, longitude
     test_items = any([item is None for item in items])
@@ -374,10 +383,12 @@ def add_usm():
         try:
             data_mech = db.session.query(Post).filter(
                 Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
+            latitude = data_mech.latitude
+            longitude = data_mech.longitude
         except Exception as e:
+            latitude = 132.9
+            longitude = 42.9 
             logger.debug(e)
-        latitude = data_mech.latitude
-        longitude = data_mech.longitude
     terminal = which_terminal('usm', number, latitude, longitude) # exist 9, 11, 13, 15
     new_post = Post(value=value, value2=value2, value3=value3, count=count,
                     latitude=latitude, longitude=longitude, mechanism_id=mechanism_id,
@@ -386,52 +397,52 @@ def add_usm():
     return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
 
 
-@app.route('/api/v1.0/add_kran', methods=['GET'])
-def add_kran():
-    '''add post by GET request from arduino'''
-    mechanism_id = request.args.get('mechanism_id')
-    password = request.args.get('password')
-    value = request.args.get('value')
-    value3 = request.args.get('value3')
-    latitude = request.args.get('latitude')
-    longitude = request.args.get('longitude')
-    try:
-        mech = Mechanism.query.get(mechanism_id)
-    except Exception as e:
-        logger.debug(e)
-    items = mechanism_id, password, latitude, longitude, value, value3
-    test_items = any([item is None for item in items]) # if this id is exist
-    if test_items:
-        return 'Bad request'
-    if password not in post_passw:
-        return 'Bad password'
-    if int(mechanism_id) not in all_mechanisms_id('kran'):
-        return 'Not this id or not kran'
-    if latitude == '':
-        latitude = 0
-        longitude = 0
-    if float(latitude) == 0 or float(longitude) == 0:
-        try:
-            data_mech = db.session.query(Post).filter(
-                Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
-        except Exception as e:
-            logger.debug(e)
-        latitude = data_mech.latitude
-        longitude = data_mech.longitude
-    if mech.number in krans_if_3_then_2 and value == '3':
-        value = 2
-    if mech.number in krans_if_1_then_0 and value == '1':
-        value = 4
-    k1, b1 = line_kran(mech.number)
-    k2, b2 = perpendicular_line_equation(
-        k1, float(latitude), float(longitude))
-    latitude, longitude = intersection_point_of_lines(k1, b1, k2, b2)
-    terminal = which_terminal('kran', number, latitude, longitude) # exist 9, 11, 13, 15
-    new_post = Post(value=value, value3=value3, latitude=latitude,
-                    longitude=longitude, mechanism_id=mechanism_id, terminal=terminal)
-    db.session.add(new_post)
-    db.session.commit()
-    return f'Success, {str(mech.number)},  {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
+# @app.route('/api/v1.0/add_kran', methods=['GET'])
+# def add_kran():
+#     '''add post by GET request from arduino'''
+#     mechanism_id = request.args.get('mechanism_id')
+#     password = request.args.get('password')
+#     value = request.args.get('value')
+#     value3 = request.args.get('value3')
+#     latitude = request.args.get('latitude')
+#     longitude = request.args.get('longitude')
+#     try:
+#         mech = Mechanism.query.get(mechanism_id)
+#     except Exception as e:
+#         logger.debug(e)
+#     items = mechanism_id, password, latitude, longitude, value, value3
+#     test_items = any([item is None for item in items]) # if this id is exist
+#     if test_items:
+#         return 'Bad request'
+#     if password not in post_passw:
+#         return 'Bad password'
+#     if int(mechanism_id) not in all_mechanisms_id('kran'):
+#         return 'Not this id or not kran'
+#     if latitude == '':
+#         latitude = 0
+#         longitude = 0
+#     if float(latitude) == 0 or float(longitude) == 0:
+#         try:
+#             data_mech = db.session.query(Post).filter(
+#                 Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
+#         except Exception as e:
+#             logger.debug(e)
+#         latitude = data_mech.latitude
+#         longitude = data_mech.longitude
+#     if mech.number in krans_if_3_then_2 and value == '3':
+#         value = 2
+#     if mech.number in krans_if_1_then_0 and value == '1':
+#         value = 4
+#     k1, b1 = line_kran(mech.number)
+#     k2, b2 = perpendicular_line_equation(
+#         k1, float(latitude), float(longitude))
+#     latitude, longitude = intersection_point_of_lines(k1, b1, k2, b2)
+#     terminal = which_terminal('kran', number, latitude, longitude) # exist 9, 11, 13, 15
+#     new_post = Post(value=value, value3=value3, latitude=latitude,
+#                     longitude=longitude, mechanism_id=mechanism_id, terminal=terminal)
+#     db.session.add(new_post)
+#     db.session.commit()
+#     return f'Success, {str(mech.number)},  {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
 
 @app.route('/api/v2.0/add_kran', methods=['GET'])
 def add_kran2():
@@ -451,12 +462,14 @@ def add_kran2():
     try:
         mech = Mechanism.query.get(mechanism_id)
     except Exception as e:
+        print('Bed request mech', number)
         logger.debug(e)
+        return f"bed request mech, {number}"
     if (number == 31 or number == 17) and value == 1: # FIX
         value = 2 
     items = mechanism_id, password, latitude, longitude, value, count
-    test_items = any([item is None for item in items]) # if this id is exist
-    if test_items:
+    test_exist_items = any([item is None for item in items]) # if this id is exist
+    if test_exist_items:
         return 'Bad request'
     if password not in post_passw:
         return 'Bad password'
@@ -466,9 +479,9 @@ def add_kran2():
         value = 4 # 4 work how 0
     if value==0 and ((x>300 and y > 300) or x>700 or y>700) :  #acselerometer
         value = 5 # kran move
-    if latitude == '':
-        latitude = 0
-        longitude = 0
+    # if latitude == '':
+    #     latitude = 0
+    #     longitude = 0
     latitude, longitude = corect_position(mech, latitude, longitude)
     terminal = which_terminal('kran', number, latitude, longitude) # exist 9, 11, 13, 15
     new_post = Post(value=value, count=count, latitude=latitude,
@@ -509,10 +522,12 @@ def add_sennebogen():
         try:
             data_mech = db.session.query(Post).filter(
                 Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
+            latitude = data_mech.latitude
+            longitude = data_mech.longitude
         except Exception as e:
             logger.debug(e)
-        latitude = data_mech.latitude
-        longitude = data_mech.longitude
+        latitude = 132.8
+        longitude = 40.8
     terminal = which_terminal('sennebogen', number, latitude, longitude)
     new_post = Post(value=x, value2=y, count=count,
                     latitude=latitude, longitude=longitude, mechanism_id=mechanism_id,
@@ -543,14 +558,17 @@ def add_post():
             try:
                 data_mech = db.session.query(Post).filter(
                     Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
+                latitude = data_mech.latitude
+                longitude = data_mech.longitude
             except Exception as e:
                 logger.debug(e)
-            latitude = data_mech.latitude
-            longitude = data_mech.longitude
+                latitude = 132.7
+                longitude = 40.7
     elif request.method == 'GET':
         return 'Need POST methods'
     else:
         abort(400)
+        return
 
     new_post = Post(value, latitude, longitude, mechanism_id)
     data = request.data
@@ -624,7 +642,7 @@ def add_usm_rfid_2():
     passw = request.args.get('passw')
     rfid = request.args.get('rfid')
     flag = bool(int(request.args.get('flag')))
-    items = number, mech_id, passw, rfid, flag 
+    # items = number, mech_id, passw, rfid, flag 
     rfid = dez10_to_dez35C(int(rfid))
     current = CurrentUSM(type_mech, mech_id, number, count, 0, 0, rfid, flag, 0, 0)
     if mech_id is None:

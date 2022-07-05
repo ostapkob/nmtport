@@ -404,11 +404,12 @@ def mech_periods(type_mechanism, date, shift):
 
 
 def hash_all_last_data_state():
-    start = datetime.now()
+    # start = datetime.now()
     try:
         last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
             Post.timestamp.desc()).first() for x in all_mechanisms_id()]
     except Exception as e:
+        last_data_mech = {}
         logger.debug(e)
     last_data_mech = filter(lambda x: x is not None, last_data_mech)
     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
@@ -430,9 +431,11 @@ def hash_all_last_data_state():
             }
     posts = mongodb['hash']
     if data is not None:
-        data['_id'] = 'last_data'
+        data["_id"] = "last_data"
         posts.delete_one({"_id":"last_data"})
         posts.insert_one(data)
+    else: 
+        return
 
 
 def hash_now(type_mechanism):
@@ -482,7 +485,7 @@ def get_dict_mechanisms_number_by_id():
 
 def dez10_to_dez35C(n):
     '''
-        convert rf_idid to "text_format" rfid
+        convert rfid_id to "text_format" rfid
         https://guardsaas.com/ru/content/keycode
     '''
     n = str(n).zfill(10)
