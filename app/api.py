@@ -12,7 +12,8 @@ from app.sennebogen import time_for_shift_sennebogen, sennebogen_periods
 from psw import post_passw
 from config import HOURS
 from config import krans_if_3_then_2, krans_if_1_then_0, usm_no_move
-from loguru import logger
+from app  import logger
+import random
 from rich import print
 import pickle
 
@@ -348,9 +349,10 @@ def add_usm():
         mech = Mechanism.query.get(mechanism_id)
     except Exception as e:
         logger.debug(e)
-    # if (number==13 or number==11) and float(value) == 1: # FIX
-    # if number==7  and float(value) == 1: # FIX
-    #     value = random.randrange(50, 100, 1)/100
+    if number==7  and float(value) == 1: # FIX
+        value = random.randrange(50, 100, 1)/100
+    # if number==10  and float(value) > 0: # FIX
+    #     value3 = 10
 
     items = mechanism_id, password, latitude, longitude
     test_items = any([item is None for item in items])

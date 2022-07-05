@@ -17,5 +17,9 @@ f:
 stat:
 	sudo systemctl status nmtport.service
 
+u:
+	cat /var/log/nginx/access.log |  rg 'add_usm_[\w]+\?number=$n'
+
+
 test: 
 	echo "-> $1 = $2"

@@ -23,3 +23,5 @@ middleware/*.xlsx
 *.pyc 
 *.zip 
 New*
+tmp*
+tags

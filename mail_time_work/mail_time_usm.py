@@ -41,6 +41,8 @@ addresses = {
     1: [
         'Petr.Gerasimenko@nmtport.ru',
         'Fedor.Tormasov@nmtport.ru',
+        'Aleksey.Makogon@nmtport.ru',
+        'shift.engineer@nmtport.ru'
         ],
     2: [
     ],

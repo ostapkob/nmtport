@@ -20,8 +20,8 @@ nginx_log = '/var/log/nginx/access.log'
 with open(nginx_log) as f:
     lines = f.readlines()
 
-time_start = datetime(2022, 1, 6, 8, 0, 0)
-time_finish = datetime(2022, 1, 6, 17, 0, 0)
+time_start = datetime(2022, 6, 19, 8, 1, 0)
+time_finish = datetime(2022, 6, 19, 19, 6, 0)
 for line in lines:
     if 'add_kran' in line:
         line = line.split('&')
@@ -52,7 +52,7 @@ for line in lines:
                     terminal=terminal,
         )
         db.session.add(new_post)
-    if 'add_usm' in line:
+    if 'add_usm?' in line:
         line = line.split('&')
         time = re.search(r'\[.*\]', line[0])[0]
         time = time[1:21]
@@ -68,6 +68,9 @@ for line in lines:
         count = line[5].split('=')[1]
         lat = line[6].split('=')[1]
         lon = line[7].split(' ')[0].split('=')[1]
+        if mechanism_id=='32942' and int(value3)>0:
+            value=0.7
+            
         terminal = which_terminal('usm', number, lat, lon) 
         timestamp=time-timedelta(hours=10)
         new_post = Post(
@@ -81,9 +84,7 @@ for line in lines:
                     longitude=lon,
                     terminal=terminal,
         )
-        # if mechanism_id!='34214':
-        #     continue
         print(timestamp,number, mechanism_id, value, value2, value3, count, lat, lon, terminal)
         db.session.add(new_post)
-db.session.commit()
-print('FINISH')
+# db.session.commit()
+# print('FINISH')
