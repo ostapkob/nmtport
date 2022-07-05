@@ -3,6 +3,7 @@
 from app import db
 from app.model import  Mechanism, Rfid_ids
 from datetime import datetime, timedelta
+from app  import logger
 
 def all_mechanisms_id(type=None):
     '''Find all mechanisms id'''
@@ -43,7 +44,7 @@ def all_mechanisms_type():
     return set(ls)
 
 
-def all_number(type, number):
+def all_number():
     '''Need to do then'''
     return [m.id for m in Mechanism.query.all()]
 
@@ -91,4 +92,4 @@ def fio_by_rfid_id(rfid_id): #DEL
     return None
 
 def is_kran(mech_id):
-    return id_mech in all_mechanisms_id('kran')
+    return mech_id in all_mechanisms_id('kran')

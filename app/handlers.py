@@ -4,7 +4,7 @@ from app.model import Mechanism, Post, Rfid_work
 from dataclasses import dataclass
 from app import db, app, redis_client
 from config import usm_no_move
-from app.functions import   *
+from app.functions import   which_terminal, line_kran, perpendicular_line_equation, intersection_point_of_lines, fio_by_rfid_id
 from app.functions_for_all import *
 from loguru import logger
 import pickle
@@ -35,12 +35,13 @@ def add_fix_post(post):  # !move
             Post.mechanism_id == post.mechanism_id).order_by(Post.timestamp.desc()).first()
     except Exception as e:
         print('exept', e)
+        last = None
         logger.debug(e)
     if last:  # if not exist item in db not use function
         dt_seconds = (post.timestamp - last.timestamp).seconds
     else:
         dt_seconds = 201
-    if dt_seconds < 200:  # whatever the difference is not big
+    if dt_seconds < 200 and last:  # whatever the difference is not big
         last_minute = last.timestamp.minute
         post_minute = post.timestamp.minute
         dt_minutes = post_minute - last_minute
@@ -59,10 +60,12 @@ def corect_position(mech, latitude, longitude): # TODO dataclasses
         try:
             data_mech = db.session.query(Post).filter(
                 Post.mechanism_id == mech.id).order_by(Post.timestamp.desc()).first()
+            latitude = data_mech.latitude
+            longitude = data_mech.longitude
         except Exception as e:
             logger.debug(e)
-        latitude = data_mech.latitude
-        longitude = data_mech.longitude
+            latitude = 132.6
+            longitude = 42.6 
     k1, b1 = line_kran(mech.number)
     if not k1:
         return latitude, longitude
@@ -131,8 +134,10 @@ def handler_position(mech: CurrentUSM): # ? kran
         try:
             last_data_mech = db.session.query(Post).filter(
                 Post.mechanism_id == mech.mech_id).order_by(Post.timestamp.desc()).first()
+            mech.lat = last_data_mech.latitude
+            mech.lon = last_data_mech.longitude
         except Exception as e:
             logger.debug(e)
-        mech.lat = last_data_mech.latitude
-        mech.lon = last_data_mech.longitude
+            mech.lat = 132.5
+            mech.lon = 42.5
     return mech

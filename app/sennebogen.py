@@ -1,8 +1,10 @@
-from app.functions_for_all import *
-from config import HOURS
+from datetime import date, datetime, timedelta
+
+from app import db, logger
+from app.functions_for_all import (all_mechanisms_id, get_start_shift,
+                                   id_and_number, today_shift_date)
 from app.model import Post
-from app import db
-from datetime import datetime, timedelta
+from config import HOURS
 
 TYPE = 'sennebogen'
 ids_and_nums = id_and_number(TYPE)
@@ -39,12 +41,12 @@ def get_data_per_shift(cursor: dict) -> dict:
     return data_per_shift
 
 
-def get_time_by_minuts(data_per_shift: dict, date_shift: datetime, shift: int):
+def get_time_by_minuts(data_per_shift: dict, date_shift: date, shift: int):
     start_shift = get_start_shift(date_shift, shift)
     time_by_minuts = {}
     for key in data_per_shift.keys():
         flag_start = True
-        mech = data_per_shift[key]['mechanism']
+        # mech = data_per_shift[key]['mechanism']
         # flag_finish = True
         time_by_minuts[key] = {}
         time_by_minuts[key]['name'] = data_per_shift[key]['mechanism'].name
@@ -60,9 +62,10 @@ def get_time_by_minuts(data_per_shift: dict, date_shift: datetime, shift: int):
         try:
             # ! maybe is slower request
             last_find_item = db.session.query(Post).filter(Post.mechanism_id==data_per_shift[key]['mechanism'].id).order_by(Post.timestamp.desc()).first()
+            terminal = last_find_item.terminal
         except Exception as e:
             logger.debug(e)
-        terminal = last_find_item.terminal
+            terminal = 8
         time_move = 0
         for i in range(1, 60 * 12 + 1):
             date_t = delta_minutes.strftime("%H:%M")
@@ -97,7 +100,7 @@ def get_time_by_minuts(data_per_shift: dict, date_shift: datetime, shift: int):
 
 
 
-def time_for_shift_sennebogen(date_shift: datetime, shift: int) -> dict:
+def time_for_shift_sennebogen(date_shift: date, shift: int) -> dict:
     '''get dict with all minute's values for the period, name and total
     value is lever, value3 is speed roler,
     '''
@@ -107,12 +110,9 @@ def time_for_shift_sennebogen(date_shift: datetime, shift: int) -> dict:
     try:
         cursor = db.session.query(Post).filter(Post.date_shift == date_shift, Post.shift ==
                                                shift, Post.mechanism_id.in_(all_mechs)).order_by(Post.mechanism_id).all()
+        data_per_shift = get_data_per_shift(cursor) # create dict all works mechanism in shift
     except Exception as e:
         logger.debug(e)
-
-    data_per_shift = get_data_per_shift(cursor) # create dict all works mechanism in shift
-
-    if data_per_shift == {}:
         return {}
 
     time_by_minuts =  get_time_by_minuts(data_per_shift, date_shift, shift)
@@ -121,7 +121,7 @@ def time_for_shift_sennebogen(date_shift: datetime, shift: int) -> dict:
 
 def sennebogen_periods(mechanisms_data: dict) -> dict:
     if not mechanisms_data:
-        return None
+        return {}
     for mech, data_mech in mechanisms_data.items():
         values_period = -1
         new_data = {}
@@ -129,7 +129,7 @@ def sennebogen_periods(mechanisms_data: dict) -> dict:
         pre_time = ''  # data_mech['data'][1]['time']
         counter = 1
 
-        for number, value_number in data_mech['data'].items():
+        for value_number in data_mech['data'].values():
             if value_number['value'] == 0:
                 value_min = 0  # yellow
             elif value_number['value'] == 1:
@@ -158,8 +158,8 @@ def sennebogen_periods(mechanisms_data: dict) -> dict:
 
 
 if __name__ == "__main__":
-    from pprint import pp
     import pickle
+    from pprint import pp
     date_shift = datetime.now().date()
     date_shift -= timedelta(days=3)
     shift = 1
@@ -175,6 +175,5 @@ if __name__ == "__main__":
         load = pickle.load(f)
 
     pp(load==before_resons)
-
 
 

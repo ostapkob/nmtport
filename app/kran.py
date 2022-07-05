@@ -1,7 +1,8 @@
-from app.functions_for_all import *
+from app.functions_for_all import all_mechanisms_id, get_start_shift, id_and_number, today_shift_date
 from config import HOURS, names_terminals
 from app.model import Post
 from app import db
+from app.model import Post
 from datetime import datetime, timedelta
 from app  import logger
 from rich import print
@@ -44,7 +45,7 @@ def get_data_per_shift(cursor: list) -> dict:
 def get_time_by_minuts(data_per_shift: dict, date_shift: datetime, shift: int) -> dict:
     start_shift = get_start_shift(date_shift, shift)
     time_by_minuts = {}
-    for key, value in data_per_shift.items():
+    for key in data_per_shift.keys():
         flag_start = True
         mech = data_per_shift[key]['mechanism']
         time_by_minuts[key] = {}
@@ -60,9 +61,11 @@ def get_time_by_minuts(data_per_shift: dict, date_shift: datetime, shift: int) -
         try:
             last_find_item = db.session.query(Post).filter(
                 Post.mechanism_id==data_per_shift[key]['mechanism'].id).order_by( Post.timestamp.desc()).first()
+            tmp_terminal = last_find_item.terminal
+            print("TMP", tmp_terminal)
         except Exception as e:
-            last_find_item = None
-        tmp_terminal = last_find_item.terminal
+            print(e)
+            tmp_terminal = 78
 
         for i in range(1, 60 * 12 + 1): # 720 minutes in shift
             date_t = delta_minutes.strftime("%H:%M")
@@ -125,10 +128,9 @@ def time_for_shift_kran(date_shift, shift):
     try:
         cursor = db.session.query(Post).filter(Post.date_shift == date_shift, Post.shift ==
                                                shift, Post.mechanism_id.in_(all_mechs)).order_by(Post.mechanism_id).all()
+        data_per_shift = get_data_per_shift(cursor)
     except Exception as e:
-        logger.debug(e)
-    data_per_shift = get_data_per_shift(cursor)
-    if data_per_shift == {}:
+        print(e)
         return None
     time_by_minuts =  get_time_by_minuts(data_per_shift, date_shift, shift)
 
@@ -149,7 +151,7 @@ def kran_periods(mechanisms_data):
         total_180 = 0  # if value=2
         total_90_2 = 0  # if value=3
         terminal = None
-        for number, value_number in data_mech['data'].items():
+        for  value_number in data_mech['data'].values():
             value_minute = value_number['value']
             terminal = value_number['terminal']
             if value_minute != period_value: #if previous value != current value
@@ -163,8 +165,6 @@ def kran_periods(mechanisms_data):
                 elif period_value == 3:
                     total_90_2 += step
                     total_step = total_90_2
-                else:
-                    total_step
 
                 new_data[counter] = {
                                     'time': pre_time,
@@ -205,5 +205,3 @@ if __name__ == "__main__":
         load = pickle.load(f)
 
     print(load==before_resons)
-
-

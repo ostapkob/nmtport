@@ -1,28 +1,40 @@
-from rich import print
-from rich import print
-from datetime import datetime, timedelta
-from app.model import Rfid_work, Rfid_ids
-from app import db
-from app.functions_for_all import all_mechanisms_id 
-from app.usm import usm_periods, time_for_shift_usm
-from app.kran import kran_periods, time_for_shift_kran
-from datetime import datetime, timedelta
-from flask import flash, redirect, url_for
-from app.model import Post, Mechanism, Work_1C_1, Rfid_work
-from app import db, mongodb
-from config import TIME_PERIODS
-from config import lines_krans, names_terminals, mechanisms_type, usm_tons_in_hour 
-from app  import logger
-from app.kran import  kran_periods, time_for_shift_kran
-from app.usm import usm_periods, time_for_shift_usm
-from app.sennebogen import sennebogen_periods, time_for_shift_sennebogen
-from config import HOURS
-from app.functions_for_all import all_mechanisms_id, today_shift_date, fio_by_rfid_id, id_by_number #  all_mechanisms_type, all_number, name_by_id
+# from datetime import datetime, timedelta
+# from app.model import Rfid_work, Rfid_ids
+# from app import db
+# from app.functions_for_all import all_mechanisms_id 
+# from app.usm import usm_periods, time_for_shift_usm
+# from app.kran import kran_periods, time_for_shift_kran
+# from datetime import datetime, timedelta
+# from flask import flash, redirect, url_for
+# from app.model import Post, Mechanism, Work_1C_1, Rfid_work
+# from app import db, mongodb
+# from config import TIME_PERIODS
+# from config import lines_krans, names_terminals, mechanisms_type, usm_tons_in_hour 
+# from app  import logger
+# from app.kran import  kran_periods, time_for_shift_kran
+# from app.usm import usm_periods, time_for_shift_usm
+# from app.sennebogen import sennebogen_periods, time_for_shift_sennebogen
+# from config import HOURS
+# from app.functions_for_all import all_mechanisms_id, today_shift_date, fio_by_rfid_id, id_by_number #  all_mechanisms_type, all_number, name_by_id
 
 
+from datetime import datetime, timedelta
+
+from rich import print
+
+from app import db, logger, mongodb
 from app.add_fio_1c import add_fio_and_grab_from_1c
 from app.add_fio_rfid import add_fio_from_rfid
 from app.add_resons_1c import add_resons_from_1c
+from app.functions_for_all import (  # all_mechanisms_type, all_number, name_by_id
+    all_mechanisms_id, fio_by_rfid_id, id_by_number, today_shift_date)
+from app.kran import kran_periods, time_for_shift_kran
+from app.model import Mechanism, Post, Rfid_ids, Rfid_work, Work_1C_1
+from app.sennebogen import sennebogen_periods, time_for_shift_sennebogen
+from app.usm import time_for_shift_usm, usm_periods
+from config import (HOURS, TIME_PERIODS, lines_krans, mechanisms_type,
+                    names_terminals, usm_tons_in_hour)
+from flask import flash, redirect, url_for
 
 
 def multiple_5(date):  # not use

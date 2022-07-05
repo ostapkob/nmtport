@@ -112,7 +112,7 @@ class Work_1C_1(db.Model):
     smena =db.Column(db.Integer, index=True)
     port =db.Column(db.Integer, index=True)
 
-    def __init__(self, id, inv_num, greifer_num, greifer_vol, fio, data_nach, data_kon, data_smen, smena):
+    def __init__(self, id, inv_num, greifer_num, greifer_vol, fio, data_nach, data_kon, data_smen, smena, port):
         self.id = id
         self.inv_num = inv_num
         self.greifer_num =greifer_num
