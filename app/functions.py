@@ -1,23 +1,3 @@
-# from datetime import datetime, timedelta
-# from app.model import Rfid_work, Rfid_ids
-# from app import db
-# from app.functions_for_all import all_mechanisms_id 
-# from app.usm import usm_periods, time_for_shift_usm
-# from app.kran import kran_periods, time_for_shift_kran
-# from datetime import datetime, timedelta
-# from flask import flash, redirect, url_for
-# from app.model import Post, Mechanism, Work_1C_1, Rfid_work
-# from app import db, mongodb
-# from config import TIME_PERIODS
-# from config import lines_krans, names_terminals, mechanisms_type, usm_tons_in_hour 
-# from app  import logger
-# from app.kran import  kran_periods, time_for_shift_kran
-# from app.usm import usm_periods, time_for_shift_usm
-# from app.sennebogen import sennebogen_periods, time_for_shift_sennebogen
-# from config import HOURS
-# from app.functions_for_all import all_mechanisms_id, today_shift_date, fio_by_rfid_id, id_by_number #  all_mechanisms_type, all_number, name_by_id
-
-
 from datetime import datetime, timedelta
 
 from rich import print
@@ -33,7 +13,7 @@ from app.model import Mechanism, Post, Rfid_ids, Rfid_work, Work_1C_1
 from app.sennebogen import sennebogen_periods, time_for_shift_sennebogen
 from app.usm import time_for_shift_usm, usm_periods
 from config import (HOURS, TIME_PERIODS, lines_krans, mechanisms_type,
-                    names_terminals, usm_tons_in_hour)
+                    names_terminals)
 from flask import flash, redirect, url_for
 
 
@@ -189,7 +169,7 @@ def data_from_1c(date_shift, shift):
 
 
 def state_mech(el):
-    type_mechanism = el.mech.type 
+    type_mechanism = el.mech.type
     value = el.value
     value2 = el.value2
     value3 = el.value3
@@ -213,31 +193,32 @@ def state_mech(el):
             return 'move'
         return 'err'
 
-    if type_mechanism == 'usm': # value - lever, value3 - roller
+    if type_mechanism == 'usm':  # value - lever, value3 - roller
         if dt > 120.0:
             return 'long_no_power'
         if dt >= 3.0:
             return 'no_power'
         if value >= 0.1:
             return 'work'
-        if value < 0.1 and value3>=5:
+        if value < 0.1 and value3 >= 5:
             return 'move'
-        if value < 0.1 or value3<5:
+        if value < 0.1 or value3 < 5:
             return 'stay'
         else:
             return 'err'
 
-    if type_mechanism == "sennebogen": # value - x, value2 - y
+    if type_mechanism == "sennebogen":  # value - x, value2 - y
         if dt > 120.0:
             return 'long_no_power'
         if dt >= 3.0:
             return 'no_power'
-        if value >= 500 or value2>=500:
+        if value >= 500 or value2 >= 500:
             return 'work'
         else:
             return 'stay'
         return 'err'
     return None
+
 
 def is_alarm(args):
     """if last 10 minuts not values > 1 but 15 minutes ago mechanism worked"""
@@ -358,13 +339,13 @@ def line_kran(number):
 
 def get_kompleks(latitude, longitude):
     x = (longitude-132) / (latitude-42+0.0000001)
-    if (x < 1.1):  
+    if (x < 1.1):
         return 1
     else:
         return 2
 
 
-def get_kompleksGut(latitude, longitude): 
+def get_kompleksGut(latitude, longitude):
     if 7.265 > (longitude-132)*10*(latitude-42):
         return 5
     return 4
@@ -374,19 +355,19 @@ def get_k1_b1_not_kran(latitude, longitude):
     kompleks = get_kompleks(latitude, longitude)
     latitude = int(latitude)
     longitude = int(longitude)
-    if  kompleks == 1:
-        return [0.593270908597224, 107.49050635162425] # ut
+    if kompleks == 1:
+        return [0.593270908597224, 107.49050635162425]  # ut
     else:
         if get_kompleksGut(latitude, longitude) == 5:
-          return [1.696165886483065, 60.30071859473439] # 5k
-        else: 
-          return [0.339389423498601, 118.37599497658572] # 4k
+            return [1.696165886483065, 60.30071859473439]  # 5k
+        else:
+            return [0.339389423498601, 118.37599497658572]  # 4k
 
 
 def which_terminal(type_mech, number, latitude, longitude):
     latitude = float(latitude)
     longitude = float(longitude)
-    if type_mech == 'kran': 
+    if type_mech == 'kran':
         k1, b1 = line_kran(int(number))
     else:
         k1, b1 = get_k1_b1_not_kran(latitude, longitude)
@@ -395,7 +376,7 @@ def which_terminal(type_mech, number, latitude, longitude):
         k1, latitude, longitude)
     # print(k1, b1)
     nx, ny = intersection_point_of_lines(k1, b1, k2, b2)
-    name_terminal = 78 # !make None
+    name_terminal = 78  # !make None
     for name, lon_max, lon_min in names_terminals:
         # print(name, lon_max, ny, lon_min)
         if ny < lon_max and ny > lon_min:
@@ -429,7 +410,8 @@ def hash_all_last_data_state():
                                                  'type': el.mech.type,
                                                  'number': el.mech.number,
                                                  # if roller not work
-                                                 'value': round(el.value, 2) if not el.value3 else 0, # !need function
+                                                 # !need function
+                                                 'value': round(el.value, 2) if not el.value3 else 0,
                                                  'value2': el.value2,
                                                  'value3': el.value3,
                                                  'latitude': el.latitude,
@@ -438,15 +420,15 @@ def hash_all_last_data_state():
                                                  'alarm': get_status_alarm(el.mech.id, el.mech.type),
                                                  'terminal': el.terminal,
                                                  'time': el.timestamp + timedelta(hours=HOURS)
-                                                } 
+                                                 }
             for el in last_data_mech
             }
     posts = mongodb['hash']
     if data is not None:
         data["_id"] = "last_data"
-        posts.delete_one({"_id":"last_data"})
+        posts.delete_one({"_id": "last_data"})
         posts.insert_one(data)
-    else: 
+    else:
         return
 
 
@@ -476,20 +458,22 @@ def hash_now(type_mechanism):
 
 
 def get_dict_mechanisms_id_by_number():
-    dict_mechanisms = {mech_type:{} for mech_type in mechanisms_type}
+    dict_mechanisms = {mech_type: {} for mech_type in mechanisms_type}
     for mech_type in mechanisms_type:
         try:
-            dict_mechanisms[mech_type] = {m.number:m.id for m in db.session.query(Mechanism).filter(Mechanism.type==mech_type).all()}
+            dict_mechanisms[mech_type] = {m.number: m.id for m in db.session.query(
+                Mechanism).filter(Mechanism.type == mech_type).all()}
         except Exception as e:
             logger.debug(e)
     return dict_mechanisms
 
 
 def get_dict_mechanisms_number_by_id():
-    dict_mechanisms = {mech_type:{} for mech_type in mechanisms_type}
+    dict_mechanisms = {mech_type: {} for mech_type in mechanisms_type}
     for mech_type in mechanisms_type:
         try:
-            dict_mechanisms[mech_type] = {m.id:m.number for m in db.session.query(Mechanism).filter(Mechanism.type==mech_type).all()}
+            dict_mechanisms[mech_type] = {m.id: m.number for m in db.session.query(
+                Mechanism).filter(Mechanism.type == mech_type).all()}
         except Exception as e:
             logger.debug(e)
     return dict_mechanisms
@@ -528,10 +512,10 @@ if __name__ == "__main__":
     type_mechanism = 'usm'
     shift = 1
     rfid_ids = [
-            '36/59956',
-            '240/01548',
-            '15/23422',
-        ]
+        '36/59956',
+        '240/01548',
+        '15/23422',
+    ]
 
     data = mech_periods(type_mechanism, date_shift, shift)
     data = add_fio_from_rfid(data, date_shift, shift)

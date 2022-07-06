@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from app import db
-from app.model import  Mechanism, Rfid_ids
+from app.model import Mechanism, Rfid_ids
 from datetime import datetime, timedelta
-from app  import logger
+from app import logger
+
 
 def all_mechanisms_id(type=None):
     '''Find all mechanisms id'''
@@ -54,16 +55,17 @@ def name_by_id(id):
     return Mechanism.query.filter(Mechanism.id == id).first().name
 
 
-def id_by_number(type, number): # TODO new project not started when exist it
+def id_by_number(type, number):  # TODO new project not started when exist it
     '''Find mechanism_id by type and number'''
-    mech = Mechanism.query.filter(Mechanism.type==type,  Mechanism.number==number).first()
+    mech = Mechanism.query.filter(
+        Mechanism.type == type,  Mechanism.number == number).first()
     if mech:
         return mech.id
     return None
 
 
 def number_by_id(id):
-    mech = Mechanism.query.filter(Mechanism.id==id).first()
+    mech = Mechanism.query.filter(Mechanism.id == id).first()
     if mech:
         return mech.number
     return None
@@ -71,7 +73,7 @@ def number_by_id(id):
 
 def id_and_number(type):
     '''id and number by type'''
-    mechanisms = Mechanism.query.filter(Mechanism.type==type).all()
+    mechanisms = Mechanism.query.filter(Mechanism.type == type).all()
     if mechanisms:
         return {mech.id: mech.number for mech in mechanisms}
     return None
@@ -85,11 +87,12 @@ def get_start_shift(date_shift, shift):
         return start_shift.replace(hour=20, minute=0, second=0, microsecond=0)
 
 
-def fio_by_rfid_id(rfid_id): #DEL
-    val = Rfid_ids.query.filter(Rfid_ids.rfid_id==rfid_id).first()
+def fio_by_rfid_id(rfid_id):  # DEL
+    val = Rfid_ids.query.filter(Rfid_ids.rfid_id == rfid_id).first()
     if val:
         return val.fio
     return None
+
 
 def is_kran(mech_id):
     return mech_id in all_mechanisms_id('kran')

@@ -1,10 +1,10 @@
 from flask import request, jsonify, abort, make_response
-from flask import render_template  
+from flask import render_template
 from app import db, app, redis_client, mongodb
 from app.model import Mechanism, Post
 from datetime import datetime, timedelta
-from app.functions import   get_dict_mechanisms_number_by_id, get_dict_mechanisms_id_by_number, mech_periods, state_mech, which_terminal, dez10_to_dez35C
-from app.functions_for_all import all_mechanisms_id, today_shift_date,  id_by_number 
+from app.functions import get_dict_mechanisms_number_by_id, get_dict_mechanisms_id_by_number, mech_periods, state_mech, which_terminal, dez10_to_dez35C
+from app.functions_for_all import all_mechanisms_id, today_shift_date,  id_by_number
 from app.handlers import add_fix_post, corect_position, CurrentUSM, handler_position, handler_rfid, add_to_db_rfid_work
 from app.usm import time_for_shift_usm, usm_periods
 from app.kran import time_for_shift_kran, kran_periods
@@ -41,7 +41,7 @@ def get_per_shift(m_id):
                                                        shift, Post.mechanism_id == m_id).order_by(Post.timestamp.desc()).first()[0]
     except TypeError:
         abort(405)
-        return 
+        return
     start += timedelta(hours=HOURS)  # it should be better
     stop += timedelta(hours=HOURS)
     total = round(sum(el.value for el in data_per_shift) / 60, 3)
@@ -122,7 +122,7 @@ def get_data_period2(type_mechanism, date_shift, shift):
 def convert_keys_int_to_str(data):
     mongo_data = {str(key): value for key, value in data.items()}
     for key, value in data.items():
-        mongo_data[str(key)]['data'] = { # del str
+        mongo_data[str(key)]['data'] = {  # del str
             str(k): v for k, v in value['data'].items()
         }
     return mongo_data
@@ -158,10 +158,10 @@ def get_data_period_with_fio2(type_mechanism, date_shift, shift):
         return make_response(jsonify({'error': 'Bad format date'}), 400)
 
     if today_date == date and today_shift == shift:
-        mongo_request = mongodb[type_mechanism].find_one(  
+        mongo_request = mongodb[type_mechanism].find_one(
             {"_id": "now"})
     else:
-        mongo_request = mongodb[type_mechanism].find_one( 
+        mongo_request = mongodb[type_mechanism].find_one(
             {"_id": f"{date_shift}|{shift}"})
     if mongo_request is not None:  # if item alredy exist
         del mongo_request["_id"]
@@ -173,7 +173,7 @@ def get_data_period_with_fio2(type_mechanism, date_shift, shift):
     data = add_resons_from_1c(data, date, shift)
 
     # add_to_mongo(data, date, shift)
-    if data is not None: 
+    if data is not None:
         # convert int key to str
         mongo_data = {str(key): value for key, value in data.items()}
         for key, value in data.items():
@@ -203,7 +203,8 @@ def get_data_now(type_mechanism):
         data = kran_periods(time_for_shift_kran(*today_shift_date()))
 
     if type_mechanism == 'sennebogen':
-        data = sennebogen_periods(time_for_shift_sennebogen(*today_shift_date()))
+        data = sennebogen_periods(
+            time_for_shift_sennebogen(*today_shift_date()))
     return jsonify(data)
 
 
@@ -216,7 +217,8 @@ def get_data_period_with_fio_now(type_mechanism):
     if type_mechanism == 'kran':
         data = kran_periods(time_for_shift_kran(*today_shift_date()))
     if type_mechanism == 'sennebogen':
-        data = sennebogen_periods(time_for_shift_sennebogen(*today_shift_date()))
+        data = sennebogen_periods(
+            time_for_shift_sennebogen(*today_shift_date()))
     data_with_fio = add_fio_and_grab_from_1c(data, *today_shift_date())
     return jsonify(data_with_fio)
 
@@ -337,7 +339,7 @@ def get_mech(m_id):
         return f'{mech.name}'
     except Exception as e:
         logger.debug(e)
-        return 
+        return
 
 
 @app.route('/api/v1.0/add_usm', methods=['GET'])
@@ -376,7 +378,7 @@ def add_usm():
     if number in usm_no_move:
         latitude = 0
         longitude = 0
-    if latitude == '': 
+    if latitude == '':
         latitude = 0
         longitude = 0
     if float(latitude) == 0 or float(longitude) == 0:
@@ -387,9 +389,10 @@ def add_usm():
             longitude = data_mech.longitude
         except Exception as e:
             latitude = 132.9
-            longitude = 42.9 
+            longitude = 42.9
             logger.debug(e)
-    terminal = which_terminal('usm', number, latitude, longitude) # exist 9, 11, 13, 15
+    terminal = which_terminal('usm', number, latitude,
+                              longitude)  # exist 9, 11, 13, 15
     new_post = Post(value=value, value2=value2, value3=value3, count=count,
                     latitude=latitude, longitude=longitude, mechanism_id=mechanism_id,
                     terminal=terminal)
@@ -453,8 +456,8 @@ def add_kran2():
     count = request.args.get('count')
     latitude = request.args.get('lat')
     longitude = request.args.get('lon')
-    x = abs(int(request.args.get('x'))) # accelerometr x-axis
-    y = abs(int(request.args.get('y'))) # accelerometr y-axis
+    x = abs(int(request.args.get('x')))  # accelerometr x-axis
+    y = abs(int(request.args.get('y')))  # accelerometr y-axis
     try:
         mechanism_id = dict_mechanisms_id_by_number['kran'][number]
     except KeyError:
@@ -465,10 +468,11 @@ def add_kran2():
         print('Bed request mech', number)
         logger.debug(e)
         return f"bed request mech, {number}"
-    if (number == 31 or number == 17) and value == 1: # FIX
-        value = 2 
+    if (number == 31 or number == 17) and value == 1:  # FIX
+        value = 2
     items = mechanism_id, password, latitude, longitude, value, count
-    test_exist_items = any([item is None for item in items]) # if this id is exist
+    # if this id is exist
+    test_exist_items = any([item is None for item in items])
     if test_exist_items:
         return 'Bad request'
     if password not in post_passw:
@@ -476,19 +480,21 @@ def add_kran2():
     if number in krans_if_3_then_2 and value == 3:
         value = 2
     if number in krans_if_1_then_0 and value == 1:
-        value = 4 # 4 work how 0
-    if value==0 and ((x>300 and y > 300) or x>700 or y>700) :  #acselerometer
-        value = 5 # kran move
+        value = 4  # 4 work how 0
+    if value == 0 and ((x > 300 and y > 300) or x > 700 or y > 700):  # acselerometer
+        value = 5  # kran move
     # if latitude == '':
     #     latitude = 0
     #     longitude = 0
     latitude, longitude = corect_position(mech, latitude, longitude)
-    terminal = which_terminal('kran', number, latitude, longitude) # exist 9, 11, 13, 15
+    terminal = which_terminal('kran', number, latitude,
+                              longitude)  # exist 9, 11, 13, 15
     new_post = Post(value=value, count=count, latitude=latitude,
                     longitude=longitude, mechanism_id=mechanism_id, terminal=terminal)
     db.session.add(new_post)
     db.session.commit()
     return f'Success, {str(mech.number)},  {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
+
 
 @app.route('/api/v1.0/add_sennebogen', methods=['GET'])
 def add_sennebogen():
@@ -501,7 +507,7 @@ def add_sennebogen():
     count = request.args.get('count')
     latitude = request.args.get('lat')
     longitude = request.args.get('lon')
-    mechanism_id = id_by_number(type_mechanism, number)  
+    mechanism_id = id_by_number(type_mechanism, number)
     try:
         mech = Mechanism.query.get(mechanism_id)
     except Exception as e:
@@ -515,10 +521,10 @@ def add_sennebogen():
         return 'Bad password'
     if int(mechanism_id) not in all_mechanisms_id(type_mechanism):
         return 'Not this id'
-    if latitude == '': 
+    if latitude == '':
         latitude = 0
         longitude = 0
-    if float(latitude) == 0 or float(longitude) == 0: # get last find value
+    if float(latitude) == 0 or float(longitude) == 0:  # get last find value
         try:
             data_mech = db.session.query(Post).filter(
                 Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
@@ -534,6 +540,7 @@ def add_sennebogen():
                     terminal=terminal)
     add_fix_post(new_post)
     return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
+
 
 @app.route('/api/v1.0/add_post', methods=['GET', 'POST'])
 def add_post():
@@ -592,17 +599,18 @@ def wrong_password(error):
 def add_usm2():
     '''add post by GET request from arduino'''
     type_mech = 'usm'
-    number= request.args.get('number')
+    number = request.args.get('number')
     passw = request.args.get('passw')
     count = request.args.get('count')
     lever = request.args.get('lever')
-    roll =  request.args.get('roll')
-    rfid =  request.args.get('rfid')
-    flag =  request.args.get('flag')
-    lat =   request.args.get('lat')
-    lon =   request.args.get('lon')
-    mech_id = id_by_number(type_mech, number)  
-    items = (type_mech, mech_id, number, count, lever, roll, rfid, flag, lat, lon)
+    roll = request.args.get('roll')
+    rfid = request.args.get('rfid')
+    flag = request.args.get('flag')
+    lat = request.args.get('lat')
+    lon = request.args.get('lon')
+    mech_id = id_by_number(type_mech, number)
+    items = (type_mech, mech_id, number, count,
+             lever, roll, rfid, flag, lat, lon)
     if any([item is None for item in items]):
         return 'Bad request'
     if passw not in post_passw:
@@ -615,20 +623,22 @@ def add_usm2():
     lon = float(lon)
     rfid = dez10_to_dez35C(int(rfid))
     if roll < 4:  # if roller not circle
-        lever= 0
+        lever = 0
 
-    current = CurrentUSM(type_mech, mech_id, number, count, lever, roll, rfid, flag, lat, lon)
+    current = CurrentUSM(type_mech, mech_id, number, count,
+                         lever, roll, rfid, flag, lat, lon)
     current = handler_position(current)
     handler_rfid(current)
-    new_post = Post(count=current.count, 
-                    value=current.lever, 
-                    value3=current.roll, 
-                    latitude=current.lat, 
-                    longitude=current.lon, 
+    new_post = Post(count=current.count,
+                    value=current.lever,
+                    value3=current.roll,
+                    latitude=current.lat,
+                    longitude=current.lon,
                     mechanism_id=current.mech_id,
                     terminal=current.terminal())
     add_fix_post(new_post)
-    redis_client.set(str( mech_id ), pickle.dumps(current)) # convert and save to redis
+    redis_client.set(str(mech_id), pickle.dumps(
+        current))  # convert and save to redis
     return f'Success, {str(current)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
 
 
@@ -638,13 +648,14 @@ def add_usm_rfid_2():
     type_mech = 'usm'
     number = request.args.get('number')
     count = int(request.args.get('count'))
-    mech_id = id_by_number(type_mech, number)  
+    mech_id = id_by_number(type_mech, number)
     passw = request.args.get('passw')
     rfid = request.args.get('rfid')
     flag = bool(int(request.args.get('flag')))
-    # items = number, mech_id, passw, rfid, flag 
+    # items = number, mech_id, passw, rfid, flag
     rfid = dez10_to_dez35C(int(rfid))
-    current = CurrentUSM(type_mech, mech_id, number, count, 0, 0, rfid, flag, 0, 0)
+    current = CurrentUSM(type_mech, mech_id, number,
+                         count, 0, 0, rfid, flag, 0, 0)
     if mech_id is None:
         return 'No this number ' + type_mech
     # if any([item is None for item in current]):
