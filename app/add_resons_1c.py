@@ -123,10 +123,10 @@ def _add_steps(resons):
             "step" : _count_step(i[0], i[1])
         }
         sum_step += _count_step(i[0], i[1])
-    if sum_step > 720:
-        print(sum_step)
-    if sum_step < 717:
-        print(sum_step)
+    # if sum_step > 720:
+    #     print(sum_step)
+    # if sum_step < 717:
+    #     print(sum_step)
     return result
 
 

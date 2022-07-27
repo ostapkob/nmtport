@@ -362,8 +362,12 @@ def add_usm():
     except Exception as e:
         logger.debug(e)
     # if (number==13 or number==11) and float(value) == 1: # FIX
-    # if number==7  and float(value) == 1: # FIX
-    #     value = random.randrange(50, 100, 1)/100
+    # if number==13 and float(value) <0.7: # FIX
+    #     value = 0.8
+    # if number==7: # FIX
+    #     value = 0.8 
+    # if number==6: # FIX
+    #     value3 = 15
 
     items = mechanism_id, password, latitude, longitude
     test_items = any([item is None for item in items])
@@ -468,8 +472,8 @@ def add_kran2():
         print('Bed request mech', number)
         logger.debug(e)
         return f"bed request mech, {number}"
-    if (number == 31 or number == 17) and value == 1:  # FIX
-        value = 2
+    # if (number in (17, 31) ) and value == 1:  # FIX
+    #     value = 2
     items = mechanism_id, password, latitude, longitude, value, count
     # if this id is exist
     test_exist_items = any([item is None for item in items])

@@ -9,10 +9,10 @@
   Triangle css
   update Invite
 
-# Power Bi
-  work
-
 # BackUp SQL DB
   Change type field id in SQL 
   pymongo.errors.DuplicateKeyError
 
+# Back
+  Now posible add only in curent shift
+  Reastart Auth-Server

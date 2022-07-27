@@ -35,7 +35,7 @@ logger.add(
         serialize=True
         )
 
-from app import views, api,  model, functions
+from app import  api,  model, functions
 hash_last_data = functions.hash_all_last_data_state
 hash_now = functions.hash_now
 
