@@ -427,7 +427,11 @@ def hash_all_last_data_state():
     if data is not None:
         data["_id"] = "last_data"
         posts.delete_one({"_id": "last_data"})
-        posts.insert_one(data)
+        try:
+            posts.insert_one(data)
+        except Exception as e:
+            logger.debug(e)
+            print("thread already use")
     else:
         return
 
@@ -479,7 +483,7 @@ def get_dict_mechanisms_number_by_id():
     return dict_mechanisms
 
 
-def dez10_to_dez35C(n):
+def dez10_to_dez35C(n: str) -> str:
     '''
         convert rfid_id to "text_format" rfid
         https://guardsaas.com/ru/content/keycode

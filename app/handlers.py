@@ -4,49 +4,102 @@ from app.model import Mechanism, Post, Rfid_work
 from dataclasses import dataclass
 from app import db, app, redis_client
 from config import usm_no_move
-from app.functions import   which_terminal, line_kran, perpendicular_line_equation, intersection_point_of_lines, fio_by_rfid_id
-from app.functions_for_all import *
+from app.functions import which_terminal, line_kran, perpendicular_line_equation, intersection_point_of_lines, fio_by_rfid_id, dez10_to_dez35C
+from app.functions_for_all import id_by_number
 from loguru import logger
 import pickle
 from rich import print
 from datetime import datetime, timedelta
-from psw import post_passw
+from config import HOURS
 import time
+
 
 @dataclass
 class CurrentUSM:
-    type_mech: str 
-    mech_id: int
     number: int
+    passw: str
     count: int
     lever: float
-    roll: float
+    roll: int
     rfid_id: str
     flag: bool
     lat: float
     lon: float
-    def terminal(self) -> int:
-        return which_terminal(self.type_mech, self.number, self.lat, self.lon) # exist 9, 11, 13, 15
+    mech_id: int
+    terminal: int
+    timestamp: datetime
+
+    def __init__(self, number, passw, count, lever, roll, rfid_id, flag, lat, lon):
+        self.type_mech = 'usm'
+        self.number: int = int(number)
+        self.passw = str(passw)
+        self.count: int = int(count)
+        self.lever = float(lever)
+        self.roll = int(roll)
+        self.rfid_id = str(rfid_id)
+        self.flag = bool(int(flag))
+        self.lat = float(lat)
+        self.lon = float(lon)
+        self.rfid_id = dez10_to_dez35C(int(self.rfid_id))
+        self.mech_id: int = id_by_number(self.type_mech, self.number)
+        self._handler_position()
+        redis_client.set(str(self.mech_id), pickle.dumps(self))
+        self.terminal = which_terminal(
+            self.type_mech, self.number, self.lat, self.lon)
+        self.timestamp = datetime.now() - timedelta(hours=HOURS)
+
+    def _handler_position(self):
+        '''if position is empty or this mech should not move'''
+        if self.number in usm_no_move \
+                or self.lat == 0 \
+                or self.lon == 0:
+            self._paste_from_redis()
+
+    def _paste_from_redis(self):
+        redis_mech = redis_client.get(str(self.mech_id))  # load from redis
+        if redis_mech is not None:
+            redis_mech = pickle.loads(redis_mech)  # convert to dataclass
+        if redis_mech.lat != 0.0:
+            self.lat = float(redis_mech.lat)
+            self.lon = float(redis_mech.lon)
+        else:
+            self._paste_from_sql()
+
+    def _paste_from_sql(self):
+        try:
+            last_data_mech = db.session.query(Post).filter(
+                Post.mechanism_id == self.mech_id).order_by(Post.timestamp.desc()).first()
+            self.lat = float(last_data_mech.latitude)
+            self.lon = float(last_data_mech.longitude)
+        except Exception as e:
+            logger.debug(e)
+            self.lat = 132.5  # default
+            self.lon = 42.5  # default
+
+    def _fix_timestamp(self):
+        redis_mech = redis_client.get(str(self.mech_id))  # load from redis
+        if redis_mech is not None:
+            pass
+
 
 def add_fix_post(post):  # !move
     ''' I use it fix because arduino sometimes accumulates an extra minute '''
-    try:
-        last = db.session.query(Post).filter(
-            Post.mechanism_id == post.mechanism_id).order_by(Post.timestamp.desc()).first()
-    except Exception as e:
-        print('exept', e)
-        last = None
-        logger.debug(e)
-    if last:  # if not exist item in db not use function
-        dt_seconds = (post.timestamp - last.timestamp).seconds
-    else:
-        dt_seconds = 201
-    if dt_seconds < 200 and last:  # whatever the difference is not big
-        last_minute = last.timestamp.minute
-        post_minute = post.timestamp.minute
-        dt_minutes = post_minute - last_minute
-        if dt_minutes == 2 or dt_minutes == -58:
-            post.timestamp -= timedelta(seconds=30)
+    # try:
+    #     last = db.session.query(Post).filter(
+    #         Post.mechanism_id == post.mechanism_id).order_by(Post.timestamp.desc()).first()
+    # except Exception as e:
+    #     last = None
+    #     logger.debug(e)
+    # if last:  # if not exist item in db not use function
+    #     dt_seconds = (post.timestamp - last.timestamp).seconds
+    # else:
+    #     dt_seconds = 201
+    # if dt_seconds < 200 and last:  # whatever the difference is not big
+    #     last_minute = last.timestamp.minute
+    #     post_minute = post.timestamp.minute
+    #     dt_minutes = post_minute - last_minute
+    #     if dt_minutes == 2 or dt_minutes == -58:
+    #         post.timestamp -= timedelta(seconds=30)
     db.session.add(post)
     try:
         db.session.commit()
@@ -55,8 +108,9 @@ def add_fix_post(post):  # !move
         time.sleep(10)
         db.session.commit()
 
-def corect_position(mech, latitude, longitude): # TODO dataclasses
-    if float(latitude) == 0 or float(longitude) == 0: # get last values
+
+def corect_position(mech, latitude, longitude):  # TODO dataclasses
+    if float(latitude) == 0 or float(longitude) == 0:  # get last values
         try:
             data_mech = db.session.query(Post).filter(
                 Post.mechanism_id == mech.id).order_by(Post.timestamp.desc()).first()
@@ -65,7 +119,7 @@ def corect_position(mech, latitude, longitude): # TODO dataclasses
         except Exception as e:
             logger.debug(e)
             latitude = 132.6
-            longitude = 42.6 
+            longitude = 42.6
     k1, b1 = line_kran(mech.number)
     if not k1:
         return latitude, longitude
@@ -74,6 +128,7 @@ def corect_position(mech, latitude, longitude): # TODO dataclasses
     latitude, longitude = intersection_point_of_lines(k1, b1, k2, b2)
     return latitude, longitude
 
+
 def add_to_db_rfid_work(current: CurrentUSM):
     if current.rfid_id == '0/00000':
         return 'RFID is empy'
@@ -81,35 +136,38 @@ def add_to_db_rfid_work(current: CurrentUSM):
     if fio is None:
         print('fio is', None, 'for', current.rfid_id)
         logger.debug(current.rfid_id)
-    new_rfid = Rfid_work(mechanism_id = current.mech_id,
-                        count = current.count,
-                        rfid_id = current.rfid_id,
-                        flag = current.flag,
-                        )
+    current.lever = 0 if current.roll < 4 else current.lever  # if roller not circle
+    new_rfid = Rfid_work(mechanism_id=current.mech_id,
+                         count=current.count,
+                         rfid_id=current.rfid_id,
+                         flag=current.flag,
+                         )
     db.session.add(new_rfid)
     db.session.commit()
     return f'Success, {fio} {current},  {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
 
 
 def handler_rfid(current):
-    '''if last request rfid_work failed  get previos values and compare with current value'''
+    '''if last request rfid_work failed get previos values and compare with current value'''
     if current.rfid_id == '0/00000':
         return f'rfid is {current.rfid_id}'
-    redis_tmp = redis_client.get(str( current.mech_id ))  # load from redis
+    redis_tmp = redis_client.get(str(current.mech_id))  # load from redis
     if redis_tmp is None:
         return 'redis_tmp is Empty'
     redis_tmp = pickle.loads(redis_tmp)  # convert to dataclass
 
     if current.rfid_id != redis_tmp.rfid_id or current.flag != redis_tmp.flag:
-        two_min_ago= datetime.now() - timedelta(minutes=2)
+        two_min_ago = datetime.now() - timedelta(minutes=2)
         last = db.session.query(Rfid_work).filter(
-            Rfid_work.rfid_id == current.rfid_id, 
-            Rfid_work.mechanism_id == current.mech_id, 
+            Rfid_work.rfid_id == current.rfid_id,
+            Rfid_work.mechanism_id == current.mech_id,
             Rfid_work.flag == current.flag,
             Rfid_work.timestamp > two_min_ago
         ).order_by(Rfid_work.timestamp.desc()).first()
-        print(f"[yellow]CHANGED current RFID: {current.rfid_id}, redis_tmp RFID: {redis_tmp.rfid_id}[/yellow]")
-        print(f"[yellow]CHANGED current flag: {current.flag}, redis_tmp flag:  {redis_tmp.flag}[/yellow]")
+        print(
+            f"[yellow]CHANGED current RFID: {current.rfid_id}, redis_tmp RFID: {redis_tmp.rfid_id}[/yellow]")
+        print(
+            f"[yellow]CHANGED current flag: {current.flag}, redis_tmp flag:  {redis_tmp.flag}[/yellow]")
         print(f"[sky_blue1]LAST {last}[/sky_blue1]")
         if last is None:
             print(f"[cian]ADD {current.rfid_id}[/cian]")
@@ -118,26 +176,3 @@ def handler_rfid(current):
             print(f"[red]ADD {current.rfid_id}[/red]")
             return add_to_db_rfid_work(current)
     return 'ok'
-
-
-def handler_position(mech: CurrentUSM): # ? kran
-    '''if position is empty or this mech should not move'''
-    if mech.number in usm_no_move \
-            or mech.lat == 0 \
-            or mech.lon == 0: 
-        redis_mech = redis_client.get(str( mech.mech_id ))  # load from redis
-        if redis_mech is not None:
-            redis_mech = pickle.loads(redis_mech)  # convert to dataclass
-            mech.lat = redis_mech.lat
-            mech.lon = redis_mech.lon
-            return mech
-        try:
-            last_data_mech = db.session.query(Post).filter(
-                Post.mechanism_id == mech.mech_id).order_by(Post.timestamp.desc()).first()
-            mech.lat = last_data_mech.latitude
-            mech.lon = last_data_mech.longitude
-        except Exception as e:
-            logger.debug(e)
-            mech.lat = 132.5
-            mech.lon = 42.5
-    return mech

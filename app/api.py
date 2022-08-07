@@ -5,7 +5,7 @@ from app.model import Mechanism, Post
 from datetime import datetime, timedelta
 from app.functions import get_dict_mechanisms_number_by_id, get_dict_mechanisms_id_by_number, mech_periods, state_mech, which_terminal, dez10_to_dez35C
 from app.functions_for_all import all_mechanisms_id, today_shift_date,  id_by_number
-from app.handlers import add_fix_post, corect_position, CurrentUSM, handler_position, handler_rfid, add_to_db_rfid_work
+from app.handlers import add_fix_post, corect_position, CurrentUSM,  handler_rfid, add_to_db_rfid_work
 from app.usm import time_for_shift_usm, usm_periods
 from app.kran import time_for_shift_kran, kran_periods
 from app.sennebogen import time_for_shift_sennebogen, sennebogen_periods
@@ -365,7 +365,7 @@ def add_usm():
     # if number==13 and float(value) <0.7: # FIX
     #     value = 0.8
     # if number==7: # FIX
-    #     value = 0.8 
+    #     value = 0.8
     # if number==6: # FIX
     #     value3 = 15
 
@@ -602,36 +602,23 @@ def wrong_password(error):
 @app.route('/api/v2.0/add_usm_work', methods=['GET'])
 def add_usm2():
     '''add post by GET request from arduino'''
-    type_mech = 'usm'
-    number = request.args.get('number')
-    passw = request.args.get('passw')
-    count = request.args.get('count')
-    lever = request.args.get('lever')
-    roll = request.args.get('roll')
-    rfid = request.args.get('rfid')
-    flag = request.args.get('flag')
-    lat = request.args.get('lat')
-    lon = request.args.get('lon')
-    mech_id = id_by_number(type_mech, number)
-    items = (type_mech, mech_id, number, count,
-             lever, roll, rfid, flag, lat, lon)
+    necessary_args = [
+        'number',
+        'passw',
+        'count',
+        'lever',
+        'roll',
+        'rfid',
+        'flag',
+        'lat',
+        'lon'
+    ]
+    items = [request.args.get(arg, None) for arg in necessary_args]
     if any([item is None for item in items]):
         return 'Bad request'
-    if passw not in post_passw:
+    current = CurrentUSM(*items)
+    if current.passw not in post_passw:
         return 'Bad password'
-    count = int(count)
-    lever = float(lever)
-    roll = int(roll)
-    flag = bool(int(flag))
-    lat = float(lat)
-    lon = float(lon)
-    rfid = dez10_to_dez35C(int(rfid))
-    if roll < 4:  # if roller not circle
-        lever = 0
-
-    current = CurrentUSM(type_mech, mech_id, number, count,
-                         lever, roll, rfid, flag, lat, lon)
-    current = handler_position(current)
     handler_rfid(current)
     new_post = Post(count=current.count,
                     value=current.lever,
@@ -639,10 +626,13 @@ def add_usm2():
                     latitude=current.lat,
                     longitude=current.lon,
                     mechanism_id=current.mech_id,
-                    terminal=current.terminal())
-    add_fix_post(new_post)
-    redis_client.set(str(mech_id), pickle.dumps(
+                    terminal=current.terminal)
+    # add_fix_post(new_post)
+    db.session.add(new_post)
+    db.session.commit()
+    redis_client.set(str(current.mech_id), pickle.dumps(
         current))  # convert and save to redis
+    print(current)
     return f'Success, {str(current)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
 
 
