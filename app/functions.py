@@ -453,7 +453,10 @@ def hash_now(type_mechanism):
                 str(k): v for k, v in value['data'].items()}
         mongo_data['_id'] = "now"
         posts.delete_one({"_id": "now"})
-        posts.insert_one(mongo_data)
+        try:
+            posts.insert_one(mongo_data)
+        except Exception as e:
+            logger.debug(e)
     else:
         mongo_data = {}
         mongo_data['_id'] = "now"

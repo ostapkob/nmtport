@@ -15,30 +15,32 @@ ids_and_nums = id_and_number(TYPE)
 def get_data_per_shift(cursor):
     '''create dict with all minutes to now if value is None return (-1) because  0 may exist'''
     data_per_shift = {}
-    for el in cursor:
-        date_t = el.timestamp.replace(second=0, microsecond=0)
+    for item in cursor:
+        item_value = item.value
+        item_value3 = item.value3
+        date_t = item.timestamp.replace(second=0, microsecond=0)
         date_t += timedelta(hours=HOURS)
-        el.value = -1 if el.value is None else el.value
-        el.value3 = 0 if el.value3 is None else el.value3
-        val_min = 0 if el.value < 0.1 else el.value
-        el.value = 0 if el.value3 < 4 else el.value  # maybe more, value3 is speed rool
-        val_min = 0 if el.value3 < 4 else el.value
+        item_value = -1 if item_value is None else item_value
+        item_value3 = 0 if item_value3 is None else item_value3
+        val_min = 0 if item_value < 0.1 else item_value
+        item_value = 0 if item_value3 < 4 else item_value  # maybe more, value3 is speed rool
+        val_min = 0 if item_value3 < 4 else item_value
 
-        if data_per_shift.get(el.mech.number):
+        if data_per_shift.get(item.mech.number):
             # bad
-            data_per_shift[el.mech.number]['data'][date_t] = val_min, el.value3, el.value
-            data_per_shift[el.mech.number]['time_coal'] += el.value
-            data_per_shift[el.mech.number]['total_time'] += 1
+            data_per_shift[item.mech.number]['data'][date_t] = val_min, item_value3, item_value
+            data_per_shift[item.mech.number]['time_coal'] += item_value
+            data_per_shift[item.mech.number]['total_time'] += 1
         else:
-            data_per_shift[el.mech.number] = {}
-            data_per_shift[el.mech.number]['mechanism'] = el.mech
-            data_per_shift[el.mech.number]['time_coal'] = el.value
-            data_per_shift[el.mech.number]['total_time'] = 1
-            data_per_shift[el.mech.number]['data'] = {}
-            data_per_shift[el.mech.number]['data'][date_t] = val_min, el.value3, el.value
-        data_per_shift[el.mech.number].setdefault('work_time', 0)
-        if el.value > 0:
-            data_per_shift[el.mech.number]['work_time'] += 1
+            data_per_shift[item.mech.number] = {}
+            data_per_shift[item.mech.number]['mechanism'] = item.mech
+            data_per_shift[item.mech.number]['time_coal'] = item_value
+            data_per_shift[item.mech.number]['total_time'] = 1
+            data_per_shift[item.mech.number]['data'] = {}
+            data_per_shift[item.mech.number]['data'][date_t] = val_min, item_value3, item_value
+        data_per_shift[item.mech.number].setdefault('work_time', 0)
+        if item_value > 0:
+            data_per_shift[item.mech.number]['work_time'] += 1
     return data_per_shift
 
 def get_time_by_minuts(data_per_shift, date_shift, shift):

@@ -25,6 +25,7 @@ redis_client = FlaskRedis(app)
 mongodb_client = PyMongo(app, uri="mongodb://localhost:27017/HashShift")
 mongodb = mongodb_client.db
 CORS(app)
+from app import  functions
 
 logger.add(
         "logs/debug.json", 
@@ -35,7 +36,6 @@ logger.add(
         serialize=True
         )
 
-from app import  api,  model, functions
 hash_last_data = functions.hash_all_last_data_state
 hash_now = functions.hash_now
 
@@ -47,7 +47,7 @@ def _loop():
         hash_last_data()
         for mech_type in mechanisms_type:
             hash_now(mech_type)
-        time.sleep(15)
+        time.sleep(45)
 
 
 logger.debug("RESTART: " + str(datetime.now()))

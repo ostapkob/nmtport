@@ -613,6 +613,7 @@ def add_usm2():
         'lat',
         'lon'
     ]
+    print('sent')
     items = [request.args.get(arg, None) for arg in necessary_args]
     if any([item is None for item in items]):
         return 'Bad request'
