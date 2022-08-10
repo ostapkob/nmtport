@@ -8,10 +8,10 @@ from app.model import Mechanism_downtime_1C
 #from app import db
 from app.functions_for_all import get_start_shift
 # from app.usm import usm_periods, time_for_shift_usm # DEL
-#from app.kran import kran_periods, time_for_shift_kran # DEL
+# from app.kran import kran_periods, time_for_shift_kran # DEL
 #from typing import Dict, List
 
-#def get_resons(type_mechanisms: str, date_shift: datetime.date, shift: int) -> dict:
+# def get_resons(type_mechanisms: str, date_shift: datetime.date, shift: int) -> dict:
 #    shift = int(shift)
 #    all_mechs = all_mechanisms_id(type_mechanisms)
 #    cursor = db.session.query(MD).filter(MD.data_smen == date_shift, MD.smena ==
@@ -19,7 +19,7 @@ from app.functions_for_all import get_start_shift
 #    return cursor
 
 
-#def process_resons(resons: list, ids_and_nums:list) -> dict:
+# def process_resons(resons: list, ids_and_nums:list) -> dict:
 #    result:dict = {}
 #    for el in resons:
 #        number = ids_and_nums[el.inv_num]
@@ -46,7 +46,7 @@ from app.functions_for_all import get_start_shift
 #    return result
 
 
-#def handle_reson(start:datetime, stop:datetime, reson:[int, None]):
+# def handle_reson(start:datetime, stop:datetime, reson:[int, None]):
 #    start = start.replace(second=0)
 #    stop = stop.replace(second=0)
 #    return {
@@ -57,7 +57,7 @@ from app.functions_for_all import get_start_shift
 #    }
 
 # #DEL
-#def convert_resons_to_720minuts(resons: List[Dict[str, object]], start_shift: datetime) -> dict:
+# def convert_resons_to_720minuts(resons: List[Dict[str, object]], start_shift: datetime) -> dict:
 #    if not resons:
 #        return {}
 #    result: dict = {
@@ -77,7 +77,7 @@ from app.functions_for_all import get_start_shift
 #                resons[i]["stop"], start_shift + timedelta(minutes=719), None)
 #    return result
 
-def _count_step(start:datetime, stop:datetime) -> int:
+def _count_step(start: datetime, stop: datetime) -> int:
     return int(round((stop - start).total_seconds()/60))
 
 
@@ -87,10 +87,11 @@ def _add_empty_spaces(resons, start_shift):
     stop_shift = start_shift + timedelta(hours=12)
     resons = sorted(resons, key=lambda r: r.data_nach)
     result = []
-    if start_shift!=resons[0].data_nach:
+    if start_shift != resons[0].data_nach:
         result.append([start_shift, resons[0].data_nach, None])
     for i in range(len(resons)):
-        result.append([resons[i].data_nach, resons[i].data_kon, resons[i].id_downtime])
+        result.append(
+            [resons[i].data_nach, resons[i].data_kon, resons[i].id_downtime])
         try:
             result.append([resons[i].data_kon, resons[i+1].data_nach, None])
         except IndexError:
@@ -119,8 +120,8 @@ def _add_steps(resons):
         result[str(en)] = {
             "start": i[0].strftime("%H:%M"),
             "stop": i[1].strftime("%H:%M"),
-            "reson" : i[2],
-            "step" : _count_step(i[0], i[1])
+            "reson": i[2],
+            "step": _count_step(i[0], i[1])
         }
         sum_step += _count_step(i[0], i[1])
     # if sum_step > 720:
@@ -134,15 +135,15 @@ def add_resons_from_1c(data_period, date, shift):
     if not data_period:
         return {}
     ids = [x['id'] for x in data_period.values()]
-    cursor = db.session.query(Mechanism_downtime_1C).filter( 
+    cursor = db.session.query(Mechanism_downtime_1C).filter(
         Mechanism_downtime_1C.data_smen == date,
         Mechanism_downtime_1C.smena == shift,
         Mechanism_downtime_1C.inv_num.in_(ids),
-        ).all()
+    ).all()
     start_shift = get_start_shift(date, shift)
     for key, value in data_period.items():
         mech_id = value['id']
-        resons_1c = [x for x in cursor if x.inv_num==mech_id]
+        resons_1c = [x for x in cursor if x.inv_num == mech_id]
         resons_1c = _del_dublicates(resons_1c)
         resons_1c = _add_empty_spaces(resons_1c, start_shift)
         resons_1c = _add_steps(resons_1c)
@@ -168,4 +169,3 @@ if __name__ == "__main__":
     res = add_resons_from_1c(load, date, shift)
     print(date, shift)
     print(res)
-

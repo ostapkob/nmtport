@@ -620,7 +620,7 @@ def add_usm2():
     if current.passw not in post_passw:
         return 'Bad password'
     if current.mech_id is None:
-        return 'No this number' 
+        return 'No this number'
     handler_rfid(current)
     new_post = Post(count=current.count,
                     value=current.lever,
@@ -655,7 +655,7 @@ def add_usm_rfid_2():
     if current.passw not in post_passw:
         return 'Bad password'
     if current.mech_id is None:
-        return 'No this number ' 
+        return 'No this number '
     return add_to_db_rfid_work(current)
 
 

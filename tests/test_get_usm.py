@@ -1,3 +1,4 @@
+from rich import print
 from datetime import datetime
 import time
 from requests.exceptions import HTTPError
@@ -9,9 +10,7 @@ current_dir = os.path.dirname(os.path.abspath(
     inspect.getfile(inspect.currentframe())))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
-
 from psw import post_passw, debug
-from rich import print
 
 class USM:
     api_work = '/api/v2.0/add_usm_work?'
@@ -70,7 +69,7 @@ class USM:
             http = (self.ip+self.api_rfid)
             response = requests.get(http, params)
             response.raise_for_status()
-            print(http, self.number, self.rfid, self.flag) 
+            print(http, self.number, self.rfid, self.flag)
         except HTTPError as http_err:
             print(f'HTTP error occurred -> {http_err}')
         except Exception as err:
@@ -95,7 +94,7 @@ class USM:
             self.flag = int(bool(value))
 
     def change_rfid(self, value):
-        self.rfid = value 
+        self.rfid = value
 
     def get_position(self):
         return [self.lat, self.lon]
@@ -105,40 +104,51 @@ class USM:
 
 
 if __name__ == "__main__":
-    S5  = USM(mechanism_id=32770, number=5,  lever=0, roll=0,  lat=42.8118, lon=132.8893)
-    S6  = USM(mechanism_id=32771, number=6,  lever=0, roll=0,  lat=42.8122, lon=132.8887)
-    S7  = USM(mechanism_id=32772, number=7,  lever=0, roll=0,  lat=0.0,     lon=0.0)
+    S5 = USM(mechanism_id=32770, number=5,  lever=0,
+             roll=0,  lat=42.8118, lon=132.8893)
+    S6 = USM(mechanism_id=32771, number=6,  lever=0,
+             roll=0,  lat=42.8122, lon=132.8887)
+    S7 = USM(mechanism_id=32772, number=7,  lever=0,
+             roll=0,  lat=0.0,     lon=0.0)
     # S7  = USM(mechanism_id=32772, number=7,  lever=0, roll=0,  lat=42.8144, lon=132.8899)
-    S8  = USM(mechanism_id=32773, number=8,  lever=0, roll=0,  lat=42.8171, lon=132.8926)
-    U9  = USM(mechanism_id=32941, number=9,  lever=0, roll=0,  lat=42.8132, lon=132.8899)
-    U10 = USM(mechanism_id=32942, number=10, lever=0, roll=0,  lat=42.8144, lon=132.8913)
-    E11 = USM(mechanism_id=33287, number=11, lever=0, roll=0,  lat=42.8152, lon=132.8910)
-    E12 = USM(mechanism_id=34213, number=12, lever=0, roll=0,  lat=42.8152, lon=132.8910)
-    E13 = USM(mechanism_id=34214, number=13, lever=0, roll=0,  lat=42.8152, lon=132.8910)
+    S8 = USM(mechanism_id=32773, number=8,  lever=0,
+             roll=0,  lat=42.8171, lon=132.8926)
+    U9 = USM(mechanism_id=32941, number=9,  lever=0,
+             roll=0,  lat=42.8132, lon=132.8899)
+    U10 = USM(mechanism_id=32942, number=10, lever=0,
+              roll=0,  lat=42.8144, lon=132.8913)
+    E11 = USM(mechanism_id=33287, number=11, lever=0,
+              roll=0,  lat=42.8152, lon=132.8910)
+    E12 = USM(mechanism_id=34213, number=12, lever=0,
+              roll=0,  lat=42.8152, lon=132.8910)
+    E13 = USM(mechanism_id=34214, number=13, lever=0,
+              roll=0,  lat=42.8152, lon=132.8910)
 
-    usms = S5,  S6,  S7,  S8, U9, #  U10, E11, E12, E13
+    usms = S5,  S6,  S7,  S8, U9,  # U10, E11, E12, E13
 
-    rfid_ids =   [ '0002419252',  '0015730188',  '0001006462' ]
+    rfid_ids = ['0002419252',  '0015730188',  '0001006462']
     flagPosition = True
     lat = 0.0
     lon = 0.0
     last_sent = time.time() - 61
     [x.change_lever(0.4) for x in usms]
     [x.change_roll(20) for x in usms[:1]]
-    
+
     counter = 0
     while True:
         time.sleep(1)
         if time.time() - last_sent >= 60.0:
             last_sent = time.time()
-            [m.change_position(lat, lon) for m in usms if m.get_position()[1] > 1] #! fuck
-            if counter == 1: 
+            [m.change_position(lat, lon)
+             for m in usms if m.get_position()[1] > 1]  # ! fuck
+            [x.change_roll(20-counter) for x in usms[::2]]
+            if counter == 1:
                 [x.change_rfid(r) for x, r in zip(usms, rfid_ids)]
-                [m.change_flag(1) for m in usms if m.get_rfid()!='0'*10]
+                [m.change_flag(1) for m in usms if m.get_rfid() != '0'*10]
                 S5.send_req_rfid()
                 S6.send_req_rfid()
                 S7.send_req_rfid()
-            if counter%5==0: 
+            if counter % 5 == 0:
                 S6.change_flag()
                 S6.send_req_rfid()
             if flagPosition:

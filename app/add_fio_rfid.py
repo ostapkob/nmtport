@@ -13,22 +13,22 @@ def add_fio_from_rfid(data_period, date_shift, shift):
     cursor = db.session.query(Rfid_work).filter(
         Rfid_work.date_shift == date_shift,
         Rfid_work.shift == shift,
-        ).all()
+    ).all()
     for key, value in data_period.items():
         mech_id = value['id']
         rfid_work = [
             {
-                'fio':  _fio_by_rfid_id(x.rfid_id), 
-                'time': x.timestamp, 
+                'fio':  _fio_by_rfid_id(x.rfid_id),
+                'time': x.timestamp,
                 'flag': x.flag,
             }
-              for x in cursor if x.mechanism_id==mech_id]
-        data_period[key]['rfid']  = rfid_work
+            for x in cursor if x.mechanism_id == mech_id]
+        data_period[key]['rfid'] = rfid_work
     return data_period
 
 
 def _fio_by_rfid_id(rfid_id):
-    val = Rfid_ids.query.filter(Rfid_ids.rfid_id==rfid_id).first()
+    val = Rfid_ids.query.filter(Rfid_ids.rfid_id == rfid_id).first()
     if val:
         return val.fio
     return None

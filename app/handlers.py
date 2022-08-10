@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from app.model import Mechanism, Post, Rfid_work
+from app.model import  Post, Rfid_work
 from dataclasses import dataclass
 from app import db, app, redis_client
 from config import usm_no_move
@@ -43,12 +43,19 @@ class CurrentUSM:
         self.lon = float(lon)
         self.rfid_id = dez10_to_dez35C(int(self.rfid_id))
         self.mech_id = id_by_number(self.type_mech, self.number)
+        self._handler_roll()
         self._handler_position()
         self.terminal = which_terminal(
             self.type_mech, self.number, self.lat, self.lon)
-        self.timestamp = datetime.now()  # - timedelta(hours=HOURS)
+        self.timestamp = datetime.now()
         self._fix_timestamp()
         redis_client.set(str(self.mech_id), pickle.dumps(self))
+
+    def _handler_roll(self):
+        # if self.number==13 and self.lever>0: # FIX
+        #     self.roll = 25
+        if self.roll < 5:
+            self.lever = 0
 
     def _handler_position(self):
         '''if position is empty or this mech should not move'''
