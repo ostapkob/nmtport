@@ -55,7 +55,7 @@ def name_by_id(id):
     return Mechanism.query.filter(Mechanism.id == id).first().name
 
 
-def id_by_number(type, number):  # TODO new project not started when exist it
+def id_by_number(type, number) -> int|None:  # TODO new project not started when exist it
     '''Find mechanism_id by type and number'''
     mech = Mechanism.query.filter(
         Mechanism.type == type,  Mechanism.number == number).first()

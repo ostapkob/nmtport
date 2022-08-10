@@ -606,20 +606,21 @@ def add_usm2():
         'number',
         'passw',
         'count',
-        'lever',
-        'roll',
         'rfid',
         'flag',
+        'lever',
+        'roll',
         'lat',
         'lon'
     ]
-    print('sent')
     items = [request.args.get(arg, None) for arg in necessary_args]
     if any([item is None for item in items]):
         return 'Bad request'
     current = CurrentUSM(*items)
     if current.passw not in post_passw:
         return 'Bad password'
+    if current.mech_id is None:
+        return 'No this number' 
     handler_rfid(current)
     new_post = Post(count=current.count,
                     value=current.lever,
@@ -627,36 +628,34 @@ def add_usm2():
                     latitude=current.lat,
                     longitude=current.lon,
                     mechanism_id=current.mech_id,
-                    terminal=current.terminal)
-    # add_fix_post(new_post)
+                    terminal=current.terminal,
+                    timestamp=current.timestamp
+                    )
     db.session.add(new_post)
     db.session.commit()
     redis_client.set(str(current.mech_id), pickle.dumps(
         current))  # convert and save to redis
-    print(current)
     return f'Success, {str(current)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
 
 
 @app.route('/api/v2.0/add_usm_rfid', methods=['GET'])
 def add_usm_rfid_2():
     '''add post by GET request from arduino'''
-    type_mech = 'usm'
-    number = request.args.get('number')
-    count = int(request.args.get('count'))
-    mech_id = id_by_number(type_mech, number)
-    passw = request.args.get('passw')
-    rfid = request.args.get('rfid')
-    flag = bool(int(request.args.get('flag')))
-    # items = number, mech_id, passw, rfid, flag
-    rfid = dez10_to_dez35C(int(rfid))
-    current = CurrentUSM(type_mech, mech_id, number,
-                         count, 0, 0, rfid, flag, 0, 0)
-    if mech_id is None:
-        return 'No this number ' + type_mech
-    # if any([item is None for item in current]):
-    #     return 'Bad request'
-    if passw not in post_passw:
+    necessary_args = [
+        'number',
+        'passw',
+        'count',
+        'rfid',
+        'flag',
+    ]
+    items = [request.args.get(arg, None) for arg in necessary_args]
+    if any([item is None for item in items]):
+        return 'Bad request'
+    current = CurrentUSM(*items)
+    if current.passw not in post_passw:
         return 'Bad password'
+    if current.mech_id is None:
+        return 'No this number ' 
     return add_to_db_rfid_work(current)
 
 

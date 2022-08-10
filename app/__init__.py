@@ -25,7 +25,7 @@ redis_client = FlaskRedis(app)
 mongodb_client = PyMongo(app, uri="mongodb://localhost:27017/HashShift")
 mongodb = mongodb_client.db
 CORS(app)
-from app import  functions
+from app import api, functions
 
 logger.add(
         "logs/debug.json", 

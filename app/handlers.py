@@ -4,8 +4,8 @@ from app.model import Mechanism, Post, Rfid_work
 from dataclasses import dataclass
 from app import db, app, redis_client
 from config import usm_no_move
-from app.functions import which_terminal, line_kran, perpendicular_line_equation, intersection_point_of_lines, fio_by_rfid_id, dez10_to_dez35C
-from app.functions_for_all import id_by_number
+from app.functions import which_terminal, line_kran, perpendicular_line_equation, intersection_point_of_lines,  dez10_to_dez35C
+from app.functions_for_all import id_by_number, fio_by_rfid_id
 from loguru import logger
 import pickle
 from rich import print
@@ -26,15 +26,15 @@ class CurrentUSM:
     flag: bool
     lat: float
     lon: float
-    mech_id: int
+    mech_id: int | None
     terminal: int
     timestamp: datetime
 
-    def __init__(self, number, passw, count, lever, roll, rfid_id, flag, lat, lon):
+    def __init__(self, number, passw, count, rfid_id, flag, lever=0, roll=0,  lat=0, lon=0):
         self.type_mech = 'usm'
-        self.number: int = int(number)
+        self.number = int(number)
         self.passw = str(passw)
-        self.count: int = int(count)
+        self.count = int(count)
         self.lever = float(lever)
         self.roll = int(roll)
         self.rfid_id = str(rfid_id)
@@ -42,14 +42,13 @@ class CurrentUSM:
         self.lat = float(lat)
         self.lon = float(lon)
         self.rfid_id = dez10_to_dez35C(int(self.rfid_id))
-        self.mech_id: int = id_by_number(self.type_mech, self.number)
+        self.mech_id = id_by_number(self.type_mech, self.number)
         self._handler_position()
-        self._fix_timestamp()
-        redis_client.set(str(self.mech_id), pickle.dumps(self))
         self.terminal = which_terminal(
             self.type_mech, self.number, self.lat, self.lon)
-        self.timestamp = datetime.now() - timedelta(hours=HOURS)
-
+        self.timestamp = datetime.now()  # - timedelta(hours=HOURS)
+        self._fix_timestamp()
+        redis_client.set(str(self.mech_id), pickle.dumps(self))
 
     def _handler_position(self):
         '''if position is empty or this mech should not move'''
@@ -72,11 +71,11 @@ class CurrentUSM:
                 "roll": redis_mech.roll,
                 "lat": redis_mech.lat,
                 "lon": redis_mech.lon,
-                "mech_id":redis_mech.mech_id,
+                "mech_id": redis_mech.mech_id,
                 "terminal": redis_mech.terminal,
                 "timestamp": redis_mech.timestamp
             }
-        
+
         try:
             sql_mech = db.session.query(Post).filter(
                 Post.mechanism_id == self.mech_id).order_by(Post.timestamp.desc()).first()
@@ -84,7 +83,7 @@ class CurrentUSM:
             sql_mech = None
 
         if sql_mech:
-            return  {
+            return {
                 "number": sql_mech.mech.number,
                 "count": sql_mech.count,
                 "lever": sql_mech.value,
@@ -103,42 +102,21 @@ class CurrentUSM:
             "roll": None,
             "lat": 132.5,
             "lon": 42.5,
-            "mech_id":None,
+            "mech_id": None,
             "terminal": 78,
             "timestamp": datetime.now()
         }
 
-
-
     def _fix_timestamp(self):
-
         last_post = self._get_last_post()
-        self.lat = float(last_post["lat"])
-        self.lon = float(last_post["lon"])
-
         dt_seconds = (self.timestamp - last_post['timestamp']).seconds
-        print(dt_seconds)
-        print(self.timestamp.minute)
-        print(last_post["timestamp"].minute)
+        dt_minutes = self.timestamp.minute - last_post['timestamp'].minute
+        if dt_seconds < 200 and (dt_minutes == 2 or dt_minutes == -58):
+            self.timestamp -= timedelta(seconds=30)
+            print(f'{self.timestamp}')
 
-        # if dt_seconds < 200: 
-        #     last_minute = last_post.timestamp.minute
-        #     post_minute = self.timestamp.minute
-        #     dt_minutes = post_minute - last_minute
-        #     if dt_minutes == 2 or dt_minutes == -58:
-        #         post.timestamp -= timedelta(seconds=30)
 
-# def add_fix_post(post):  # !move
-#     ''' I use it fix because arduino sometimes accumulates an extra minute '''
-#     db.session.add(post)
-#     try:
-#         db.session.commit()
-#     except Exception as e:
-#         logger.debug(e)
-#         time.sleep(10)
-#         db.session.commit()
-
-def add_fix_post(post):  # !move
+def add_fix_post(post):  # delete after change all api to version2
     ''' I use it fix because arduino sometimes accumulates an extra minute '''
     try:
         last = db.session.query(Post).filter(
@@ -164,6 +142,7 @@ def add_fix_post(post):  # !move
         logger.debug(e)
         time.sleep(10)
         db.session.commit()
+
 
 def corect_position(mech, latitude, longitude):  # TODO dataclasses
     if float(latitude) == 0 or float(longitude) == 0:  # get last values
@@ -192,7 +171,6 @@ def add_to_db_rfid_work(current: CurrentUSM):
     if fio is None:
         print('fio is', None, 'for', current.rfid_id)
         logger.debug(current.rfid_id)
-    current.lever = 0 if current.roll < 4 else current.lever  # if roller not circle
     new_rfid = Rfid_work(mechanism_id=current.mech_id,
                          count=current.count,
                          rfid_id=current.rfid_id,

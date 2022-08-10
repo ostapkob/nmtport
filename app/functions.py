@@ -7,74 +7,25 @@ from app.add_fio_1c import add_fio_and_grab_from_1c
 from app.add_fio_rfid import add_fio_from_rfid
 from app.add_resons_1c import add_resons_from_1c
 from app.functions_for_all import (  # all_mechanisms_type, all_number, name_by_id
-    all_mechanisms_id, fio_by_rfid_id, id_by_number, today_shift_date)
+    all_mechanisms_id,  today_shift_date)
 from app.kran import kran_periods, time_for_shift_kran
-from app.model import Mechanism, Post, Rfid_ids, Rfid_work, Work_1C_1
+from app.model import Mechanism, Post,  Work_1C_1
 from app.sennebogen import sennebogen_periods, time_for_shift_sennebogen
 from app.usm import time_for_shift_usm, usm_periods
 from config import (HOURS, TIME_PERIODS, lines_krans, mechanisms_type,
                     names_terminals)
 from flask import flash, redirect, url_for
 
+from pymongo.errors import DuplicateKeyError
+
 
 def multiple_5(date):  # not use
     '''Return time multiple 5 minutes and remite microseconds'''
-    global HOURS
-    # date -= timedelta(minutes=5)
+    # global HOURS
     date += timedelta(hours=HOURS)
     mul5 = date.minute - date.minute % 5
     date_n = date.replace(minute=mul5, second=0, microsecond=0)
     return date_n
-
-
-def image_mechanism(value, type_mechanism, number, last_time):
-    '''NOT USE'''
-    dt = datetime.now() - last_time
-    dt = dt.total_seconds() / 60
-    if type_mechanism == "usm":
-        if dt > 120.0:
-            return './static/numbers/'+str(
-                type_mechanism)+'/gray/'+str(number)+'.png'
-        if dt >= 3.0:
-            return './static/numbers/'+str(
-                type_mechanism)+'/red/'+str(number)+'.png'
-        if value < 0.1:
-            return './static/numbers/'+str(
-                type_mechanism)+'/yellow/'+str(number)+'.png'
-        else:
-            return './static/numbers/'+str(
-                type_mechanism)+'/green/'+str(number)+'.png'
-
-    if type_mechanism == "kran":
-        if dt > 120.0:
-            return './static/numbers/'+str(
-                type_mechanism)+'/gray/'+str(number)+'.png'
-        if dt >= 5.0:
-            return './static/numbers/'+str(
-                type_mechanism)+'/red/'+str(number)+'.png'
-        if value == 1:
-            return './static/numbers/'+str(
-                type_mechanism)+'/black/'+str(number)+'.png'
-        if value == 2:
-            return './static/numbers/'+str(
-                type_mechanism)+'/blue/'+str(number)+'.png'
-        else:
-            return './static/numbers/'+str(
-                type_mechanism)+'/yellow/'+str(number)+'.png'
-
-    if type_mechanism == "sennebogen":
-        if dt > 120.0:
-            return './static/numbers/'+str(
-                type_mechanism)+'/gray/'+str(number)+'.png'
-        if dt >= 3.0:
-            return './static/numbers/'+str(
-                type_mechanism)+'/red/'+str(number)+'.png'
-        if value < 0.1:
-            return './static/numbers/'+str(
-                type_mechanism)+'/yellow/'+str(number)+'.png'
-        else:
-            return './static/numbers/'+str(
-                type_mechanism)+'/green/'+str(number)+'.png'
 
 
 def time_for_shift_list(date_shift, shift):  # not use
@@ -84,6 +35,7 @@ def time_for_shift_list(date_shift, shift):  # not use
             Post.date_shift == date_shift,
             Post.shift == shift).order_by(Post.mechanism_id).all()
     except Exception as e:
+        cursor = {}
         logger.debug(e)
 
     # create dict all works mechanism in shift
@@ -113,10 +65,10 @@ def time_for_shift_list(date_shift, shift):  # not use
     # create dict with all minutes to now if value is not return (-1) because
     # 0 may exist
     time_by_minuts = {}
-    for key_m, values_m in existing_values.items():
+    for key_m in existing_values.keys():
         start_m = start
         time_by_minuts[key_m] = []
-        for i in range(60 * 12 - 1):
+        for _ in range(60 * 12 - 1):
             val_minutes = existing_values[key_m].setdefault(start_m, -1)
             if (val_minutes < 0.1 and val_minutes > 0):
                 val_minutes = 0
@@ -163,6 +115,7 @@ def data_from_1c(date_shift, shift):
             Work_1C_1.data_nach >= time_from,
             Work_1C_1.data_nach <= time_to).all()
     except Exception as e:
+        cursor = {}
         logger.debug(e)
     data_1C = [x.get() for x in cursor]
     return data_1C
@@ -216,7 +169,6 @@ def state_mech(el):
             return 'work'
         else:
             return 'stay'
-        return 'err'
     return None
 
 
@@ -292,14 +244,16 @@ def is_alarm_sennebogen(args):
 
 def get_status_alarm(mech_id, mech_type):
     try:
+        # TODO redis
         last = db.session.query(Post).filter(
             Post.mechanism_id == mech_id).order_by(
             Post.timestamp.desc()).limit(20)
     except Exception as e:
+        last = None
         logger.debug(e)
     now_hour = datetime.now().hour + datetime.now().minute/60
     cofe_time = any(now_hour > t1 and now_hour < t2 for t1, t2 in TIME_PERIODS)
-    # logger.inf o(mech_type)
+    # logger.info(mech_type)
     if cofe_time:
         return False
     if mech_type == 'kran':
@@ -337,7 +291,8 @@ def line_kran(number):
     return None, None
 
 
-def get_kompleks(latitude, longitude):
+def get_terminal(latitude, longitude):
+    '''matched values'''
     x = (longitude-132) / (latitude-42+0.0000001)
     if (x < 1.1):
         return 1
@@ -345,20 +300,21 @@ def get_kompleks(latitude, longitude):
         return 2
 
 
-def get_kompleksGut(latitude, longitude):
+def get_terminalGut(latitude, longitude):
+    '''7.265 - matched value'''
     if 7.265 > (longitude-132)*10*(latitude-42):
         return 5
     return 4
 
 
 def get_k1_b1_not_kran(latitude, longitude):
-    kompleks = get_kompleks(latitude, longitude)
+    terminal = get_terminal(latitude, longitude)
     latitude = int(latitude)
     longitude = int(longitude)
-    if kompleks == 1:
+    if terminal == 1:
         return [0.593270908597224, 107.49050635162425]  # ut
     else:
-        if get_kompleksGut(latitude, longitude) == 5:
+        if get_terminalGut(latitude, longitude) == 5:
             return [1.696165886483065, 60.30071859473439]  # 5k
         else:
             return [0.339389423498601, 118.37599497658572]  # 4k
@@ -429,8 +385,7 @@ def hash_all_last_data_state():
         posts.delete_one({"_id": "last_data"})
         try:
             posts.insert_one(data)
-        except Exception as e:
-            logger.debug(e)
+        except DuplicateKeyError:
             print("thread already use")
     else:
         return
@@ -444,7 +399,6 @@ def hash_now(type_mechanism):
     data = add_resons_from_1c(data, date, shift)
 
     posts = mongodb[type_mechanism]
-    # logger.debug(data)
     if data is not None:
         # convert int key to str
         mongo_data = {str(key): value for key, value in data.items()}
@@ -455,8 +409,8 @@ def hash_now(type_mechanism):
         posts.delete_one({"_id": "now"})
         try:
             posts.insert_one(mongo_data)
-        except Exception as e:
-            logger.debug(e)
+        except DuplicateKeyError:
+            print("thread already use")
     else:
         mongo_data = {}
         mongo_data['_id'] = "now"
