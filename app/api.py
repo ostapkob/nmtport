@@ -5,8 +5,9 @@ from app.model import Mechanism, Post
 from datetime import datetime, timedelta
 from app.functions import get_dict_mechanisms_number_by_id, get_dict_mechanisms_id_by_number, mech_periods, state_mech, which_terminal, dez10_to_dez35C
 from app.functions_for_all import all_mechanisms_id, today_shift_date,  id_by_number
-from app.handlers import add_fix_post, corect_position, CurrentUSM,  handler_rfid, add_to_db_rfid_work
+from app.handlers import add_fix_post, corect_position, handler_rfid, add_to_db_rfid_work
 from app.usm import time_for_shift_usm, usm_periods
+from app.usm_post import PostUSM
 from app.kran import time_for_shift_kran, kran_periods
 from app.sennebogen import time_for_shift_sennebogen, sennebogen_periods
 from psw import post_passw
@@ -616,7 +617,7 @@ def add_usm2():
     items = [request.args.get(arg, None) for arg in necessary_args]
     if any([item is None for item in items]):
         return 'Bad request'
-    current = CurrentUSM(*items)
+    current = PostUSM(*items)
     if current.passw not in post_passw:
         return 'Bad password'
     if current.mech_id is None:
@@ -651,7 +652,8 @@ def add_usm_rfid_2():
     items = [request.args.get(arg, None) for arg in necessary_args]
     if any([item is None for item in items]):
         return 'Bad request'
-    current = CurrentUSM(*items)
+    current = PostUSM(*items)
+
     if current.passw not in post_passw:
         return 'Bad password'
     if current.mech_id is None:
