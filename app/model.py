@@ -72,8 +72,6 @@ class Post(db.Model):
 
     def _get_date_and_shift(self) -> Tuple[date, int]:
         hour = self.timestamp.hour
-        print(self.timestamp)
-        print(hour)
         if hour >= 8 and hour < 20:
             date_shift = self.timestamp.date()
             shift = 1
@@ -83,7 +81,6 @@ class Post(db.Model):
         else:
             date_shift = self.timestamp.date()
             shift = 2
-        print(date_shift, shift)
         return date_shift, shift
 
     def add_post(self):

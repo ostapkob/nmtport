@@ -141,7 +141,6 @@ if __name__ == "__main__":
             last_sent = time.time()
             [m.change_position(lat, lon)
              for m in usms if m.get_position()[1] > 1]  # ! fuck
-            [x.change_roll(20-counter) for x in usms[::2]]
             if counter == 1:
                 [x.change_rfid(r) for x, r in zip(usms, rfid_ids)]
                 [m.change_flag(1) for m in usms if m.get_rfid() != '0'*10]

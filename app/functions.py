@@ -65,7 +65,7 @@ def time_for_shift_list(date_shift, shift):  # not use
     # create dict with all minutes to now if value is not return (-1) because
     # 0 may exist
     time_by_minuts = {}
-    for key_m in existing_values.keys():
+    for key_m in existing_values:
         start_m = start
         time_by_minuts[key_m] = []
         for _ in range(60 * 12 - 1):

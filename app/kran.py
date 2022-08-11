@@ -55,7 +55,7 @@ def get_time_by_minuts(data_per_shift: dict, date_shift: date, shift: int) -> di
     start_shift = get_start_shift(date_shift, shift)
     time_by_minuts = {}
     terminal = 78
-    for key in data_per_shift.keys():
+    for key in data_per_shift:
         flag_start = True
         mech = data_per_shift[key]['mechanism']
         time_by_minuts[key] = {}

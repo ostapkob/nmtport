@@ -12,6 +12,7 @@ from config import HOURS, usm_tons_in_hour
 TYPE = 'usm'
 ids_and_nums = id_and_number(TYPE)
 
+
 def get_data_per_shift(cursor):
     '''create dict with all minutes to now if value is None return (-1) because  0 may exist'''
     data_per_shift = {}
@@ -23,7 +24,8 @@ def get_data_per_shift(cursor):
         item_value = -1 if item_value is None else item_value
         item_value3 = 0 if item_value3 is None else item_value3
         val_min = 0 if item_value < 0.1 else item_value
-        item_value = 0 if item_value3 < 4 else item_value  # maybe more, value3 is speed rool
+        # maybe more, value3 is speed rool
+        item_value = 0 if item_value3 < 4 else item_value
         val_min = 0 if item_value3 < 4 else item_value
 
         if data_per_shift.get(item.mech.number):
@@ -43,26 +45,30 @@ def get_data_per_shift(cursor):
             data_per_shift[item.mech.number]['work_time'] += 1
     return data_per_shift
 
+
 def get_time_by_minuts(data_per_shift, date_shift, shift):
     start_shift = get_start_shift(date_shift, shift)
     time_by_minuts = {}
-    for key in data_per_shift.keys():
+    for key in data_per_shift:
         flag_start = True
         mech = data_per_shift[key]['mechanism']
         time_by_minuts[key] = {}
         time_by_minuts[key]['name'] = mech.name
         time_by_minuts[key]['id'] = mech.id
         time_by_minuts[key]['number'] = mech.number
-        time_by_minuts[key]['tons_in_hour'] =usm_tons_in_hour[mech.number]
+        time_by_minuts[key]['tons_in_hour'] = usm_tons_in_hour[mech.number]
         # translate hours into minutes and round
-        time_by_minuts[key]['time_coal']  = round(data_per_shift[key]['time_coal'] / 60, 2)
-        time_by_minuts[key]['total_time'] = round(data_per_shift[key]['total_time'] / 60, 1)
-        time_by_minuts[key]['work_time']  = round(data_per_shift[key]['work_time'] / 60, 1)
+        time_by_minuts[key]['time_coal'] = round(
+            data_per_shift[key]['time_coal'] / 60, 2)
+        time_by_minuts[key]['total_time'] = round(
+            data_per_shift[key]['total_time'] / 60, 1)
+        time_by_minuts[key]['work_time'] = round(
+            data_per_shift[key]['work_time'] / 60, 1)
         time_by_minuts[key]['data'] = {}
         delta_minutes = start_shift
         try:
             last_find_item = db.session.query(Post).filter(
-                Post.mechanism_id==data_per_shift[key]['mechanism'].id).order_by(Post.timestamp.desc()).first()
+                Post.mechanism_id == data_per_shift[key]['mechanism'].id).order_by(Post.timestamp.desc()).first()
             terminal = last_find_item.terminal
         except Exception as e:
             terminal = 8
@@ -71,7 +77,8 @@ def get_time_by_minuts(data_per_shift, date_shift, shift):
         time_coal = 0
         for i in range(1, 60 * 12 + 1):
             date_t = delta_minutes.strftime("%H:%M")
-            val_minute = data_per_shift[key]['data'].setdefault(delta_minutes, (-1, -1, 0))
+            val_minute = data_per_shift[key]['data'].setdefault(
+                delta_minutes, (-1, -1, 0))
             time_coal += val_minute[2] / 60
             time_by_minuts[key]['data'][i] = {'time': date_t,
                                               'value': val_minute[0],
@@ -103,7 +110,7 @@ def time_for_shift_usm(date_shift, shift):
     value is lever, value3 is speed roler,
     '''
     shift = int(shift)
-    all_mechs = all_mechanisms_id(TYPE) # TODO get not from db
+    all_mechs = all_mechanisms_id(TYPE)  # TODO get not from db
     try:
         cursor = db.session.query(Post).filter(Post.date_shift == date_shift, Post.shift ==
                                                shift, Post.mechanism_id.in_(all_mechs)).order_by(Post.mechanism_id).all()
@@ -114,7 +121,7 @@ def time_for_shift_usm(date_shift, shift):
     data_per_shift = get_data_per_shift(cursor)
     if not data_per_shift:
         return {}
-    time_by_minuts =  get_time_by_minuts(data_per_shift, date_shift, shift)
+    time_by_minuts = get_time_by_minuts(data_per_shift, date_shift, shift)
     return time_by_minuts
 
 
@@ -147,21 +154,22 @@ def usm_periods(data):
             else:
                 step += 1
         new_data[counter] = {'time': pre_time,
-                             'value': values_period, 
+                             'value': values_period,
                              'step': step,
                              'time_coal': tmp_time_coal
                              }
         mechanisms_data[mech]['data'] = new_data
     return mechanisms_data
 
+
 def get_values_min(value_number):
     if value_number['value'] >= 0 and value_number['value'] < 0.1:
         if value_number['speed'] <= 4:
             return 0  # yellow
         else:
-            return 2 # dark yellow
+            return 2  # dark yellow
     elif value_number['value'] >= 0.1:
-        return  1  # blue
+        return 1  # blue
     else:
         return -1  # red
 
@@ -172,7 +180,7 @@ if __name__ == "__main__":
     from rich import print
     date_shift = datetime.now().date()
     date_shift -= timedelta(days=0)
-    dates_shifts = [  date_shift - timedelta(days=x) for x in range(18, 19) ]
+    dates_shifts = [date_shift - timedelta(days=x) for x in range(18, 19)]
     shift = 2
 
     for date in dates_shifts:

@@ -554,7 +554,7 @@ def add_post():
     if request.method == 'POST':
         if not request_j:
             abort(400)
-        keys = [p for p in request_j.keys()]
+        keys = [p for p in request_j]
         if not set(keys).issubset(need_keys):
             abort(400)
         if request_j['password'] not in post_passw:
