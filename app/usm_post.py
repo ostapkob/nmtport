@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from app.model import  Post, Rfid_work
+from app.model import Post, Rfid_work
 from dataclasses import dataclass
 from app import db, app, redis_client
 from typing import Dict
 from datetime import datetime, timedelta
-from app.functions_for_all import id_by_number 
+from app.functions_for_all import id_by_number
 from app.functions import which_terminal,  dez10_to_dez35C
 from config import usm_no_move
 import pickle
+
 
 @dataclass
 class PostUSM:
@@ -41,6 +42,7 @@ class PostUSM:
         self.mech_id = id_by_number(self.type_mech, self.number)
         self._handler_roll()
         self._handler_position()
+        self._handler_rfid()
         self.terminal = which_terminal(
             self.type_mech, self.number, self.lat, self.lon)
         self.timestamp = datetime.now()
@@ -117,3 +119,6 @@ class PostUSM:
         if dt_seconds < 200 and (dt_minutes == 2 or dt_minutes == -58):
             self.timestamp -= timedelta(seconds=30)
             print(f'{self.timestamp}')
+
+    def _handler_rfid(self):
+        print('pass')

@@ -28,13 +28,13 @@ CORS(app)
 from app import api, functions
 
 logger.add(
-        "logs/debug.json", 
-        format="{time} {level} {message}", 
-        level="DEBUG", 
-        rotation="1 day", 
-        compression="zip", 
-        serialize=True
-        )
+    "logs/debug.json",
+    format="{time} {level} {message}",
+    level="DEBUG",
+    rotation="1 day",
+    compression="zip",
+    serialize=True
+)
 
 hash_last_data = functions.hash_all_last_data_state
 hash_now = functions.hash_now
@@ -53,5 +53,3 @@ def _loop():
 logger.debug("RESTART: " + str(datetime.now()))
 thread = threading.Thread(target=_loop, daemon=True)
 thread.start()
-
-

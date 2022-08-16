@@ -4,8 +4,8 @@ from app import db, app, redis_client, mongodb
 from app.model import Mechanism, Post
 from datetime import datetime, timedelta
 from app.functions import get_dict_mechanisms_number_by_id, get_dict_mechanisms_id_by_number, mech_periods, state_mech, which_terminal, dez10_to_dez35C
-from app.functions_for_all import all_mechanisms_id, today_shift_date,  id_by_number
-from app.handlers import add_fix_post, corect_position, handler_rfid, add_to_db_rfid_work
+from app.functions_for_all import all_mechanisms_id, today_shift_date,  id_by_number, fio_by_rfid_id
+from app.handlers import add_fix_post, corect_position,  add_to_db_rfid_work
 from app.usm import time_for_shift_usm, usm_periods
 from app.usm_post import PostUSM
 from app.kran import time_for_shift_kran, kran_periods
@@ -619,10 +619,9 @@ def add_usm2():
         return 'Bad request'
     current = PostUSM(*items)
     if current.passw not in post_passw:
-        return 'Bad password'
+        abort(401, 'Bad password')
     if current.mech_id is None:
-        return 'No this number'
-    handler_rfid(current)
+        abort(406, 'No this number')
     new_post = Post(count=current.count,
                     value=current.lever,
                     value3=current.roll,
@@ -651,13 +650,16 @@ def add_usm_rfid_2():
     ]
     items = [request.args.get(arg, None) for arg in necessary_args]
     if any([item is None for item in items]):
-        return 'Bad request'
+        abort(400, 'Bad request')
     current = PostUSM(*items)
 
     if current.passw not in post_passw:
-        return 'Bad password'
+        abort(401, 'Bad password')
     if current.mech_id is None:
-        return 'No this number '
+        abort(406, 'No this number')
+    fio = fio_by_rfid_id(current.rfid_id)
+    if fio is None:
+        abort(406, 'No this rfid id')
     return add_to_db_rfid_work(current)
 
 

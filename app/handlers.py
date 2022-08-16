@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from app.model import  Post, Rfid_work
+from app.model import Post, Rfid_work
 from app import db, app, redis_client
-from app.functions import  line_kran, perpendicular_line_equation, intersection_point_of_lines  
-from app.functions_for_all import  fio_by_rfid_id
+from app.functions import line_kran, perpendicular_line_equation, intersection_point_of_lines
+from app.functions_for_all import fio_by_rfid_id
 from loguru import logger
 from rich import print
 from datetime import datetime, timedelta
@@ -11,7 +11,6 @@ from config import HOURS
 from app.usm_post import PostUSM
 import pickle
 import time
-
 
 
 def add_fix_post(post):  # delete after change all api to version2
@@ -63,8 +62,6 @@ def corect_position(mech, latitude, longitude):  # TODO dataclasses
 
 
 def add_to_db_rfid_work(current: PostUSM):
-    if current.rfid_id == '0/00000':
-        return 'RFID is empy'
     fio = fio_by_rfid_id(current.rfid_id)
     if fio is None:
         print('fio is', None, 'for', current.rfid_id)
@@ -82,10 +79,10 @@ def add_to_db_rfid_work(current: PostUSM):
 def handler_rfid(current: PostUSM):
     '''if last request rfid_work failed get previos values and compare with current value'''
     if current.rfid_id == '0/00000':
-        return f'rfid is {current.rfid_id}'
+        return
     redis_tmp = redis_client.get(str(current.mech_id))  # load from redis
     if redis_tmp is None:
-        return 'redis_tmp is Empty'
+        return
     redis_tmp = pickle.loads(redis_tmp)  # convert to dataclass
 
     if current.rfid_id != redis_tmp.rfid_id or current.flag != redis_tmp.flag:
@@ -96,15 +93,15 @@ def handler_rfid(current: PostUSM):
             Rfid_work.flag == current.flag,
             Rfid_work.timestamp > two_min_ago
         ).order_by(Rfid_work.timestamp.desc()).first()
-        print(
-            f"[yellow]CHANGED current RFID: {current.rfid_id}, redis_tmp RFID: {redis_tmp.rfid_id}[/yellow]")
-        print(
-            f"[yellow]CHANGED current flag: {current.flag}, redis_tmp flag:  {redis_tmp.flag}[/yellow]")
-        print(f"[sky_blue1]LAST {last}[/sky_blue1]")
+        # print(
+        #     f"[yellow]CHANGED current RFID: {current.rfid_id}, redis_tmp RFID: {redis_tmp.rfid_id}[/yellow]")
+        # print(
+        #     f"[yellow]CHANGED current flag: {current.flag}, redis_tmp flag:  {redis_tmp.flag}[/yellow]")
+        # print(f"[sky_blue1]LAST {last}[/sky_blue1]")
         if last is None:
-            print(f"[cian]ADD {current.rfid_id}[/cian]")
+            # print(f"[cian]ADD {current.rfid_id}[/cian]")
             return add_to_db_rfid_work(current)
         if current.rfid_id != last.rfid_id or current.flag != last.flag:
-            print(f"[red]ADD {current.rfid_id}[/red]")
+            # print(f"[red]ADD {current.rfid_id}[/red]")
             return add_to_db_rfid_work(current)
     return 'ok'
