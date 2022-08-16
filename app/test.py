@@ -9,13 +9,18 @@ sys.path.insert(0, '/home/admin/nmtport')
 from app import db
 from app.model import Post, Rfid_work
 from psw import post_passw
-
+from app.functions import which_terminal,  dez10_to_dez35C
 class TestUSM(unittest.TestCase):
     mech = USM(number=4, passw=post_passw[1], lever=0,
-               roll=0,  lat=42.8118, lon=132.8893, port=80)
+               roll=0,  lat=42.8118, lon=132.8893, port=5000)
 
     def test_01_existed_rfid_id(self):
         self.mech.change_rfid('0002419252')
+        self.mech.change_flag()
+        self.assertTrue(self.mech.send_req_rfid())
+
+    def test_011_existed_rfid_id(self):
+        self.mech.change_rfid('0005787018')
         self.mech.change_flag()
         self.assertTrue(self.mech.send_req_rfid())
 

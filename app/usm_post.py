@@ -42,7 +42,7 @@ class PostUSM:
         self.mech_id = id_by_number(self.type_mech, self.number)
         self._handler_roll()
         self._handler_position()
-        self._handler_rfid()
+        # self._handler_rfid()
         self.terminal = which_terminal(
             self.type_mech, self.number, self.lat, self.lon)
         self.timestamp = datetime.now()
@@ -120,5 +120,5 @@ class PostUSM:
             self.timestamp -= timedelta(seconds=30)
             print(f'{self.timestamp}')
 
-    def _handler_rfid(self):
-        print('pass')
+    # def _handler_rfid(self):
+    #     print('pass')

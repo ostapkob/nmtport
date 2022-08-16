@@ -123,7 +123,7 @@ def get_data_period2(type_mechanism, date_shift, shift):
 def convert_keys_int_to_str(data):
     mongo_data = {str(key): value for key, value in data.items()}
     for key, value in data.items():
-        mongo_data[str(key)]['data'] = {  # del str
+        mongo_data[str(key)]['data'] = { 
             str(k): v for k, v in value['data'].items()
         }
     return mongo_data

@@ -452,8 +452,8 @@ def dez10_to_dez35C(n: str) -> str:
     left = left.zfill(3)
     right = str(int(hex_n[2:], 16))
     right = right.zfill(5)
-    # return left+','+right
-    return str(int(left))+'/'+right
+    return left+','+right
+    # return str(int(left))+','+right
 
 
 if __name__ == "__main__":
