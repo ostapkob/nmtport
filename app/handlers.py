@@ -62,10 +62,10 @@ def corect_position(mech, latitude, longitude):  # TODO dataclasses
 
 
 def add_to_db_rfid_work(current: PostUSM):
-    fio = fio_by_rfid_id(current.rfid_id)
-    if fio is None:
-        print('fio is', None, 'for', current.rfid_id)
-        logger.debug(current.rfid_id)
+    # fio = fio_by_rfid_id(current.rfid_id)
+    # if fio is None:
+    #     print('fio is', None, 'for', current.rfid_id)
+    #     logger.debug(current.rfid_id)
     new_rfid = Rfid_work(mechanism_id=current.mech_id,
                          count=current.count,
                          rfid_id=current.rfid_id,
@@ -73,7 +73,12 @@ def add_to_db_rfid_work(current: PostUSM):
                          )
     db.session.add(new_rfid)
     db.session.commit()
-    return f'Success, {fio} {current},  {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
+    # if (last.flag==0):
+    #     return 200
+    # elif (last.flag==1):
+    #     return 201
+
+    return f'Success, {current},  {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
 
 
 def handler_rfid(current: PostUSM):

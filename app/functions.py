@@ -445,6 +445,8 @@ def dez10_to_dez35C(n: str) -> str:
         convert rfid_id to "text_format" rfid
         https://guardsaas.com/ru/content/keycode
     '''
+    import re
+    n = re.sub("[^0-9]", "", n)
     n = str(n).zfill(10)
     hex_n = hex(int(n)).split('x')[-1]
     hex_n = hex_n.zfill(6)

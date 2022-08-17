@@ -1,7 +1,7 @@
 from flask import request, jsonify, abort, make_response
 from flask import render_template
 from app import db, app, redis_client, mongodb
-from app.model import Mechanism, Post
+from app.model import Mechanism, Post, Rfid_work
 from datetime import datetime, timedelta
 from app.functions import get_dict_mechanisms_number_by_id, get_dict_mechanisms_id_by_number, mech_periods, state_mech, which_terminal, dez10_to_dez35C
 from app.functions_for_all import all_mechanisms_id, today_shift_date,  id_by_number, fio_by_rfid_id
@@ -34,7 +34,7 @@ def get_per_shift(m_id):
             Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).all()
     except Exception as e:
         data_per_shift = []
-        logger.debug(e)
+        # logger.debug(e)
     try:
         start = db.session.query(Post.timestamp).filter(
             Post.date_shift == date_shift, Post.shift == shift, Post.mechanism_id == m_id).first()[0]
@@ -123,7 +123,7 @@ def get_data_period2(type_mechanism, date_shift, shift):
 def convert_keys_int_to_str(data):
     mongo_data = {str(key): value for key, value in data.items()}
     for key, value in data.items():
-        mongo_data[str(key)]['data'] = { 
+        mongo_data[str(key)]['data'] = {  # del str
             str(k): v for k, v in value['data'].items()
         }
     return mongo_data
@@ -164,14 +164,19 @@ def get_data_period_with_fio2(type_mechanism, date_shift, shift):
     else:
         mongo_request = mongodb[type_mechanism].find_one(
             {"_id": f"{date_shift}|{shift}"})
+         
     if mongo_request is not None:  # if item alredy exist
         del mongo_request["_id"]
         return jsonify(mongo_request)
 
     data = mech_periods(type_mechanism, date, shift)
+    print(str(data is None))
     data = add_fio_and_grab_from_1c(data, date, shift)
+    print(str(data is None))
     data = add_fio_from_rfid(data, date, shift)
+    print(str(data is None))
     data = add_resons_from_1c(data, date, shift)
+    print(str(data is None))
 
     # add_to_mongo(data, date, shift)
     if data is not None:
@@ -240,7 +245,7 @@ def get_all_last_data():
             Post.timestamp.desc()).first() for x in all_mechanisms_id()]
     except Exception as e:
         last_data_mech = []
-        logger.debug(e)
+        # logger.debug(e)
     last_data_mech = filter(lambda x: x is not None, last_data_mech)
     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
                                                  'name': el.mech.name,
@@ -251,24 +256,6 @@ def get_all_last_data():
                                                  'longitude': el.longitude,
                                                  'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
     return jsonify(data)
-
-
-# @app.route("/api/v1.0/get_all_last_data_by_type_ico/<mech_type>", methods=["GET"])
-# def get_all_last_data_by_type(mech_type):
-#     '''get all data mechanism'''
-#     try:
-#         last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
-#             Post.timestamp.desc()).first() for x in all_mechanisms_id(mech_type)]
-#     except Exception as e:
-#         logger.debug(e)
-#     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
-#                                                  'name': el.mech.name,
-#                                                  'value': el.value,
-#                                                  'latitude': el.latitude,
-#                                                  'longitude': el.longitude,
-#                                                  'src': image_mechanism(el.value, el.mech.type, el.mech.number, el.timestamp + timedelta(hours=HOURS)),
-#                                                  'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
-#     return jsonify(data)
 
 
 @app.route("/api/v1.0/get_all_last_data_state", methods=["GET"])
@@ -312,26 +299,6 @@ def get_all_last_data_state2():
     return jsonify({})
 
 
-# @app.route("/api/v1.0/get_all_last_data_ico", methods=["GET"])
-# def get_all_last_data_ico():
-#     '''get all data mechanism and mechanism state'''
-#     try:
-#         last_data_mech = [db.session.query(Post).filter(Post.mechanism_id == x).order_by(
-#             Post.timestamp.desc()).first() for x in all_mechanisms_id()]
-#     except Exception as e:
-#         last_data_mech = []
-#         logger.debug(e)
-#     last_data_mech = filter(lambda x: x is not None, last_data_mech)
-#     data = {el.mech.type + str(el.mech.number): {'id': el.mech.id,
-#                                                  'name': el.mech.name,
-#                                                  'value': el.value,
-#                                                  'latitude': el.latitude,
-#                                                  'longitude': el.longitude,
-#                                                  'src': image_mechanism(el.value, el.mech.type, el.mech.number, el.timestamp + timedelta(hours=HOURS)),
-#                                                  'time': el.timestamp + timedelta(hours=HOURS)} for el in last_data_mech}
-#     return jsonify(data)
-
-
 @app.route("/api/v1.0/get_mech/<int:m_id>", methods=["GET"])
 def get_mech(m_id):
     '''get name mechanism'''
@@ -339,7 +306,7 @@ def get_mech(m_id):
         mech = Mechanism.query.get(m_id)
         return f'{mech.name}'
     except Exception as e:
-        logger.debug(e)
+        # logger.debug(e)
         return
 
 
@@ -361,7 +328,10 @@ def add_usm():
     try:
         mech = Mechanism.query.get(mechanism_id)
     except Exception as e:
+        pass
         logger.debug(e)
+    if number==11 and float(value) >0: # FIX
+        value3 = 25
     # if (number==13 or number==11) and float(value) == 1: # FIX
     # if number==13 and float(value) <0.7: # FIX
     #     value = 0.8
@@ -405,53 +375,6 @@ def add_usm():
     return f'Success, {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
 
 
-# @app.route('/api/v1.0/add_kran', methods=['GET'])
-# def add_kran():
-#     '''add post by GET request from arduino'''
-#     mechanism_id = request.args.get('mechanism_id')
-#     password = request.args.get('password')
-#     value = request.args.get('value')
-#     value3 = request.args.get('value3')
-#     latitude = request.args.get('latitude')
-#     longitude = request.args.get('longitude')
-#     try:
-#         mech = Mechanism.query.get(mechanism_id)
-#     except Exception as e:
-#         logger.debug(e)
-#     items = mechanism_id, password, latitude, longitude, value, value3
-#     test_items = any([item is None for item in items]) # if this id is exist
-#     if test_items:
-#         return 'Bad request'
-#     if password not in post_passw:
-#         return 'Bad password'
-#     if int(mechanism_id) not in all_mechanisms_id('kran'):
-#         return 'Not this id or not kran'
-#     if latitude == '':
-#         latitude = 0
-#         longitude = 0
-#     if float(latitude) == 0 or float(longitude) == 0:
-#         try:
-#             data_mech = db.session.query(Post).filter(
-#                 Post.mechanism_id == mechanism_id).order_by(Post.timestamp.desc()).first()
-#         except Exception as e:
-#             logger.debug(e)
-#         latitude = data_mech.latitude
-#         longitude = data_mech.longitude
-#     if mech.number in krans_if_3_then_2 and value == '3':
-#         value = 2
-#     if mech.number in krans_if_1_then_0 and value == '1':
-#         value = 4
-#     k1, b1 = line_kran(mech.number)
-#     k2, b2 = perpendicular_line_equation(
-#         k1, float(latitude), float(longitude))
-#     latitude, longitude = intersection_point_of_lines(k1, b1, k2, b2)
-#     terminal = which_terminal('kran', number, latitude, longitude) # exist 9, 11, 13, 15
-#     new_post = Post(value=value, value3=value3, latitude=latitude,
-#                     longitude=longitude, mechanism_id=mechanism_id, terminal=terminal)
-#     db.session.add(new_post)
-#     db.session.commit()
-#     return f'Success, {str(mech.number)},  {str(items)}, {str(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))}'
-
 @app.route('/api/v2.0/add_kran', methods=['GET'])
 def add_kran2():
     '''add post by GET request from arduino'''
@@ -471,11 +394,14 @@ def add_kran2():
         mech = Mechanism.query.get(mechanism_id)
     except Exception as e:
         print('Bed request mech', number)
-        logger.debug(e)
+        # logger.debug(e)
         return f"bed request mech, {number}"
     # if (number in (17, 31) ) and value == 1:  # FIX
     #     value = 2
+    if number in (6,)  and value == 1:  # FIX
+        value = 3
     items = mechanism_id, password, latitude, longitude, value, count
+
     # if this id is exist
     test_exist_items = any([item is None for item in items])
     if test_exist_items:
@@ -516,7 +442,8 @@ def add_sennebogen():
     try:
         mech = Mechanism.query.get(mechanism_id)
     except Exception as e:
-        logger.debug(e)
+        # logger.debug(e)
+        pass
     items = mechanism_id, password, latitude, longitude, x, y
     test_items = any([item is None for item in items])
 
@@ -536,7 +463,8 @@ def add_sennebogen():
             latitude = data_mech.latitude
             longitude = data_mech.longitude
         except Exception as e:
-            logger.debug(e)
+            # logger.debug(e)
+            pass
         latitude = 132.8
         longitude = 40.8
     terminal = which_terminal('sennebogen', number, latitude, longitude)
@@ -573,7 +501,7 @@ def add_post():
                 latitude = data_mech.latitude
                 longitude = data_mech.longitude
             except Exception as e:
-                logger.debug(e)
+                # logger.debug(e)
                 latitude = 132.7
                 longitude = 40.7
     elif request.method == 'GET':
@@ -616,7 +544,8 @@ def add_usm2():
     ]
     items = [request.args.get(arg, None) for arg in necessary_args]
     if any([item is None for item in items]):
-        return 'Bad request'
+        print(f'400{items=}')
+        abort(400, 'Bad request')
     current = PostUSM(*items)
     if current.passw not in post_passw:
         abort(401, 'Bad password')
@@ -649,6 +578,7 @@ def add_usm_rfid_2():
         'flag',
     ]
     items = [request.args.get(arg, None) for arg in necessary_args]
+    print(f'{items=}')
     if any([item is None for item in items]):
         abort(400, 'Bad request')
     current = PostUSM(*items)
@@ -660,8 +590,45 @@ def add_usm_rfid_2():
     fio = fio_by_rfid_id(current.rfid_id)
     if fio is None:
         abort(406, 'No this rfid id')
-    return add_to_db_rfid_work(current)
+    
+    last_flag = current.get_last_rfid_flag()
 
+    if last_flag:
+        current.set_rfid_flag(0)
+    else:
+        current.set_rfid_flag(1)
+    current.add_to_db_rfid_work()
+
+    if last_flag:
+        return "start", 200
+    else:
+        return "finish", 200
+
+#firs word must be 'add' becouse nginx use it how toggle to 80 port
+@app.route('/api/v2.0/add_get_rfid_flag', methods=['GET'])
+def get_usm_rfid_flag():
+    necessary_args = [
+        'number',
+        'type',
+        'passw',
+    ]
+    items = [request.args.get(arg, None) for arg in necessary_args]
+    if any([item is None for item in items]):
+        abort(400, 'Bad request')
+    mech_id = id_by_number(items[1], items[0]) # type number
+    if items[2] not in post_passw:
+        abort(401, 'Bad password')
+    try:
+        sql_rfid = db.session.query(Rfid_work).filter(
+            Rfid_work.mechanism_id == mech_id).order_by(Rfid_work.timestamp.desc()).first()
+    except:
+        abort(400, 'Bad request')
+    last_flag = bool(sql_rfid.flag)
+    print('last_flag: ', f"[yellow] {last_flag}[/yellow]")
+    if last_flag:
+        return "start", 200
+    else:
+        return "finish", 200
 
 # if __name__ == "__main__":
 #     pass

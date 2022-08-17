@@ -38,7 +38,7 @@ class PostUSM:
         self.flag = bool(int(flag))
         self.lat = float(lat)
         self.lon = float(lon)
-        self.rfid_id = dez10_to_dez35C(int(self.rfid_id))
+        self.rfid_id = dez10_to_dez35C(self.rfid_id)
         self.mech_id = id_by_number(self.type_mech, self.number)
         self._handler_roll()
         self._handler_position()
@@ -60,11 +60,19 @@ class PostUSM:
         if self.number in usm_no_move \
                 or self.lat == 0 \
                 or self.lon == 0:
-            last_post = self._get_last_post()
+            last_post = self.get_last_post()
             self.lat = float(last_post["lat"])
             self.lon = float(last_post["lon"])
 
-    def _get_last_post(self) -> Dict:
+    def get_last_rfid_flag(self) ->  bool:
+        try:
+            sql_mech = db.session.query(Rfid_work).filter(
+                Rfid_work.mechanism_id == self.mech_id).order_by(Rfid_work.timestamp.desc()).first()
+        except:
+            return False
+        return bool(sql_mech.flag)
+
+    def get_last_post(self) -> Dict:
         '''try return last redis or db else None'''
         redis_mech = redis_client.get(str(self.mech_id))  # load from redis
         if redis_mech:
@@ -113,12 +121,22 @@ class PostUSM:
         }
 
     def _fix_timestamp(self):
-        last_post = self._get_last_post()
+        last_post = self.get_last_post()
         dt_seconds = (self.timestamp - last_post['timestamp']).seconds
         dt_minutes = self.timestamp.minute - last_post['timestamp'].minute
         if dt_seconds < 200 and (dt_minutes == 2 or dt_minutes == -58):
             self.timestamp -= timedelta(seconds=30)
             print(f'{self.timestamp}')
 
-    # def _handler_rfid(self):
-    #     print('pass')
+    def add_to_db_rfid_work(self):
+        new_rfid = Rfid_work(mechanism_id=self.mech_id,
+                             count=self.count,
+                             rfid_id=self.rfid_id,
+                             flag=self.flag,
+                             )
+        db.session.add(new_rfid)
+        db.session.commit()
+
+    def set_rfid_flag(self, value: int):
+        self.flag = bool(value)
+
