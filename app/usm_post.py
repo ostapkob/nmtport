@@ -70,7 +70,10 @@ class PostUSM:
                 Rfid_work.mechanism_id == self.mech_id).order_by(Rfid_work.timestamp.desc()).first()
         except:
             return False
-        return bool(sql_mech.flag)
+        if sql_mech:
+            return bool(sql_mech.flag)
+        else:
+            return False
 
     def get_last_post(self) -> Dict:
         '''try return last redis or db else None'''
@@ -121,12 +124,12 @@ class PostUSM:
         }
 
     def _fix_timestamp(self):
+        ''' I use it fix because arduino sometimes accumulates an extra minute '''
         last_post = self.get_last_post()
         dt_seconds = (self.timestamp - last_post['timestamp']).seconds
         dt_minutes = self.timestamp.minute - last_post['timestamp'].minute
         if dt_seconds < 200 and (dt_minutes == 2 or dt_minutes == -58):
             self.timestamp -= timedelta(seconds=30)
-            print(f'{self.timestamp}')
 
     def add_to_db_rfid_work(self):
         new_rfid = Rfid_work(mechanism_id=self.mech_id,

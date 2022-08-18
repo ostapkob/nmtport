@@ -544,7 +544,6 @@ def add_usm2():
     ]
     items = [request.args.get(arg, None) for arg in necessary_args]
     if any([item is None for item in items]):
-        print(f'400{items=}')
         abort(400, 'Bad request')
     current = PostUSM(*items)
     if current.passw not in post_passw:
@@ -578,7 +577,6 @@ def add_usm_rfid_2():
         'flag',
     ]
     items = [request.args.get(arg, None) for arg in necessary_args]
-    print(f'{items=}')
     if any([item is None for item in items]):
         abort(400, 'Bad request')
     current = PostUSM(*items)
@@ -590,21 +588,18 @@ def add_usm_rfid_2():
     fio = fio_by_rfid_id(current.rfid_id)
     if fio is None:
         abort(406, 'No this rfid id')
-    
-    last_flag = current.get_last_rfid_flag()
-
-    if last_flag:
+    if current.flag:
         current.set_rfid_flag(0)
     else:
         current.set_rfid_flag(1)
-    current.add_to_db_rfid_work()
 
-    if last_flag:
+    current.add_to_db_rfid_work()
+    if current.flag:
         return "start", 200
     else:
         return "finish", 200
 
-#firs word must be 'add' becouse nginx use it how toggle to 80 port
+#firs word must be 'add' because nginx use it how toggle to 80 port
 @app.route('/api/v2.0/add_get_rfid_flag', methods=['GET'])
 def get_usm_rfid_flag():
     necessary_args = [
@@ -623,8 +618,10 @@ def get_usm_rfid_flag():
             Rfid_work.mechanism_id == mech_id).order_by(Rfid_work.timestamp.desc()).first()
     except:
         abort(400, 'Bad request')
-    last_flag = bool(sql_rfid.flag)
-    print('last_flag: ', f"[yellow] {last_flag}[/yellow]")
+    if sql_rfid:
+        last_flag = bool(sql_rfid.flag)
+    else:
+        last_flag = False
     if last_flag:
         return "start", 200
     else:
