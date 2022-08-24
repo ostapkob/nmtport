@@ -50,10 +50,10 @@ class PostUSM:
         redis_client.set(str(self.mech_id), pickle.dumps(self))
 
     def _handler_roll(self):
-        # if self.number==13 and self.lever>0: # FIX
-        #     self.roll = 25
-        if self.roll < 5:
-            self.lever = 0
+        if self.number==13 and self.lever>0: # FIX
+            self.roll = 25
+        # if self.roll < 5:
+        #     self.lever = 0
 
     def _handler_position(self):
         '''if position is empty or this mech should not move'''

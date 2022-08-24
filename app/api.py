@@ -330,7 +330,7 @@ def add_usm():
     except Exception as e:
         pass
         logger.debug(e)
-    if number==11 and float(value) >0: # FIX
+    if number in (5, 11, 13) and float(value) >0: # FIX
         value3 = 25
     # if (number==13 or number==11) and float(value) == 1: # FIX
     # if number==13 and float(value) <0.7: # FIX
@@ -519,7 +519,8 @@ def add_post():
 
 @app.errorhandler(404)
 def not_found(error):
-    return render_template('404.html'), 404
+    return 'Error 404'
+    # return render_template('404.html'), 404
     # return make_response(jsonify({'error': 'Not found'}), 404)
 
 
@@ -611,6 +612,8 @@ def get_usm_rfid_flag():
     if any([item is None for item in items]):
         abort(400, 'Bad request')
     mech_id = id_by_number(items[1], items[0]) # type number
+    if mech_id is None:
+        abort(406, 'No this number')
     if items[2] not in post_passw:
         abort(401, 'Bad password')
     try:

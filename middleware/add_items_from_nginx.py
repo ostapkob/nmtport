@@ -19,7 +19,7 @@ dict_mechanisms_number_by_id = get_dict_mechanisms_number_by_id()
 from rich import print
 from rich.console import Console
 from rich.table import Table
-HOURS = 10
+HOURS = 0
 console = Console()
 
 table_kran = Table(title="Kran")
@@ -37,6 +37,7 @@ table_kran.add_column("terminal", justify="right", style="blue")
 
 
 table_usm = Table(title="USM")
+
 table_usm.add_column("timestamp", justify="right", style="cyan", no_wrap=True)
 table_usm.add_column("number",   style="magenta")
 table_usm.add_column("mech_id",  style="magenta")
@@ -83,8 +84,8 @@ nginx_log = '/var/log/nginx/access.log'
 with open(nginx_log) as f:
     lines = f.readlines()
 
-time_start = datetime(2022, 7, 17, 19, 10, 0)
-time_finish = datetime(2022, 7, 17, 19, 34, 0)
+time_start = datetime(2022, 8, 21, 0, 1, 0)
+time_finish = datetime(2022, 8, 21, 7, 59, 0)
 for line_file in lines:
     # if 'add_kran' in line_file:
     #     line = line_file.split('&')
@@ -141,8 +142,11 @@ for line_file in lines:
         count = line[5].split('=')[1]
         lat = line[6].split('=')[1]
         lon = line[7].split(' ')[0].split('=')[1]
-        # if mechanism_id=='32942' and int(value3)>0:
-        #     value=0.7
+        if not mechanism_id=='33287': 
+            continue
+        print(value)
+        if float(value)>0:
+            value3=24
             
         terminal = which_terminal('usm', number, lat, lon) 
         timestamp=time-timedelta(hours=HOURS)

@@ -13,9 +13,9 @@ from datetime import date, datetime, timedelta
 from middleware import  list_mechanisms 
 kran = list_mechanisms.kran
 usm = list_mechanisms.usm
-date = date(2022, 7, 26)
-shift = 1
-mech = usm[13]
+date = date(2022, 8, 20)
+shift = 2
+mech = usm[11]
 # cursor = db.session.query(Post).filter(Post.mechanism_id == mech,
 #                                        Post.date_shift == date, Post.shift == shift, Post.value == value)
 # delta = timedelta(seconds=1)
@@ -68,28 +68,28 @@ mech = usm[13]
 #     .update({"value": 1})
     # .update({"value": Post.value*0.55})
 
-print(mech)
-db.session.query(Post)\
-    .filter(
-        Post.mechanism_id == mech,
-        Post.date_shift == date, 
-        Post.shift == shift,
-        Post.value <=0.5
+# print(mech)
+# db.session.query(Post)\
+#     .filter(
+#         Post.mechanism_id == mech,
+#         Post.date_shift == date, 
+#         Post.shift == shift,
+#         Post.value <=0.5
 
-    )\
-    .update({"value": 0.55})
+#     )\
+#     .update({"value": 0.55})
     # .update({"value": Post.value*0.55})
 
 
+        # Post.timestamp > datetime.now(),
 
-# db.session.query(Post)\
-#     .filter(
-#         Post.mechanism_id == mech, 
-#         Post.timestamp > datetime.now(),
-#         Post.date_shift == date, 
-#         Post.shift == shift
-#     )\
-#     .delete()
+db.session.query(Post)\
+    .filter(
+        Post.mechanism_id == mech, 
+        Post.date_shift == date, 
+        Post.shift == shift
+    )\
+    .delete()
 
 
 
