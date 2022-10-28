@@ -2,13 +2,13 @@
 last:
 	bash ~/nmtport/bash_script/last.sh
 
-kran:
+krans:
 	bash ~/nmtport/bash_script/kran.sh
 
-usm:
+usms:
 	bash ~/nmtport/bash_script/usm.sh
 
-sen:
+sens:
 	bash ~/nmtport/bash_script/sennebogen.sh
 
 f:

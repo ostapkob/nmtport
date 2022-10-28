@@ -8,7 +8,7 @@ client = MongoClient('mongodb://localhost:27017')
 mongodb = client['HashShift']
 
 krans_UT = [45, 34, 53, 69, 21, 37, 4, 41, 5, 36, 40, 32,
-            25, 11, 33, 20, 8, 22, 12, 13, 6, 26, 47, 54, 14, 16, 82]
+            25, 11, 33, 20, 8, 22, 12, 13, 26, 47, 54, 14, 16, 82]
 krans_GUT = [28, 18, 1, 35, 31, 17, 58, 60, 49, 38, 39, 23, 48, 72, 65, 10]
 
 
@@ -132,8 +132,8 @@ def save_to_xlsx(avg_by_terminals):
 
 
 if __name__ == "__main__":
-    date_start = datetime(2021, 6, 1).date()
-    date_finish = datetime(2022, 7, 1).date()
+    date_start = datetime(2022, 9, 1).date()
+    date_finish = datetime(2022, 9, 30).date()
     assert date_start <= date_finish, "start <= finish"
     type_mechanism = 'kran'
     data_by_days = diapozone_time_work(date_start, date_finish, type_mechanism)

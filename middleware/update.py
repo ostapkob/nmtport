@@ -10,19 +10,19 @@ sys.path.insert(0, parent_dir)
 from app import db
 from app.model import Post, Mechanism
 from datetime import date, datetime, timedelta
-from middleware import  list_mechanisms 
+from middleware import  list_mechanisms
 kran = list_mechanisms.kran
 usm = list_mechanisms.usm
-date = date(2022, 8, 20)
+date = date(2022, 10, 3)
 shift = 2
-mech = usm[11]
+mech = usm[8]
 # cursor = db.session.query(Post).filter(Post.mechanism_id == mech,
 #                                        Post.date_shift == date, Post.shift == shift, Post.value == value)
 # delta = timedelta(seconds=1)
 # db.session.query(Post)\
-#     .filter(Post.mechanism_id == mech, 
-#             Post.date_shift == date, 
-#             Post.shift == shift, 
+#     .filter(Post.mechanism_id == mech,
+#             Post.date_shift == date,
+#             Post.shift == shift,
 #             # Post.id==2046832,
 #             Post.value == 1,
 #             )\
@@ -61,7 +61,7 @@ mech = usm[11]
 # db.session.query(Post)\
 #     .filter(
 #         Post.mechanism_id == mech,
-#         Post.date_shift == date, 
+#         Post.date_shift == date,
 #         Post.shift == shift,
 #         Post.value == 2
 #     )\
@@ -72,56 +72,23 @@ mech = usm[11]
 # db.session.query(Post)\
 #     .filter(
 #         Post.mechanism_id == mech,
-#         Post.date_shift == date, 
+#         Post.date_shift == date,
 #         Post.shift == shift,
-#         Post.value <=0.5
-
+#         Post.value > 0
 #     )\
-#     .update({"value": 0.55})
+#     .update({"value": 0.8})
     # .update({"value": Post.value*0.55})
-
 
         # Post.timestamp > datetime.now(),
 
 db.session.query(Post)\
     .filter(
-        Post.mechanism_id == mech, 
-        Post.date_shift == date, 
+        Post.mechanism_id == mech,
+        Post.date_shift == date,
         Post.shift == shift
     )\
     .delete()
 
 
-
-#=======================================================
-# time_start  = datetime(2022, 7, 23, 13, 17, 0)
-# time_finish = datetime(2022, 7, 23, 16, 30, 0)
-# time = time_start
-
-# # lat=42.815608
-# # lon=132.892540
-# lat=0
-# lon=0
-# # x=409
-# # y=1048
-# i = 0
-
-# while time<time_finish:
-#     i+=1
-#     time+=timedelta(minutes=1)
-#     if not i%3!=0: #frequency
-#         continue
-#     new_post = Post(
-#                 timestamp=time-timedelta(hours=10),
-#                 mechanism_id= mech,
-#                 value=2,
-#                 value3=20,
-#                 count=i,
-#                 latitude=lat,
-#                 longitude=lon,
-#                 terminal=13,
-#     )
-#     db.session.add(new_post)
-#     print(new_post)
-db.session.commit()
 print('FINISH')
+db.session.commit()

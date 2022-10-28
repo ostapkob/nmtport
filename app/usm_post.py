@@ -50,8 +50,10 @@ class PostUSM:
         redis_client.set(str(self.mech_id), pickle.dumps(self))
 
     def _handler_roll(self):
-        if self.number==13 and self.lever>0: # FIX
-            self.roll = 25
+        # if self.number==13 and self.lever>0: # FIX
+        #     self.roll = 25
+        if self.number==12 and self.lever==1: # FIX
+            self.lever = 0.8
         # if self.roll < 5:
         #     self.lever = 0
 

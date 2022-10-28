@@ -6,7 +6,7 @@ from app.model import Rfid_ids
 import openpyxl
 db.create_all()
 
-filepath = 'ww.xlsx'
+filepath = 'id_rfid.xlsx'
 wb = openpyxl.load_workbook(filepath, data_only=True)
 ws = wb.active
 
