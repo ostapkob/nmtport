@@ -1,0 +1,15 @@
+/****** Script for SelectTopNRows command from SSMS  ******/
+SELECT TOP (1000) [id]
+      ,[mechanism_id]
+      ,[latitude]
+      ,[longitude]
+      ,[value]
+      ,[value2]
+      ,[value3]
+      ,[count]
+      ,[timestamp]
+      ,[date_shift]
+      ,[shift]
+      ,[terminal]
+  FROM [nmtport].[dbo].[post] 
+ where date_shift=	'2021-05-22' and shift=1 and mechanism_id=32777

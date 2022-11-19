@@ -333,8 +333,8 @@ def add_usm():
     # if number in (11, ) and float(value) >0: # FIX
     #     value3 = 25
     # if (number==13 or number==11) and float(value) == 1: # FIX
-    if number==8 and float(value3) >1 and float(value)==1: # FIX
-        value = 0.8
+    # if number==8 and float(value3) >1 and float(value)==1: # FIX
+    #     value = 0.8
     # if number==7: # FIX
     #     value = 0.8
     # if number==6: # FIX

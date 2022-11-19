@@ -132,8 +132,8 @@ def save_to_xlsx(avg_by_terminals):
 
 
 if __name__ == "__main__":
-    date_start = datetime(2022, 9, 1).date()
-    date_finish = datetime(2022, 9, 30).date()
+    date_start = datetime(2022, 11, 1).date()
+    date_finish = datetime(2022, 11, 17).date()
     assert date_start <= date_finish, "start <= finish"
     type_mechanism = 'kran'
     data_by_days = diapozone_time_work(date_start, date_finish, type_mechanism)

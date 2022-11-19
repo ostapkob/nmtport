@@ -11,18 +11,19 @@ from rich.table import Table
 console = Console()
 nginx_log = '/var/log/nginx/access.log'
 
-
-table_kran2 = Table(title="KRAN-2")
-table_kran2.add_column("num", justify="right", style="green", no_wrap=True)
-table_kran2.add_column("timestamp", justify="right", style="cyan", no_wrap=True)
-table_kran2.add_column("count",    justify="right", style="green")
-table_kran2.add_column("bad",    justify="right", style="yellow3")
-table_kran2.add_column("dt",    justify="right", style="light_steel_blue")
-table_kran2.add_column("value",   justify="right", style="magenta")
-table_kran2.add_column("lat",    justify="right", style="blue")
-table_kran2.add_column("lon",    justify="right", style="blue")
-table_kran2.add_column("x",    justify="right", style="green")
-table_kran2.add_column("y",    justify="right", style="green")
+def create_table(n):
+    table_kran2 = Table(title="KRAN-"+ n)
+    table_kran2.add_column("num", justify="right", style="green", no_wrap=True)
+    table_kran2.add_column("timestamp", justify="right", style="cyan", no_wrap=True)
+    table_kran2.add_column("count",    justify="right", style="green")
+    table_kran2.add_column("bad",    justify="right", style="yellow3")
+    table_kran2.add_column("dt",    justify="right", style="light_steel_blue")
+    table_kran2.add_column("value",   justify="right", style="magenta")
+    table_kran2.add_column("lat",    justify="right", style="blue")
+    table_kran2.add_column("lon",    justify="right", style="blue")
+    table_kran2.add_column("x",    justify="right", style="green")
+    table_kran2.add_column("y",    justify="right", style="green")
+    return table_kran2
 
 def is_int_or_float(num):
     try:
@@ -112,6 +113,7 @@ def main():
     print(time_finish)
     print("-----------------------------")
     num=0
+    table_kran = create_table(number_mech)
     for line_file in lines:
         if 'add_kran?' in line_file:
             line = line_file.split('&')
@@ -144,8 +146,8 @@ def main():
                     dt = None
                 tmp_timestamp = timestamp
                 items_tab = (num, timestamp.time(), count, bad_count, dt, value, lat, lon, x, y )
-                table_kran2.add_row(*[str(i) for i in items_tab])
-    console.print(table_kran2)
+                table_kran.add_row(*[str(i) for i in items_tab])
+    console.print(table_kran)
 
 if __name__=='__main__':
     main()

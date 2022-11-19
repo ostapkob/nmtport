@@ -18,8 +18,9 @@ stat:
 	sudo systemctl status nmtport.service
 
 u:
-	cat /var/log/nginx/access.log |  rg 'add_usm_[\w]+\?number=$n'
-
+	cat /var/log/nginx/access.log | rg 'add_usm_[\w]+\?number=$n'
 
 test: 
-	echo "-> $1 = $2"
+	sqlcmd -S 192.168.99.106 -U ubuntu -P Port2020 -i sql/test_damage_shift_1.sql
+	sleep 1
+	sqlcmd -S 192.168.99.106 -U ubuntu -P Port2020 -i sql/test_damage_shift_2.sql
